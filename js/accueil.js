@@ -1,4 +1,4 @@
-/* BiZouk — accueil : chargement des thèmes */
+/* BiZouk — accueil : thèmes avec décompte réel des mots (via leurs chapitres) */
 (function () {
   const $ = id => document.getElementById(id);
   async function db() { return window.DB || (window.attendreDB ? await window.attendreDB(8000) : null); }
@@ -24,29 +24,51 @@
       return;
     }
 
-    const { data, error } = await base.from("themes")
-      .select("id, nom, description, mots")
-      .eq("entreprise_id", ent).eq("publie", true)
-      .order("created_at", { ascending: false });
+    // On charge les thèmes ET leurs chapitres pour compter les mots réellement disponibles
+    const [rT, rC] = await Promise.all([
+      base.from("themes").select("id, nom, description")
+        .eq("entreprise_id", ent).eq("publie", true).order("created_at", { ascending: false }),
+      base.from("chapitres").select("id, theme_id, mots")
+        .eq("entreprise_id", ent).eq("publie", true)
+    ]);
 
-    if (error || !data || !data.length) {
+    if (rT.error || !rT.data || !rT.data.length) {
       box.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--texte-faible);padding:30px;font-style:italic">'
         + 'Les premiers thèmes arrivent bientôt.</p>';
       return;
     }
 
-    box.innerHTML = data.map((t, i) => {
-      const nb = Array.isArray(t.mots) ? t.mots.length : 0;
+    // Additionner les mots de tous les chapitres, par thème
+    const parTheme = {};
+    (rC.data || []).forEach(c => {
+      const n = Array.isArray(c.mots) ? c.mots.length : 0;
+      if (!parTheme[c.theme_id]) parTheme[c.theme_id] = { mots: 0, chapitres: 0 };
+      parTheme[c.theme_id].mots += n;
+      parTheme[c.theme_id].chapitres += 1;
+    });
+
+    // N'afficher que les thèmes qui ont au moins un chapitre
+    const themes = rT.data.filter(t => parTheme[t.id] && parTheme[t.id].chapitres > 0);
+    if (!themes.length) {
+      box.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--texte-faible);padding:30px;font-style:italic">'
+        + 'Les premiers chapitres arrivent bientôt.</p>';
+      return;
+    }
+
+    box.innerHTML = themes.map((t, i) => {
+      const info = parTheme[t.id];
       const coul = COULEURS[i % COULEURS.length];
-      return '<a class="niv-carte" href="jeu.html?theme=' + t.id + '&niveau=15" style="--nc:' + coul + '">'
+      const nbChap = info.chapitres;
+      return '<a class="niv-carte" href="parcours.html" style="--nc:' + coul + '">'
         + '<h3 style="margin-top:6px">' + esc(t.nom) + '</h3>'
         + (t.description ? '<p>' + esc(t.description) + '</p>' : '')
-        + '<div class="niv-taille">' + nb + ' mots disponibles</div>'
-        + '</a>';
+        + '<div class="niv-taille">'
+        + nbChap + (nbChap > 1 ? ' chapitres' : ' chapitre')
+        + ' · ' + info.mots + (info.mots > 1 ? ' mots' : ' mot')
+        + '</div></a>';
     }).join("");
   }
 
-  // Masquer l'invitation si déjà connecté
   async function majAuth() {
     const base = await db();
     if (!base) return;

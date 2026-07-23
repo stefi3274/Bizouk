@@ -73,7 +73,8 @@
         + '<div class="tc-head"><h3>' + esc(t.nom) + '</h3>'
         + (finis === total && total ? '<span class="tc-fini">✓</span>' : '') + '</div>'
         + (t.description ? '<p class="tc-desc">' + esc(t.description) + '</p>' : '')
-        + '<div class="tc-meta">' + total + (total > 1 ? ' chapitres' : ' chapitre') + '</div>'
+        + '<div class="tc-meta">' + total + (total > 1 ? ' chapitres' : ' chapitre')
+        + ' · ' + t.chapitres.reduce((s,c) => s + (Array.isArray(c.mots) ? c.mots.length : 0), 0) + ' mots</div>'
         + '<div class="tc-barre"><span style="width:' + pct + '%"></span></div>'
         + '<div class="tc-progres">' + finis + ' / ' + total + ' terminé' + (finis > 1 ? 's' : '') + '</div>'
         + '</a>';
