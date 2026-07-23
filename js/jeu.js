@@ -4,15 +4,15 @@
   async function db() { return window.DB || (window.attendreDB ? await window.attendreDB(8000) : null); }
 
   const params = new URLSearchParams(location.search);
-  const niveau = parseInt(params.get("niveau"), 10) || 30;
+  const niveau = parseInt(params.get("niveau"), 10) || 15;
   const themeId = params.get("theme");
 
   const NIVEAUX = {
-    30:  { nom: "Découverte", tailleMin: 13, mots: 30 },
-    50:  { nom: "Confirmé",   tailleMin: 16, mots: 50 },
-    100: { nom: "Expert",     tailleMin: 20, mots: 100 }
+    15: { nom: "Découverte", tailleMin: 10, mots: 15 },
+    20: { nom: "Confirmé",   tailleMin: 12, mots: 20 },
+    25: { nom: "Expert",     tailleMin: 13, mots: 25 }
   };
-  const conf = NIVEAUX[niveau] || NIVEAUX[30];
+  const conf = NIVEAUX[niveau] || NIVEAUX[15];
 
   let jeu = null, debut = null, minuteur = null, themeCourant = null, fini = false;
 

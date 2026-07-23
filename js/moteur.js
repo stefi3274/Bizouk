@@ -17,7 +17,7 @@
     const plusLong = Math.max(...liste.map(m => m.length));
     // Taille compacte : on vise ~55% de remplissage (mots serrés mais plaçables)
     const totalLettres = liste.reduce((s,m) => s + m.length, 0);
-    const parVolume = Math.ceil(Math.sqrt(totalLettres / 0.58));
+    const parVolume = Math.ceil(Math.sqrt(totalLettres / 0.62));
     const taille = Math.max(tailleMin || 12, plusLong + 1, parVolume);
 
     const grille = Array.from({ length: taille }, () => Array(taille).fill(null));

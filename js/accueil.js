@@ -38,7 +38,7 @@
     box.innerHTML = data.map((t, i) => {
       const nb = Array.isArray(t.mots) ? t.mots.length : 0;
       const coul = COULEURS[i % COULEURS.length];
-      return '<a class="niv-carte" href="jeu.html?theme=' + t.id + '&niveau=30" style="--nc:' + coul + '">'
+      return '<a class="niv-carte" href="jeu.html?theme=' + t.id + '&niveau=15" style="--nc:' + coul + '">'
         + '<h3 style="margin-top:6px">' + esc(t.nom) + '</h3>'
         + (t.description ? '<p>' + esc(t.description) + '</p>' : '')
         + '<div class="niv-taille">' + nb + ' mots disponibles</div>'

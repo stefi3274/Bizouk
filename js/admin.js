@@ -36,8 +36,8 @@
     const c = $("compteMots");
     if (c) {
       c.textContent = n + (n > 1 ? " mots" : " mot");
-      c.style.background = n >= 100 ? "rgba(52,211,153,.2)" : "var(--violet-glow)";
-      c.style.color = n >= 100 ? "#6ee7b7" : "var(--violet-c)";
+      c.style.background = n >= 25 ? "rgba(52,211,153,.2)" : "var(--violet-glow)";
+      c.style.color = n >= 25 ? "#6ee7b7" : "var(--violet-c)";
     }
   });
 
@@ -134,7 +134,7 @@
         const nb = Array.isArray(t.mots) ? t.mots.length : 0;
         const apercu = Array.isArray(t.mots) ? t.mots.slice(0,8).join(" · ") : "";
         const niveaux = [];
-        if (nb >= 30) niveaux.push("30"); if (nb >= 50) niveaux.push("50"); if (nb >= 100) niveaux.push("100");
+        if (nb >= 15) niveaux.push("15"); if (nb >= 20) niveaux.push("20"); if (nb >= 25) niveaux.push("25");
         return '<div class="theme-item">'
           + '<div class="ti-nom">' + esc(t.nom) + '</div>'
           + '<div class="ti-meta"><span class="compte-mots">' + nb + ' mots</span> · '
