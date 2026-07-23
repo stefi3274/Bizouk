@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Bombe · BiZouk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="index.html" class="logo"><span class="logo-mark">B</span><span class="logo-txt">Bi<b>Zouk</b></span></a>
+    <div class="bz-compteur">
+      <span class="bz-pierre bz-vert">◆ <span id="bzVert">0</span></span>
+      <span class="bz-pierre bz-jaune">◆ <span id="bzJaune">0</span></span>
+      <span class="bz-pierre bz-rose">◆ <span id="bzRose">0</span></span>
+    </div>
+    <a href="parcours.html" class="btn-connexion">← Parcours</a>
+  </div>
+</header>
+
+<main class="bombe-page">
+  <div class="bombe-entete">
+    <h1>💣 La <span>Bombe</span></h1>
+    <p id="bombeSous">Trouve les 2 mots avant la fin du chrono</p>
+    <div class="bombe-chrono" id="chrono">2:00</div>
+  </div>
+
+  <div class="bombe-cibles" id="cibles"></div>
+
+  <div class="jeu-corps">
+    <div class="grille-box">
+      <div class="grille" id="grille"></div>
+    </div>
+    <div class="mots-box">
+      <h3>Les 2 mots à trouver</h3>
+      <div class="mots-progres" id="motsProgres">0 / 2</div>
+      <div class="mots-liste" id="motsListe"></div>
+      <p style="font-size:.82rem;color:var(--texte-faible);margin-top:14px;line-height:1.5">
+        30 mots sont cachés dans cette grille. Seuls les 2 mots indiqués comptent.
+      </p>
+    </div>
+  </div>
+</main>
+
+<!-- Fin de bombe -->
+<div class="bombe-fin" id="bombeFin">
+  <div class="bf-carte" id="bfCarte">
+    <div class="bf-emoji" id="bfEmoji">🎉</div>
+    <h2 id="bfTitre">Bombe neutralisée</h2>
+    <p class="bf-sous" id="bfSous"></p>
+    <div id="bfContenu"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-inner">
+    <div class="foot-bas" style="border:0;padding-top:0">
+      <span>© 2026 BiZouk</span>
+      <span>Conçu par <a href="https://stefi-services.vercel.app/" target="_blank" rel="noopener">SteFi Services</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/progression.js"></script>
+<script src="js/moteur.js"></script>
+<script src="js/bombe.js"></script>
+</body>
+</html>

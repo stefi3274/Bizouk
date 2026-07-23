@@ -71,6 +71,7 @@
 
     let puzzle = null;
     let trouves = [];
+    let cibles = null;   // si défini, seuls ces mots comptent
     let glisse = false, depart = null, courant = null;
 
     function couleurMot(i) { return "var(--f" + ((i % NB_COULEURS) + 1) + ")"; }
@@ -123,13 +124,26 @@
     function majListe() {
       if (!listeBox || !puzzle) return;
       const set = new Set(trouves.map(f => f.mot));
-      listeBox.innerHTML = puzzle.placements.map((p, i) =>
-        '<span class="mot' + (set.has(p.mot) ? ' trouve' : '') + '"'
-        + (set.has(p.mot) ? ' style="--mc:' + couleurMot(i) + '"' : '')
-        + '>' + p.mot + '</span>'
-      ).join("");
+      // Si des cibles sont définies, on n'affiche qu'elles
+      const aAfficher = cibles
+        ? puzzle.placements.filter(p => cibles.includes(p.mot))
+        : puzzle.placements;
+      listeBox.innerHTML = aAfficher.map(p => {
+        const i = puzzle.placements.findIndex(x => x.mot === p.mot);
+        return '<span class="mot' + (set.has(p.mot) ? ' trouve' : '') + '"'
+          + (set.has(p.mot) ? ' style="--mc:' + couleurMot(i) + '"' : '')
+          + '>' + p.mot + '</span>';
+      }).join("");
       const pr = document.getElementById("motsProgres");
-      if (pr) pr.textContent = trouves.length + " / " + puzzle.placements.length + " mots trouvés";
+      if (pr) {
+        const totalUtile = cibles ? cibles.length : puzzle.placements.length;
+        const trouvesUtiles = cibles
+          ? trouves.filter(f => cibles.includes(f.mot)).length
+          : trouves.length;
+        pr.textContent = cibles
+          ? trouvesUtiles + " / " + totalUtile
+          : trouvesUtiles + " / " + totalUtile + " mots trouvés";
+      }
     }
 
     function cheminTemp() {
@@ -164,8 +178,14 @@
           trouves.push(match);
           appliquerTrouves();
           majListe();
-          surTrouve(match, trouves.length, puzzle.placements.length);
-          if (trouves.length === puzzle.placements.length) surVictoire();
+          if (cibles) {
+            const utiles = trouves.filter(f => cibles.includes(f.mot)).length;
+            surTrouve(match, utiles, cibles.length);
+            if (utiles === cibles.length) surVictoire();
+          } else {
+            surTrouve(match, trouves.length, puzzle.placements.length);
+            if (trouves.length === puzzle.placements.length) surVictoire();
+          }
         }
       }
       glisse = false; depart = null; courant = null;
@@ -216,12 +236,17 @@
     window.addEventListener("resize", () => { if (puzzle) dessiner(); });
 
     return {
-      charger(mots, tailleMin) {
+      charger(mots, tailleMin, motsClbles) {
         puzzle = generer(mots, tailleMin);
         trouves = [];
+        cibles = motsClbles || null;
         dessiner();
         majListe();
         return puzzle;
+      },
+      definirCibles(liste) {
+        cibles = liste && liste.length ? liste : null;
+        majListe();
       },
       recommencer() {
         trouves = [];

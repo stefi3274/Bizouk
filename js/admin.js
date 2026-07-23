@@ -191,16 +191,47 @@
       if (!data.length) { box.innerHTML = "<p class='empty'>Aucune partie enregistrée pour l'instant.</p>"; return; }
 
       const fmt = s => Math.floor(s/60) + ":" + String(s%60).padStart(2,"0");
-      box.innerHTML = data.map(p =>
-        '<div class="theme-item" style="border-left-color:var(--or)">'
-        + '<div class="ti-nom">' + esc(p.joueur || "Joueur") + ' · <span style="color:var(--or)">' + fmt(p.temps_sec) + '</span></div>'
-        + '<div class="ti-meta">' + esc(p.theme_nom || "—") + ' · niveau ' + p.niveau
-        + ' · ' + p.mots_total + ' mots · ' + dateFr(p.created_at) + '</div>'
+      box.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px">'
+        + '<span style="color:var(--texte-doux);font-size:.9rem">' + data.length + ' partie(s) enregistrée(s)</span>'
+        + '<button class="btn btn-g btn-sm" id="viderParties" style="border-color:var(--rouge);color:#fca5a5">Tout effacer</button>'
         + '</div>'
-      ).join("");
+        + data.map(p =>
+          '<div class="theme-item" style="border-left-color:var(--or)">'
+          + '<div class="ti-nom">' + esc(p.joueur || "Joueur") + ' · <span style="color:var(--or)">' + fmt(p.temps_sec) + '</span></div>'
+          + '<div class="ti-meta">' + esc(p.theme_nom || "—") + ' · niveau ' + p.niveau
+          + ' · ' + p.mots_total + ' mots · ' + dateFr(p.created_at) + '</div>'
+          + '<div class="ti-act"><button class="sup" data-delp="' + p.id + '">Supprimer</button></div>'
+          + '</div>'
+        ).join("");
+
+      box.querySelectorAll("[data-delp]").forEach(b =>
+        b.onclick = () => supprimerPartie(b.getAttribute("data-delp")));
+      const vider = $("viderParties");
+      if (vider) vider.onclick = () => viderToutesParties();
     } catch (e) {
       box.innerHTML = "<p class='empty' style='color:#fca5a5'>Erreur : " + esc(String(e && e.message || e)) + "</p>";
     }
+  }
+
+  async function supprimerPartie(id) {
+    if (!confirm("Supprimer ce score du classement ?")) return;
+    const base = await db();
+    const { error } = await base.from("parties").delete().eq("id", id);
+    if (error) { status("Suppression impossible : " + error.message, "err"); return; }
+    status("Score supprimé.", "ok");
+    chargerParties();
+  }
+
+  async function viderToutesParties() {
+    if (!confirm("Effacer TOUS les scores enregistrés ?\n\nCette action est définitive et videra le classement.")) return;
+    if (!confirm("Vraiment sûr ? Tous les temps de tous les joueurs seront perdus.")) return;
+    const base = await db();
+    const ent = await entrepriseId();
+    const { error } = await base.from("parties").delete().eq("entreprise_id", ent);
+    if (error) { status("Suppression impossible : " + error.message, "err"); return; }
+    status("Tous les scores ont été effacés.", "ok");
+    chargerParties();
   }
 
   refreshAuth();

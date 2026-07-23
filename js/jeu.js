@@ -5,6 +5,7 @@
 
   const params = new URLSearchParams(location.search);
   const niveau = parseInt(params.get("niveau"), 10) || 15;
+  const partie = parseInt(params.get("partie"), 10) || 0;   // 0 = jeu libre
   const themeId = params.get("theme");
 
   const NIVEAUX = {
@@ -104,6 +105,13 @@
     const et = jeu.etat();
     $("vicSous").textContent = et.total + " mots trouvés · niveau " + conf.nom;
 
+    // Attribuer les pierres BiZouk si c'est un niveau du parcours
+    let gain = null;
+    if (partie > 0 && window.Progression) {
+      await window.Progression.init();
+      gain = await window.Progression.gagnerNiveau(partie, niveau);
+    }
+
     // Enregistrer si connecté
     const base = await db();
     let connecte = false;
@@ -118,17 +126,40 @@
           entreprise_id: ent, user_id: u.id, joueur: nom,
           theme_id: themeCourant ? themeCourant.id : null,
           theme_nom: themeCourant ? themeCourant.nom : null,
-          niveau: niveau, temps_sec: t, mots_total: et.total
+          niveau: niveau, temps_sec: t, mots_total: et.total,
+          partie: partie || 1
         });
       }
     }
 
-    $("vicInvite").innerHTML = connecte
+    let bloc = "";
+    if (gain && gain.nouveau) {
+      const sym = { vert:"◆", jaune:"◆", rose:"◆" }[gain.couleur] || "◆";
+      const cl = { vert:"var(--vert)", jaune:"var(--or)", rose:"var(--rose)" }[gain.couleur] || "var(--violet-c)";
+      bloc = '<div class="gain-bizouk"><span class="gb-nb" style="color:' + cl + '">' + sym + ' +' + gain.gain + '</span>'
+        + '<span class="gb-txt">pierres BiZouk gagnées<br><b style="color:' + cl + '">' + gain.couleur + '</b></span></div>';
+    } else if (gain && !gain.nouveau) {
+      bloc = '<div class="gain-bizouk"><span class="gb-txt" style="text-align:center">'
+        + 'Niveau déjà réussi : pas de nouvelles pierres.</span></div>';
+    }
+
+    $("vicInvite").innerHTML = bloc + (connecte
       ? 'Ton temps a été enregistré. <b>Va voir le classement !</b><br>'
         + '<a href="classement.html" style="color:var(--violet-c);font-weight:600">Voir le classement →</a>'
-      : 'Tu joues sans compte : ce temps ne sera pas enregistré.<br><br>'
-        + '<b>Avec un compte</b>, tes performances comptent pour le classement et les concours.<br>'
-        + '<a href="inscription.html" style="color:var(--violet-c);font-weight:600">Créer un compte →</a>';
+      : 'Tu joues sans compte : ce temps ne compte pas au classement.<br><br>'
+        + '<b>Avec un compte</b>, tes pierres et ta progression te suivent partout.<br>'
+        + '<a href="inscription.html" style="color:var(--violet-c);font-weight:600">Créer un compte →</a>');
+
+    // Bouton retour au parcours si on y est
+    if (partie > 0) {
+      const act = document.querySelector(".vic-actions");
+      if (act && !document.getElementById("vicParcours")) {
+        const a = document.createElement("a");
+        a.id = "vicParcours"; a.className = "btn btn-v btn-sm";
+        a.href = "parcours.html"; a.textContent = "Retour au parcours";
+        act.insertBefore(a, act.firstChild);
+      }
+    }
 
     $("victoire").classList.add("on");
   }
