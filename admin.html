@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin · BiZouk</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .adm-wrap{max-width:760px;margin:0 auto;padding:30px 20px 90px}
+  .adm-tabs{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap}
+  .adm-tab{background:none;border:1px solid var(--gris-3);color:var(--texte-doux);font-family:var(--serif);
+    font-weight:600;font-size:1rem;padding:9px 18px;border-radius:10px;cursor:pointer;transition:all .2s}
+  .adm-tab.on{background:var(--violet);border-color:var(--violet);color:#fff}
+  .adm-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:12px;flex-wrap:wrap}
+  .adm-head h1{font-family:var(--serif);font-size:1.6rem;color:var(--blanc)}
+  .theme-item{background:var(--gris-2);border:1px solid var(--gris-line);border-left:4px solid var(--violet);
+    border-radius:12px;padding:16px 18px;margin-bottom:12px}
+  .ti-nom{font-family:var(--serif);font-size:1.1rem;color:var(--blanc);margin-bottom:3px}
+  .ti-meta{font-size:.83rem;color:var(--texte-faible);margin-bottom:10px}
+  .ti-apercu{font-size:.85rem;color:var(--texte-doux);margin-bottom:10px;line-height:1.5}
+  .ti-act{display:flex;gap:8px;flex-wrap:wrap}
+  .ti-act button{font-family:inherit;font-weight:600;font-size:.82rem;padding:8px 14px;border-radius:8px;
+    cursor:pointer;border:1px solid var(--gris-3);background:none;color:var(--texte)}
+  .ti-act .mod{border-color:var(--violet);color:var(--violet-c)}
+  .ti-act .sup{border-color:var(--rouge);color:#fca5a5}
+  .empty{text-align:center;color:var(--texte-faible);padding:40px;font-style:italic}
+  .compte-mots{display:inline-block;background:var(--violet-glow);color:var(--violet-c);
+    padding:3px 10px;border-radius:20px;font-size:.78rem;font-weight:700}
+  .aide{background:var(--gris-3);border-radius:10px;padding:14px 16px;font-size:.86rem;
+    color:var(--texte-doux);line-height:1.55;margin-bottom:18px}
+  .aide b{color:var(--violet-c)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="index.html" class="logo"><span class="logo-mark">B</span><span class="logo-txt">Bi<b>Zouk</b></span></a>
+    <a href="index.html" class="btn-connexion">← Retour au site</a>
+  </div>
+</header>
+
+<div class="adm-wrap">
+
+  <div id="setupNote" class="auth" style="display:none">
+    <h1>Configuration requise</h1>
+    <p class="sub">La connexion au serveur n'est pas disponible.</p>
+  </div>
+
+  <div id="loginCard" class="auth" style="display:none">
+    <h1>Espace admin</h1>
+    <p class="sub">Gère les thèmes et les grilles de BiZouk.</p>
+    <form id="loginForm">
+      <div class="msg" id="loginMsg"></div>
+      <div class="field"><label>Email</label><input type="email" id="admEmail" required></div>
+      <div class="field"><label>Mot de passe</label><input type="password" id="admPass" required></div>
+      <button type="submit" class="btn btn-v" style="width:100%">Se connecter</button>
+    </form>
+  </div>
+
+  <div id="panel" style="display:none">
+    <div class="adm-head">
+      <div class="adm-tabs">
+        <button class="adm-tab on" data-tab="creer">Créer un thème</button>
+        <button class="adm-tab" data-tab="themes">Mes thèmes</button>
+        <button class="adm-tab" data-tab="parties">Parties jouées</button>
+      </div>
+      <button class="btn btn-g btn-sm" id="logoutBtn">Déconnexion</button>
+    </div>
+    <div class="msg" id="admMsg"></div>
+
+    <!-- Créer / modifier un thème -->
+    <div id="tab-creer">
+      <div class="form-carte">
+        <h2 style="font-family:var(--serif);font-size:1.3rem;color:var(--blanc);margin-bottom:16px" id="formTitre">Nouveau thème</h2>
+
+        <div class="aide">
+          Un thème est une <b>banque de mots</b>. Le jeu pioche dedans selon le niveau choisi par le joueur
+          (30, 50 ou 100 mots). Pour que les trois niveaux fonctionnent, vise <b>au moins 100 mots</b>.
+        </div>
+
+        <div class="field">
+          <label>Nom du thème</label>
+          <input type="text" id="thNom" placeholder="Ex. Histoire d'Haïti, Cuisine créole, Animaux">
+        </div>
+
+        <div class="field">
+          <label>Description (facultatif)</label>
+          <input type="text" id="thDesc" placeholder="Une phrase pour présenter le thème">
+        </div>
+
+        <div class="field">
+          <label>Les mots</label>
+          <textarea id="thMots" placeholder="Un mot par ligne, ou séparés par des virgules.&#10;&#10;DESSALINES&#10;TOUSSAINT&#10;ANACAONA&#10;VERTIERES"></textarea>
+          <div class="hint">
+            <span class="compte-mots" id="compteMots">0 mot</span>
+            &nbsp; Les accents sont retirés automatiquement. Mots de 2 lettres minimum.
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-v" id="btnSauver">Publier le thème</button>
+          <button class="btn btn-g" id="btnAnnuler" style="display:none">Annuler</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Liste des thèmes -->
+    <div id="tab-themes" style="display:none">
+      <div id="themesList"><p class="empty">Chargement…</p></div>
+    </div>
+
+    <!-- Parties jouées -->
+    <div id="tab-parties" style="display:none">
+      <div id="partiesList"><p class="empty">Chargement…</p></div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/passeye.js"></script>
+</body>
+</html>

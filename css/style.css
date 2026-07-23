@@ -1,0 +1,281 @@
+/* ============================================================
+   BiZouk — mots mêlés
+   Fond gris · violet principal
+   ============================================================ */
+:root{
+  /* Base */
+  --gris:#1c1b21;
+  --gris-2:#26252d;
+  --gris-3:#332f3c;
+  --gris-line:#3d3947;
+  --blanc:#f5f3f8;
+  --texte:#e8e5ee;
+  --texte-doux:#a09aae;
+  --texte-faible:#726c80;
+
+  /* Violet — couleur principale */
+  --violet:#7c3aed;
+  --violet-c:#a78bfa;
+  --violet-cc:#c4b5fd;
+  --violet-d:#5b21b6;
+  --violet-glow:rgba(124,58,237,.28);
+
+  /* Accents */
+  --or:#f0b429;
+  --vert:#34d399;
+  --rose:#f472b6;
+  --rouge:#ef4444;
+
+  /* Couleurs des mots trouvés (nuances de violet et accents) */
+  --f1:#a78bfa; --f2:#34d399; --f3:#f472b6; --f4:#f0b429;
+  --f5:#60a5fa; --f6:#fb923c; --f7:#2dd4bf; --f8:#e879f9;
+
+  --serif:'Outfit',system-ui,sans-serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --r:14px;
+  --r-lg:20px;
+  --wrap:1080px;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--gris);color:var(--texte);font-family:var(--sans);line-height:1.6;
+  font-size:16px;-webkit-font-smoothing:antialiased}
+
+/* ============================================================
+   En-tête
+   ============================================================ */
+header{position:sticky;top:0;z-index:100;background:rgba(28,27,33,.88);
+  backdrop-filter:blur(14px);border-bottom:1px solid var(--gris-line)}
+.nav{max-width:var(--wrap);margin:0 auto;display:flex;align-items:center;
+  justify-content:space-between;padding:13px 20px;gap:14px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-mark{width:38px;height:38px;border-radius:11px;
+  background:linear-gradient(135deg,var(--violet-c),var(--violet-d));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-weight:700;font-size:1.25rem;color:#fff;
+  box-shadow:0 4px 16px var(--violet-glow)}
+.logo-txt{font-family:var(--serif);font-size:1.45rem;font-weight:700;color:var(--blanc);letter-spacing:-.02em}
+.logo-txt b{color:var(--violet-c);font-weight:700}
+.nav-liens{display:flex;align-items:center;gap:4px}
+.nav-liens a{color:var(--texte-doux);text-decoration:none;font-size:.9rem;font-weight:600;
+  padding:8px 13px;border-radius:9px;transition:all .2s}
+.nav-liens a:hover{color:var(--violet-c);background:var(--gris-2)}
+.nav-liens a.on{color:var(--violet-c)}
+.btn-connexion{background:none;border:1px solid var(--gris-3);color:var(--texte);
+  font-family:inherit;font-weight:600;font-size:.87rem;padding:9px 17px;border-radius:10px;
+  cursor:pointer;text-decoration:none;transition:all .2s;white-space:nowrap}
+.btn-connexion:hover{border-color:var(--violet);color:var(--violet-c)}
+@media (max-width:700px){.nav-liens a{display:none}}
+
+/* ============================================================
+   Boutons
+   ============================================================ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  font-family:inherit;font-weight:600;font-size:.95rem;padding:12px 24px;
+  border-radius:12px;cursor:pointer;border:0;text-decoration:none;transition:all .2s}
+.btn-v{background:var(--violet);color:#fff}
+.btn-v:hover{background:var(--violet-d);transform:translateY(-1px)}
+.btn-g{background:none;border:1px solid var(--gris-3);color:var(--texte)}
+.btn-g:hover{border-color:var(--violet);color:var(--violet-c)}
+.btn-sm{padding:9px 16px;font-size:.87rem;border-radius:10px}
+
+/* ============================================================
+   Accueil
+   ============================================================ */
+.hero{max-width:var(--wrap);margin:0 auto;padding:56px 20px 34px;text-align:center}
+.hero h1{font-family:var(--serif);font-size:clamp(2.2rem,7vw,3.4rem);font-weight:700;
+  color:var(--blanc);letter-spacing:-.03em;line-height:1.05;margin-bottom:14px}
+.hero h1 b{color:var(--violet-c);font-weight:700}
+.hero p{color:var(--texte-doux);font-size:1.1rem;max-width:520px;margin:0 auto 26px}
+.hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+/* Niveaux */
+.niveaux{max-width:var(--wrap);margin:0 auto;padding:20px 20px 40px}
+.niveaux-titre{text-align:center;font-family:var(--serif);font-size:1.5rem;font-weight:600;
+  color:var(--blanc);margin-bottom:6px}
+.niveaux-sous{text-align:center;color:var(--texte-doux);font-size:.95rem;margin-bottom:26px}
+.niv-grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+.niv-carte{background:var(--gris-2);border:1px solid var(--gris-line);border-radius:var(--r-lg);
+  padding:26px 24px;text-decoration:none;display:block;transition:all .2s;position:relative;overflow:hidden}
+.niv-carte::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:var(--nc,var(--violet))}
+.niv-carte:hover{border-color:var(--nc,var(--violet));transform:translateY(-3px)}
+.niv-nb{font-family:var(--serif);font-size:2.6rem;font-weight:700;color:var(--nc,var(--violet-c));line-height:1}
+.niv-mots{font-size:.85rem;color:var(--texte-faible);text-transform:uppercase;letter-spacing:.08em;
+  font-weight:700;margin-bottom:12px}
+.niv-carte h3{font-family:var(--serif);font-size:1.25rem;color:var(--blanc);margin-bottom:6px}
+.niv-carte p{color:var(--texte-doux);font-size:.9rem;line-height:1.55}
+.niv-taille{margin-top:14px;font-size:.8rem;color:var(--texte-faible)}
+.niv-facile{--nc:var(--vert)}
+.niv-moyen{--nc:var(--or)}
+.niv-expert{--nc:var(--rose)}
+
+/* Bandeau invitation compte */
+.invite{max-width:var(--wrap);margin:0 auto 60px;padding:0 20px}
+.invite-inner{background:linear-gradient(135deg,color-mix(in srgb,var(--violet) 26%,var(--gris-2)),var(--gris-2));
+  border:1px solid var(--gris-line);border-radius:var(--r-lg);padding:30px 28px;
+  display:flex;align-items:center;justify-content:space-between;gap:22px;flex-wrap:wrap}
+.invite-txt h3{font-family:var(--serif);font-size:1.35rem;color:var(--blanc);margin-bottom:6px}
+.invite-txt p{color:var(--texte-doux);font-size:.94rem;max-width:440px}
+.invite-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* ============================================================
+   Page de jeu
+   ============================================================ */
+.jeu{max-width:var(--wrap);margin:0 auto;padding:24px 20px 70px}
+.jeu-head{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  flex-wrap:wrap;margin-bottom:20px}
+.jeu-titre h1{font-family:var(--serif);font-size:1.7rem;color:var(--blanc);line-height:1.2}
+.jeu-meta{color:var(--texte-doux);font-size:.9rem;margin-top:2px}
+.jeu-stats{display:flex;gap:10px;flex-wrap:wrap}
+.stat{background:var(--gris-2);border:1px solid var(--gris-line);border-radius:12px;
+  padding:10px 16px;text-align:center;min-width:86px}
+.stat b{display:block;font-family:var(--serif);font-size:1.35rem;color:var(--violet-c);line-height:1.1}
+.stat span{font-size:.75rem;color:var(--texte-faible);text-transform:uppercase;letter-spacing:.06em}
+.stat.chrono b{color:var(--or)}
+.stat.chrono.urgent b{color:var(--rouge)}
+
+.jeu-corps{display:grid;grid-template-columns:1fr;gap:20px}
+@media (min-width:900px){.jeu-corps{grid-template-columns:1fr 260px;align-items:start}}
+
+/* Grille */
+.grille-box{background:var(--gris-2);border:1px solid var(--gris-line);border-radius:var(--r-lg);
+  padding:16px;overflow:auto}
+.grille{display:grid;gap:2px;margin:0 auto;touch-action:none;user-select:none;-webkit-user-select:none}
+.case{aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  background:var(--gris-3);border-radius:5px;font-weight:600;color:var(--texte);
+  cursor:pointer;transition:background .12s,color .12s;user-select:none;-webkit-user-select:none;
+  touch-action:none;font-family:var(--sans)}
+.case:hover{background:var(--gris-line)}
+.case.select{background:var(--violet);color:#fff}
+.case.trouve{color:#1c1b21;font-weight:700}
+
+/* Liste des mots */
+.mots-box{background:var(--gris-2);border:1px solid var(--gris-line);border-radius:var(--r-lg);padding:18px}
+.mots-box h3{font-family:var(--serif);font-size:1.05rem;color:var(--blanc);margin-bottom:4px}
+.mots-progres{font-size:.82rem;color:var(--texte-faible);margin-bottom:14px}
+.mots-liste{display:flex;flex-wrap:wrap;gap:7px}
+.mot{font-size:.85rem;font-weight:600;padding:6px 12px;border-radius:8px;
+  background:var(--gris-3);color:var(--texte-doux);transition:all .2s}
+.mot.trouve{background:var(--mc,var(--violet));color:#1c1b21;text-decoration:line-through;opacity:.75}
+@media (min-width:900px){
+  .mots-box{position:sticky;top:80px}
+  .mots-liste{flex-direction:column}
+  .mot{text-align:left}
+}
+
+/* Actions du jeu */
+.jeu-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+
+/* Victoire */
+.victoire{position:fixed;inset:0;background:rgba(18,17,22,.9);z-index:200;
+  display:none;align-items:center;justify-content:center;padding:20px}
+.victoire.on{display:flex}
+.vic-carte{background:var(--gris-2);border:1px solid var(--violet);border-radius:var(--r-lg);
+  padding:38px 32px;max-width:420px;width:100%;text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.vic-emoji{font-size:3rem;margin-bottom:10px}
+.vic-carte h2{font-family:var(--serif);font-size:1.9rem;color:var(--blanc);margin-bottom:8px}
+.vic-carte h2 b{color:var(--violet-c)}
+.vic-temps{font-family:var(--serif);font-size:2.4rem;color:var(--or);margin:14px 0 6px;line-height:1}
+.vic-sous{color:var(--texte-doux);font-size:.92rem;margin-bottom:22px}
+.vic-invite{background:var(--gris-3);border-radius:12px;padding:16px;margin-bottom:20px;
+  font-size:.88rem;color:var(--texte-doux);line-height:1.55}
+.vic-invite b{color:var(--violet-c)}
+.vic-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+/* ============================================================
+   Pages de contenu
+   ============================================================ */
+.page{max-width:760px;margin:0 auto;padding:44px 20px 70px}
+.page-kicker{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--violet-c);margin-bottom:10px}
+.page h1{font-family:var(--serif);font-size:clamp(1.9rem,5vw,2.6rem);color:var(--blanc);
+  line-height:1.12;margin-bottom:16px;letter-spacing:-.02em}
+.page .chapo{font-size:1.08rem;color:var(--texte-doux);line-height:1.65;margin-bottom:32px}
+.page h2{font-family:var(--serif);font-size:1.4rem;color:var(--blanc);margin:32px 0 12px}
+.page h3{font-size:1.02rem;font-weight:600;color:var(--texte);margin:20px 0 8px}
+.page p{color:var(--texte);line-height:1.75;margin-bottom:14px}
+.page ul{margin:0 0 16px 20px;color:var(--texte)}
+.page li{margin-bottom:8px;line-height:1.65}
+.page a{color:var(--violet-c);text-decoration:none}
+.page a:hover{text-decoration:underline}
+.encart{background:var(--gris-2);border:1px solid var(--gris-line);border-left:4px solid var(--violet);
+  border-radius:0 var(--r) var(--r) 0;padding:20px 24px;margin:26px 0}
+.encart p:last-child{margin-bottom:0}
+.atouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin:24px 0}
+.atout{background:var(--gris-2);border:1px solid var(--gris-line);border-radius:var(--r);padding:20px}
+.atout .a-pastille{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;
+  justify-content:center;margin-bottom:12px;background:var(--violet-glow)}
+.atout .a-pastille svg{width:19px;height:19px;color:var(--violet-c)}
+.atout h3{margin:0 0 6px;font-family:var(--serif);font-size:1.08rem;color:var(--blanc)}
+.atout p{font-size:.88rem;color:var(--texte-doux);margin:0;line-height:1.55}
+
+/* ============================================================
+   Formulaires
+   ============================================================ */
+.form-carte{background:var(--gris-2);border:1px solid var(--gris-line);border-radius:var(--r);padding:26px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:.82rem;font-weight:600;margin-bottom:6px;color:var(--texte)}
+.field input,.field select,.field textarea{width:100%;background:var(--gris);border:1px solid var(--gris-3);
+  border-radius:10px;padding:12px 14px;font-family:inherit;font-size:.98rem;color:var(--texte)}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--violet)}
+.field textarea{min-height:120px;resize:vertical;line-height:1.6}
+.field .hint{font-size:.8rem;color:var(--texte-faible);margin-top:5px}
+.msg{display:none;padding:11px 14px;border-radius:10px;font-size:.9rem;margin-bottom:14px}
+.msg.on{display:block}
+.msg.ok{background:rgba(52,211,153,.15);color:#6ee7b7}
+.msg.err{background:rgba(239,68,68,.15);color:#fca5a5}
+
+/* Auth */
+.auth{max-width:400px;margin:52px auto;background:var(--gris-2);border:1px solid var(--gris-line);
+  border-radius:var(--r-lg);padding:34px}
+.auth h1{font-family:var(--serif);font-size:1.7rem;color:var(--blanc);margin-bottom:6px}
+.auth .sub{color:var(--texte-doux);font-size:.92rem;margin-bottom:24px}
+.lien-bas{text-align:center;margin-top:18px;font-size:.9rem;color:var(--texte-doux)}
+.lien-bas a{color:var(--violet-c);text-decoration:none;font-weight:600}
+
+/* ============================================================
+   Pied de page
+   ============================================================ */
+footer{border-top:1px solid var(--gris-line);background:var(--gris-2);margin-top:40px}
+.foot-inner{max-width:var(--wrap);margin:0 auto;padding:34px 20px 24px}
+.foot-haut{display:flex;justify-content:space-between;gap:26px;flex-wrap:wrap;margin-bottom:24px}
+.foot-marque{max-width:270px}
+.foot-marque .logo{margin-bottom:10px}
+.foot-marque p{color:var(--texte-doux);font-size:.88rem;line-height:1.55}
+.foot-liens{display:flex;gap:44px;flex-wrap:wrap}
+.foot-col h4{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--texte-faible);margin-bottom:12px}
+.foot-col a{display:block;color:var(--texte-doux);text-decoration:none;font-size:.9rem;
+  margin-bottom:9px;transition:color .2s}
+.foot-col a:hover{color:var(--violet-c)}
+.foot-bas{border-top:1px solid var(--gris-line);padding-top:18px;display:flex;
+  justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:.82rem;color:var(--texte-faible)}
+.foot-bas a{color:var(--texte-doux);text-decoration:none}
+.foot-bas a:hover{color:var(--violet-c)}
+
+/* ============================================================
+   Impression
+   ============================================================ */
+@media print{
+  header,footer,.jeu-actions,.jeu-stats,.no-print,.invite{display:none!important}
+  body{background:#fff!important;color:#000!important}
+  .jeu{padding:0}
+  .grille-box,.mots-box{background:#fff!important;border:1px solid #999!important;
+    border-radius:0!important;box-shadow:none!important}
+  .case{background:#fff!important;color:#000!important;border:1px solid #ccc!important;border-radius:0!important}
+  .case.trouve,.case.select{background:#fff!important;color:#000!important}
+  .mot{background:#fff!important;color:#000!important;border:1px solid #ccc!important;
+    text-decoration:none!important;opacity:1!important}
+  .jeu-titre h1,.mots-box h3{color:#000!important}
+  .jeu-meta,.mots-progres{color:#444!important}
+  .jeu-corps{grid-template-columns:1fr 200px!important;display:grid!important}
+}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* Indication de défilement de la grille */
+.grille-box.defile{position:relative}
+.grille-box.defile::after{content:"↔ fais défiler la grille";position:sticky;left:0;display:block;
+  text-align:center;font-size:.75rem;color:var(--texte-faible);padding-top:8px;font-style:italic}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connexion · BiZouk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header><div class="nav">
+  <a href="index.html" class="logo"><span class="logo-mark">B</span><span class="logo-txt">Bi<b>Zouk</b></span></a>
+  <a href="index.html" class="btn-connexion">← Retour</a>
+</div></header>
+<div class="auth">
+  <h1>Connexion</h1>
+  <p class="sub">Retrouve tes scores et le classement.</p>
+  <form id="loginForm">
+    <div class="msg" id="msg"></div>
+    <div class="field"><label>Email</label><input type="email" id="email" required autocomplete="email"></div>
+    <div class="field"><label>Mot de passe</label><input type="password" id="pass" required autocomplete="current-password"></div>
+    <button type="submit" class="btn btn-v" style="width:100%">Se connecter</button>
+  </form>
+  <p class="lien-bas">Pas encore de compte ? <a href="inscription.html">Créer un compte</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/passeye.js"></script>
+</body>
+</html>

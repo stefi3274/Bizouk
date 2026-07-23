@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jouer · BiZouk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="no-print">
+  <div class="nav">
+    <a href="index.html" class="logo"><span class="logo-mark">B</span><span class="logo-txt">Bi<b>Zouk</b></span></a>
+    <nav class="nav-liens">
+      <a href="index.html">Jouer</a>
+      <a href="classement.html">Classement</a>
+      <a href="a-propos.html">À propos</a>
+    </nav>
+    <a href="connexion.html" class="btn-connexion" id="navAuth">Se connecter</a>
+  </div>
+</header>
+
+<main class="jeu">
+  <div class="jeu-head">
+    <div class="jeu-titre">
+      <h1 id="jeuTitre">Chargement…</h1>
+      <div class="jeu-meta" id="jeuMeta"></div>
+    </div>
+    <div class="jeu-stats no-print">
+      <div class="stat chrono" id="statChrono"><b id="chrono">0:00</b><span>Temps</span></div>
+      <div class="stat"><b id="statTrouves">0</b><span>Trouvés</span></div>
+      <div class="stat"><b id="statRestants">0</b><span>Restants</span></div>
+    </div>
+  </div>
+
+  <div class="jeu-corps">
+    <div class="grille-box">
+      <div class="grille" id="grille"></div>
+    </div>
+    <div class="mots-box">
+      <h3>Mots à trouver</h3>
+      <div class="mots-progres" id="motsProgres">—</div>
+      <div class="mots-liste" id="motsListe"></div>
+    </div>
+  </div>
+
+  <div class="jeu-actions no-print">
+    <button class="btn btn-g btn-sm" id="btnNouvelle">Nouvelle grille</button>
+    <button class="btn btn-g btn-sm" id="btnRecommencer">Recommencer</button>
+    <button class="btn btn-g btn-sm" id="btnImprimer">Imprimer</button>
+    <a class="btn btn-g btn-sm" href="index.html">Changer de niveau</a>
+  </div>
+</main>
+
+<!-- Écran de victoire -->
+<div class="victoire" id="victoire">
+  <div class="vic-carte">
+    <div class="vic-emoji">🎉</div>
+    <h2>Grille <b>terminée</b></h2>
+    <div class="vic-temps" id="vicTemps">0:00</div>
+    <p class="vic-sous" id="vicSous">Tous les mots trouvés</p>
+    <div class="vic-invite" id="vicInvite"></div>
+    <div class="vic-actions">
+      <button class="btn btn-v btn-sm" id="vicRejouer">Nouvelle grille</button>
+      <a class="btn btn-g btn-sm" href="index.html">Retour</a>
+    </div>
+  </div>
+</div>
+
+<footer class="no-print">
+  <div class="foot-inner">
+    <div class="foot-bas" style="border:0;padding-top:0">
+      <span>© 2026 BiZouk</span>
+      <span>Conçu par <a href="https://stefi-services.vercel.app/" target="_blank" rel="noopener">SteFi Services</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/moteur.js"></script>
+<script src="js/jeu.js"></script>
+</body>
+</html>

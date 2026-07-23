@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BiZouk · Mots mêlés</title>
+<meta name="description" content="BiZouk, le jeu de mots mêlés. Trois niveaux, des thèmes variés, en ligne ou à imprimer.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="index.html" class="logo">
+      <span class="logo-mark">B</span>
+      <span class="logo-txt">Bi<b>Zouk</b></span>
+    </a>
+    <nav class="nav-liens">
+      <a href="index.html" class="on">Jouer</a>
+      <a href="classement.html">Classement</a>
+      <a href="a-propos.html">À propos</a>
+    </nav>
+    <a href="connexion.html" class="btn-connexion" id="navAuth">Se connecter</a>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>Cherche. Trouve. <b>Recommence.</b></h1>
+  <p>Des grilles de mots mêlés sur tous les thèmes. Joue en ligne ou imprime ta grille. Aucun compte nécessaire pour commencer.</p>
+  <div class="hero-actions">
+    <a href="#niveaux" class="btn btn-v">Choisir un niveau</a>
+    <a href="a-propos.html" class="btn btn-g">Comment ça marche</a>
+  </div>
+</section>
+
+<section class="niveaux" id="niveaux">
+  <h2 class="niveaux-titre">Trois niveaux, trois défis</h2>
+  <p class="niveaux-sous">Plus il y a de mots, plus la grille est grande.</p>
+  <div class="niv-grille" id="nivGrille">
+    <a class="niv-carte niv-facile" href="jeu.html?niveau=30">
+      <div class="niv-nb">30</div>
+      <div class="niv-mots">mots</div>
+      <h3>Découverte</h3>
+      <p>Une grille accessible pour se faire la main. Parfait pour une pause.</p>
+      <div class="niv-taille">Grille moyenne · quelques minutes</div>
+    </a>
+    <a class="niv-carte niv-moyen" href="jeu.html?niveau=50">
+      <div class="niv-nb">50</div>
+      <div class="niv-mots">mots</div>
+      <h3>Confirmé</h3>
+      <p>Il faut de la méthode et de la patience. Le bon équilibre.</p>
+      <div class="niv-taille">Grande grille · un bon moment</div>
+    </a>
+    <a class="niv-carte niv-expert" href="jeu.html?niveau=100">
+      <div class="niv-nb">100</div>
+      <div class="niv-mots">mots</div>
+      <h3>Expert</h3>
+      <p>Le vrai défi. Prends ton temps, arme-toi de café.</p>
+      <div class="niv-taille">Très grande grille · pour les tenaces</div>
+    </a>
+  </div>
+</section>
+
+<section class="niveaux" id="themes" style="padding-top:10px">
+  <h2 class="niveaux-titre">Ou choisis un thème</h2>
+  <p class="niveaux-sous">Chaque thème a ses propres grilles.</p>
+  <div class="niv-grille" id="themesGrille">
+    <p style="grid-column:1/-1;text-align:center;color:var(--texte-faible);padding:30px;font-style:italic">
+      Chargement des thèmes…
+    </p>
+  </div>
+</section>
+
+<section class="invite" id="inviteCompte">
+  <div class="invite-inner">
+    <div class="invite-txt">
+      <h3>Joue librement, ou vise le podium</h3>
+      <p>Tu peux jouer sans compte, autant que tu veux. Mais avec un compte, tes temps sont enregistrés, tu apparais au classement et tu peux participer aux concours.</p>
+    </div>
+    <div class="invite-actions">
+      <a href="inscription.html" class="btn btn-v">Créer un compte</a>
+      <a href="connexion.html" class="btn btn-g">Se connecter</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-inner">
+    <div class="foot-haut">
+      <div class="foot-marque">
+        <a href="index.html" class="logo"><span class="logo-mark">B</span><span class="logo-txt">Bi<b>Zouk</b></span></a>
+        <p>Le plaisir des mots mêlés, en ligne ou sur papier.</p>
+      </div>
+      <div class="foot-liens">
+        <div class="foot-col">
+          <h4>Jouer</h4>
+          <a href="index.html">Les niveaux</a>
+          <a href="classement.html">Classement</a>
+          <a href="inscription.html">Créer un compte</a>
+        </div>
+        <div class="foot-col">
+          <h4>BiZouk</h4>
+          <a href="a-propos.html">À propos</a>
+          <a href="mentions-legales.html">Mentions légales</a>
+          <a href="mailto:Bizouk7@gmail.com">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bas">
+      <span>© 2026 BiZouk</span>
+      <span>Conçu par <a href="https://stefi-services.vercel.app/" target="_blank" rel="noopener">SteFi Services</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/accueil.js"></script>
+</body>
+</html>

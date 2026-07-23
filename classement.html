@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classement · BiZouk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .cls-filtres{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:24px}
+  .cls-chip{background:none;border:1.5px solid var(--gris-3);color:var(--texte-doux);font-family:inherit;
+    font-weight:600;font-size:.86rem;padding:8px 16px;border-radius:20px;cursor:pointer;transition:all .2s}
+  .cls-chip:hover{border-color:var(--violet);color:var(--blanc)}
+  .cls-chip.on{background:var(--violet);border-color:var(--violet);color:#fff}
+  .cls-table{background:var(--gris-2);border:1px solid var(--gris-line);border-radius:var(--r-lg);overflow:hidden;max-width:640px;margin:0 auto}
+  .cls-row{display:grid;grid-template-columns:60px 1fr 90px 78px;align-items:center;gap:10px;
+    padding:14px 20px;border-bottom:1px solid var(--gris-line)}
+  .cls-row:last-child{border-bottom:0}
+  .cls-th{background:var(--gris-3);font-size:.75rem;font-weight:700;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--texte-faible)}
+  .cls-place{font-family:var(--serif);font-weight:700;font-size:1.1rem;color:var(--texte)}
+  .cls-podium{background:rgba(124,58,237,.08)}
+  .cls-podium .cls-place{font-size:1.4rem}
+  .cls-nom{font-weight:600;color:var(--blanc)}
+  .cls-theme{font-size:.78rem;color:var(--texte-faible);display:block;font-weight:400}
+  .cls-temps{font-family:var(--serif);font-weight:700;color:var(--or);font-variant-numeric:tabular-nums}
+  .cls-niv{font-size:.8rem;color:var(--texte-doux);text-align:right}
+  .cls-vide{text-align:center;padding:54px 24px;background:var(--gris-2);border:1px dashed var(--gris-3);
+    border-radius:var(--r-lg);max-width:640px;margin:0 auto}
+  .cls-vide h3{font-family:var(--serif);font-size:1.3rem;color:var(--blanc);margin-bottom:8px}
+  .cls-vide p{color:var(--texte-doux);max-width:380px;margin:0 auto 18px}
+  @media (max-width:520px){.cls-row{grid-template-columns:44px 1fr 72px 56px;padding:12px 14px;gap:6px;font-size:.9rem}}
+</style>
+</head>
+<body>
+<header>
+  <div class="nav">
+    <a href="index.html" class="logo"><span class="logo-mark">B</span><span class="logo-txt">Bi<b>Zouk</b></span></a>
+    <nav class="nav-liens">
+      <a href="index.html">Jouer</a>
+      <a href="classement.html" class="on">Classement</a>
+      <a href="a-propos.html">À propos</a>
+    </nav>
+    <a href="connexion.html" class="btn-connexion" id="navAuth">Se connecter</a>
+  </div>
+</header>
+
+<main class="page" style="max-width:var(--wrap)">
+  <p class="page-kicker" style="text-align:center">Tableau d'honneur</p>
+  <h1 style="text-align:center">Classement</h1>
+  <p class="chapo" style="text-align:center;max-width:520px;margin-left:auto;margin-right:auto">
+    Les meilleurs temps, par niveau. Il faut un compte pour y figurer.
+  </p>
+
+  <div class="cls-filtres">
+    <button class="cls-chip on" data-niv="tous">Tous niveaux</button>
+    <button class="cls-chip" data-niv="30">30 mots</button>
+    <button class="cls-chip" data-niv="50">50 mots</button>
+    <button class="cls-chip" data-niv="100">100 mots</button>
+  </div>
+
+  <div id="clsZone"><p style="text-align:center;color:var(--texte-faible);font-style:italic">Chargement…</p></div>
+
+  <div style="text-align:center;margin-top:34px">
+    <a href="index.html" class="btn btn-v">Jouer une grille</a>
+  </div>
+</main>
+
+<footer>
+  <div class="foot-inner">
+    <div class="foot-bas" style="border:0;padding-top:0">
+      <span>© 2026 BiZouk</span>
+      <span>Conçu par <a href="https://stefi-services.vercel.app/" target="_blank" rel="noopener">SteFi Services</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/classement.js"></script>
+</body>
+</html>

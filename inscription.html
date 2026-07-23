@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inscription · BiZouk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header><div class="nav">
+  <a href="index.html" class="logo"><span class="logo-mark">B</span><span class="logo-txt">Bi<b>Zouk</b></span></a>
+  <a href="index.html" class="btn-connexion">← Retour</a>
+</div></header>
+<div class="auth">
+  <h1>Créer un compte</h1>
+  <p class="sub">Rejoins BiZouk pour le classement et les concours.</p>
+  <form id="signupForm">
+    <div class="msg" id="msg"></div>
+    <div class="field"><label>Ton pseudo (affiché au classement)</label><input type="text" id="nom" required></div>
+    <div class="field"><label>Email</label><input type="email" id="email" required autocomplete="email"></div>
+    <div class="field"><label>Mot de passe</label><input type="password" id="pass" required autocomplete="new-password"></div>
+    <button type="submit" class="btn btn-v" style="width:100%">Créer mon compte</button>
+  </form>
+  <p class="lien-bas">Déjà un compte ? <a href="connexion.html">Se connecter</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/passeye.js"></script>
+</body>
+</html>
