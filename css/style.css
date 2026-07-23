@@ -439,3 +439,12 @@ footer{border-top:1px solid var(--gris-line);background:var(--gris-2);margin-top
   padding:16px 22px;text-align:center;min-width:96px}
 .tresor-item .ti-nb{font-family:var(--serif);font-size:1.5rem;font-weight:700;line-height:1.2;margin-top:6px}
 .tresor-item .ti-nom{font-size:.75rem;color:var(--texte-faible);text-transform:uppercase;letter-spacing:.06em}
+
+/* Boutons de partage */
+.share-btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-weight:600;
+  font-size:.82rem;padding:9px 15px;border-radius:9px;border:0;cursor:pointer;color:#fff;text-decoration:none}
+.share-wa{background:#25d366}
+.share-fb{background:#1877f2}
+.share-x{background:#000;border:1px solid #333}
+.share-tg{background:#0088cc}
+.partage-liens{margin-top:4px}

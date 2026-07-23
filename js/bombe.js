@@ -13,6 +13,7 @@
   const chapitreId = params.get("chapitre");
 
   let jeu = null, reste = DUREE, minuteur = null, cibles = [], termine = false;
+  let chapitreCourant = null, themeNomCourant = "";
 
   function fmt(s) { return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0"); }
 
@@ -117,6 +118,8 @@
     // Appliquer les cibles sans régénérer la grille
     jeu.definirCibles(cibles);
 
+    chapitreCourant = res.chapitre;
+    themeNomCourant = res.themeNom || "";
     $("bombeSous").textContent = res.chapitre.nom + (res.themeNom ? " · " + res.themeNom : "")
       + " · 20 mots cachés, 2 à trouver";
     majCibles();
@@ -146,10 +149,45 @@
         + '<span class="gb-nb" style="color:var(--rose)">+' + rb.gain + '</span>'
         + '<span class="gb-txt">pierres BiZouk gagnées<br><b style="color:var(--rose)">chapitre terminé</b></span></div>' : '')
       + '<div class="bf-options">'
-      + '<a class="btn btn-v" href="parcours.html">Continuer le parcours</a>'
+      + '<button class="btn btn-v" id="btnPartager">Partager ma victoire</button>'
+      + '<a class="btn btn-g" href="parcours.html">Continuer le parcours</a>'
       + (nom ? '' : '<a class="btn btn-g" href="inscription.html">Créer un compte pour garder ta progression</a>')
-      + '</div>';
+      + '</div>'
+      + '<div class="partage-liens" id="partageLiens"></div>';
+
+    // Bouton de partage
+    const bp = $("btnPartager");
+    if (bp) bp.onclick = async () => {
+      const info = {
+        chapitre: chapitreCourant ? chapitreCourant.nom : "",
+        theme: themeNomCourant || "",
+        pierres: 9,
+        joueur: nom || null
+      };
+      const avant = bp.textContent;
+      bp.textContent = "Préparation…"; bp.disabled = true;
+      let r = "telecharge";
+      try { r = await window.BiZoukPartage.partager(info); } catch (e) { r = "telecharge"; }
+      bp.textContent = (r === "telecharge") ? "Image téléchargée" : avant;
+      if (r === "telecharge") afficherLiensPartage(info);
+      setTimeout(() => { bp.textContent = avant; bp.disabled = false; }, 2200);
+    };
     $("bombeFin").classList.add("on");
+  }
+
+  function afficherLiensPartage(info) {
+    const zone = $("partageLiens");
+    if (!zone || zone.innerHTML) return;
+    const l = window.BiZoukPartage.liens(info);
+    zone.innerHTML =
+      '<p style="font-size:.82rem;color:var(--texte-faible);margin:14px 0 8px;font-style:italic">'
+      + 'L\'image a été téléchargée : joins-la à ton message.</p>'
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">'
+      + '<a class="share-btn share-wa" href="' + l.whatsapp + '" target="_blank" rel="noopener">WhatsApp</a>'
+      + '<a class="share-btn share-fb" href="' + l.facebook + '" target="_blank" rel="noopener">Facebook</a>'
+      + '<a class="share-btn share-x" href="' + l.x + '" target="_blank" rel="noopener">X</a>'
+      + '<a class="share-btn share-tg" href="' + l.telegram + '" target="_blank" rel="noopener">Telegram</a>'
+      + '</div>';
   }
 
   async function nomJoueur() {
