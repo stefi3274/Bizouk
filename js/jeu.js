@@ -5,17 +5,16 @@
 
   const params = new URLSearchParams(location.search);
   const niveau = parseInt(params.get("niveau"), 10) || 15;
-  const partie = parseInt(params.get("partie"), 10) || 0;   // 0 = jeu libre
+  const chapitreId = params.get("chapitre");   // null = jeu libre
   const themeId = params.get("theme");
 
   const NIVEAUX = {
     15: { nom: "Découverte", tailleMin: 10, mots: 15 },
-    20: { nom: "Confirmé",   tailleMin: 12, mots: 20 },
-    25: { nom: "Expert",     tailleMin: 13, mots: 25 }
+    20: { nom: "Confirmé",   tailleMin: 12, mots: 20 }
   };
   const conf = NIVEAUX[niveau] || NIVEAUX[15];
 
-  let jeu = null, debut = null, minuteur = null, themeCourant = null, fini = false;
+  let jeu = null, debut = null, minuteur = null, themeCourant = null, chapitreCourant = null, fini = false;
 
   function fmt(s) {
     const m = Math.floor(s / 60), r = s % 60;
@@ -39,27 +38,43 @@
   }
 
   // ---------- Chargement des mots ----------
+  function melanger(liste) {
+    const a = liste.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
   async function motsDuTheme() {
     const base = await db();
     if (!base) return null;
     const ent = await entrepriseId();
     if (!ent) return null;
 
-    let req = base.from("themes").select("*").eq("entreprise_id", ent).eq("publie", true);
-    if (themeId) req = req.eq("id", themeId);
-    const { data, error } = await req;
-    if (error || !data || !data.length) return null;
-
-    // Si aucun thème précis demandé, on en prend un au hasard
-    const theme = themeId ? data[0] : data[Math.floor(Math.random() * data.length)];
-    themeCourant = theme;
-    let mots = Array.isArray(theme.mots) ? theme.mots.slice() : [];
-    // Mélanger puis prendre le nombre voulu
-    for (let i = mots.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [mots[i], mots[j]] = [mots[j], mots[i]];
+    // Mode parcours : les mots viennent d'un chapitre précis
+    if (chapitreId) {
+      const { data: chap } = await base.from("chapitres").select("*").eq("id", chapitreId).maybeSingle();
+      if (!chap) return null;
+      const { data: th } = await base.from("themes").select("nom").eq("id", chap.theme_id).maybeSingle();
+      chapitreCourant = chap;
+      themeCourant = { id: chap.theme_id, nom: (th && th.nom) || "" };
+      const mots = melanger(Array.isArray(chap.mots) ? chap.mots : []);
+      return { theme: themeCourant, chapitre: chap, mots: mots.slice(0, conf.mots) };
     }
-    return { theme, mots: mots.slice(0, conf.mots) };
+
+    // Mode libre : on pioche dans un thème (via ses chapitres)
+    let reqC = base.from("chapitres").select("*").eq("entreprise_id", ent).eq("publie", true);
+    if (themeId) reqC = reqC.eq("theme_id", themeId);
+    const { data: chaps } = await reqC;
+    if (!chaps || !chaps.length) return null;
+    const chap = chaps[Math.floor(Math.random() * chaps.length)];
+    const { data: th } = await base.from("themes").select("nom").eq("id", chap.theme_id).maybeSingle();
+    chapitreCourant = chap;
+    themeCourant = { id: chap.theme_id, nom: (th && th.nom) || "" };
+    const mots = melanger(Array.isArray(chap.mots) ? chap.mots : []);
+    return { theme: themeCourant, chapitre: chap, mots: mots.slice(0, conf.mots) };
   }
 
   async function lancer() {
@@ -75,8 +90,9 @@
       return;
     }
 
-    $("jeuTitre").textContent = res.theme.nom;
-    $("jeuMeta").textContent = conf.nom + " · " + res.mots.length + " mots à trouver";
+    $("jeuTitre").textContent = res.chapitre ? res.chapitre.nom : res.theme.nom;
+    $("jeuMeta").textContent = (res.theme.nom ? res.theme.nom + " · " : "")
+      + conf.nom + " · " + res.mots.length + " mots à trouver";
 
     if (!jeu) {
       jeu = window.BiZouk.creerJeu({
@@ -107,9 +123,9 @@
 
     // Attribuer les pierres BiZouk si c'est un niveau du parcours
     let gain = null;
-    if (partie > 0 && window.Progression) {
+    if (chapitreId && window.Progression) {
       await window.Progression.init();
-      gain = await window.Progression.gagnerNiveau(partie, niveau);
+      gain = await window.Progression.gagnerNiveau(chapitreId, niveau);
     }
 
     // Enregistrer si connecté
@@ -127,17 +143,19 @@
           theme_id: themeCourant ? themeCourant.id : null,
           theme_nom: themeCourant ? themeCourant.nom : null,
           niveau: niveau, temps_sec: t, mots_total: et.total,
-          partie: partie || 1
+          chapitre_id: chapitreCourant ? chapitreCourant.id : null,
+          chapitre_nom: chapitreCourant ? chapitreCourant.nom : null
         });
       }
     }
 
     let bloc = "";
     if (gain && gain.nouveau) {
-      const sym = { vert:"◆", jaune:"◆", rose:"◆" }[gain.couleur] || "◆";
       const cl = { vert:"var(--vert)", jaune:"var(--or)", rose:"var(--rose)" }[gain.couleur] || "var(--violet-c)";
-      bloc = '<div class="gain-bizouk"><span class="gb-nb" style="color:' + cl + '">' + sym + ' +' + gain.gain + '</span>'
-        + '<span class="gb-txt">pierres BiZouk gagnées<br><b style="color:' + cl + '">' + gain.couleur + '</b></span></div>';
+      const svg = window.BiZoukPierre ? window.BiZoukPierre.pierre(gain.couleur, 42) : "";
+      bloc = '<div class="gain-bizouk"><span class="pierre-gain">' + svg + '</span>'
+        + '<span class="gb-nb" style="color:' + cl + '">+' + gain.gain + '</span>'
+        + '<span class="gb-txt">pierres BiZouk<br><b style="color:' + cl + '">' + gain.couleur + '</b></span></div>';
     } else if (gain && !gain.nouveau) {
       bloc = '<div class="gain-bizouk"><span class="gb-txt" style="text-align:center">'
         + 'Niveau déjà réussi : pas de nouvelles pierres.</span></div>';
@@ -151,7 +169,7 @@
         + '<a href="inscription.html" style="color:var(--violet-c);font-weight:600">Créer un compte →</a>');
 
     // Bouton retour au parcours si on y est
-    if (partie > 0) {
+    if (chapitreId) {
       const act = document.querySelector(".vic-actions");
       if (act && !document.getElementById("vicParcours")) {
         const a = document.createElement("a");

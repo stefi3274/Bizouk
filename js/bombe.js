@@ -6,11 +6,11 @@
     { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 
   const DUREE = 120;          // 2 minutes
-  const NB_MOTS_GRILLE = 30;  // mots cachés dans la grille
+  const NB_MOTS_GRILLE = 20;  // mots cachés (rebrassage des mots du chapitre)
   const NB_CIBLES = 2;        // mots à trouver
 
   const params = new URLSearchParams(location.search);
-  const apres = parseInt(params.get("apres"), 10) || 1;
+  const chapitreId = params.get("chapitre");
 
   let jeu = null, reste = DUREE, minuteur = null, cibles = [], termine = false;
 
@@ -18,9 +18,14 @@
 
   function majCompteur() {
     const d = window.Progression.detail();
-    $("bzVert").textContent = d.vert;
-    $("bzJaune").textContent = d.jaune;
-    $("bzRose").textContent = d.rose;
+    ["vert","jaune","rose"].forEach(c => {
+      const badge = $("badge" + c.charAt(0).toUpperCase() + c.slice(1));
+      const nb = $("bz" + c.charAt(0).toUpperCase() + c.slice(1));
+      if (badge && window.BiZoukPierre && !badge.querySelector("svg")) {
+        badge.insertAdjacentHTML("afterbegin", window.BiZoukPierre.pierre(c, 17));
+      }
+      if (nb) nb.textContent = d[c];
+    });
   }
 
   function majCibles() {
@@ -54,16 +59,26 @@
     if (!base) return null;
     const ent = await entrepriseId();
     if (!ent) return null;
-    const { data } = await base.from("themes").select("*")
-      .eq("entreprise_id", ent).eq("publie", true);
-    if (!data || !data.length) return null;
-    const theme = data[Math.floor(Math.random() * data.length)];
-    let liste = Array.isArray(theme.mots) ? theme.mots.slice() : [];
+
+    let chap = null;
+    if (chapitreId) {
+      const { data } = await base.from("chapitres").select("*").eq("id", chapitreId).maybeSingle();
+      chap = data;
+    } else {
+      const { data } = await base.from("chapitres").select("*")
+        .eq("entreprise_id", ent).eq("publie", true);
+      if (data && data.length) chap = data[Math.floor(Math.random() * data.length)];
+    }
+    if (!chap) return null;
+
+    const { data: th } = await base.from("themes").select("nom").eq("id", chap.theme_id).maybeSingle();
+    // Rebrassage : on mélange tous les mots du chapitre et on en prend 20
+    let liste = Array.isArray(chap.mots) ? chap.mots.slice() : [];
     for (let i = liste.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [liste[i], liste[j]] = [liste[j], liste[i]];
     }
-    return { theme, mots: liste.slice(0, NB_MOTS_GRILLE) };
+    return { chapitre: chap, themeNom: (th && th.nom) || "", mots: liste.slice(0, NB_MOTS_GRILLE) };
   }
 
   async function lancer() {
@@ -102,7 +117,8 @@
     // Appliquer les cibles sans régénérer la grille
     jeu.definirCibles(cibles);
 
-    $("bombeSous").textContent = "Thème : " + res.theme.nom + " · 30 mots cachés, 2 à trouver";
+    $("bombeSous").textContent = res.chapitre.nom + (res.themeNom ? " · " + res.themeNom : "")
+      + " · 20 mots cachés, 2 à trouver";
     majCibles();
     termine = false;
     demarrer();
@@ -113,7 +129,7 @@
     if (termine) return;
     termine = true;
     clearInterval(minuteur);
-    await window.Progression.bombeReussie();
+    const rb = await window.Progression.bombeReussie(chapitreId);
     majCompteur();
 
     const et = window.Progression.etat();
@@ -126,7 +142,10 @@
       ? "Bravo <b>" + esc(nom) + "</b>, tu assures ! Il te restait " + fmt(Math.max(0,reste)) + "."
       : "Tu assures ! Il te restait " + fmt(Math.max(0,reste)) + ".";
     $("bfContenu").innerHTML =
-      '<div class="bf-options">'
+      (rb && rb.gain ? '<div class="gain-bizouk"><span class="pierre-gain">' + (window.BiZoukPierre ? window.BiZoukPierre.pierre("rose",42) : "") + '</span>'
+        + '<span class="gb-nb" style="color:var(--rose)">+' + rb.gain + '</span>'
+        + '<span class="gb-txt">pierres BiZouk gagnées<br><b style="color:var(--rose)">chapitre terminé</b></span></div>' : '')
+      + '<div class="bf-options">'
       + '<a class="btn btn-v" href="parcours.html">Continuer le parcours</a>'
       + (nom ? '' : '<a class="btn btn-g" href="inscription.html">Créer un compte pour garder ta progression</a>')
       + '</div>';

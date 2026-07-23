@@ -15,9 +15,9 @@
   <div class="nav">
     <a href="index.html" class="logo"><span class="logo-mark">B</span><span class="logo-txt">Bi<b>Zouk</b></span></a>
     <div class="bz-compteur" id="bzCompteur" title="Tes pierres BiZouk">
-      <span class="bz-pierre bz-vert">◆ <span id="bzVert">0</span></span>
-      <span class="bz-pierre bz-jaune">◆ <span id="bzJaune">0</span></span>
-      <span class="bz-pierre bz-rose">◆ <span id="bzRose">0</span></span>
+      <span class="bz-badge bz-vert" id="badgeVert"><span class="bz-nb" id="bzVert">0</span></span>
+      <span class="bz-badge bz-jaune" id="badgeJaune"><span class="bz-nb" id="bzJaune">0</span></span>
+      <span class="bz-badge bz-rose" id="badgeRose"><span class="bz-nb" id="bzRose">0</span></span>
     </div>
     <a href="connexion.html" class="btn-connexion" id="navAuth">Se connecter</a>
   </div>
@@ -27,11 +27,15 @@
   <div style="text-align:center;margin-bottom:30px">
     <p class="page-kicker">Ton parcours</p>
     <h1 style="font-family:var(--serif);font-size:clamp(1.8rem,5vw,2.4rem);color:var(--blanc);line-height:1.15;margin-bottom:10px">
-      Trois parties, neuf défis</h1>
+      Choisis ton thème</h1>
     <p style="color:var(--texte-doux);max-width:460px;margin:0 auto">
-      Réussis un niveau pour ouvrir le suivant. Chaque victoire te rapporte 3 pierres BiZouk.
-      Entre deux parties, une bombe t'attend.
+      Chaque thème contient des chapitres. Un chapitre, c'est deux niveaux et une bombe.
+      Chaque victoire te rapporte 3 pierres BiZouk.
     </p>
+  </div>
+
+  <div class="recherche-box">
+    <input type="search" id="chercheTheme" placeholder="Rechercher un thème…" autocomplete="off">
   </div>
 
   <div id="parcoursZone">
@@ -63,6 +67,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-config.js"></script>
+<script src="js/pierre.js"></script>
 <script src="js/progression.js"></script>
 <script src="js/parcours.js"></script>
 </body>

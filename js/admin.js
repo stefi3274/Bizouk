@@ -1,4 +1,4 @@
-/* BiZouk — admin : gestion des thèmes */
+/* BiZouk — admin : thèmes, chapitres, contributions, parties */
 (function () {
   const $ = id => document.getElementById(id);
   async function db() { return window.DB || (window.attendreDB ? await window.attendreDB(8000) : null); }
@@ -8,6 +8,7 @@
   const dateFr = iso => new Date(iso).toLocaleDateString("fr-FR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
 
   let editId = null;
+  let themesCache = [];
 
   function normaliser(m) {
     return (m||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase().replace(/[^A-Z]/g,"");
@@ -21,23 +22,27 @@
     tab.addEventListener("click", () => {
       const t = tab.getAttribute("data-tab");
       document.querySelectorAll(".adm-tab").forEach(x => x.classList.toggle("on", x === tab));
-      ["creer","themes","parties"].forEach(k => {
+      ["creer","themes","contrib","parties"].forEach(k => {
         const el = $("tab-" + k); if (el) el.style.display = (t === k) ? "block" : "none";
       });
       if (t === "themes") lancerAvecDB("themesList", chargerThemes);
+      if (t === "contrib") lancerAvecDB("contribList", chargerContributions);
       if (t === "parties") lancerAvecDB("partiesList", chargerParties);
+      if (t === "creer") remplirSelectThemes();
     });
   });
 
-  // Compteur de mots (indépendant de la connexion)
-  const ta = $("thMots");
+  // Compteur de mots
+  const ta = $("chMots");
   if (ta) ta.addEventListener("input", () => {
     const n = motsDepuisTexte(ta.value).length;
     const c = $("compteMots");
     if (c) {
       c.textContent = n + (n > 1 ? " mots" : " mot");
-      c.style.background = n >= 25 ? "rgba(52,211,153,.2)" : "var(--violet-glow)";
-      c.style.color = n >= 25 ? "#6ee7b7" : "var(--violet-c)";
+      const bon = n >= 35;
+      const ok = n >= 20;
+      c.style.background = bon ? "rgba(52,211,153,.2)" : (ok ? "rgba(240,180,41,.2)" : "var(--violet-glow)");
+      c.style.color = bon ? "#6ee7b7" : (ok ? "#fbbf24" : "var(--violet-c)");
     }
   });
 
@@ -58,8 +63,10 @@
     const base = await db();
     if (!base) { const s = $("setupNote"); if (s) s.style.display = "block"; return; }
     const { data } = await base.auth.getSession();
-    if (data.session) { $("loginCard").style.display="none"; $("panel").style.display="block"; }
-    else { $("loginCard").style.display="block"; $("panel").style.display="none"; }
+    if (data.session) {
+      $("loginCard").style.display="none"; $("panel").style.display="block";
+      remplirSelectThemes();
+    } else { $("loginCard").style.display="block"; $("panel").style.display="none"; }
   }
 
   $("loginForm").addEventListener("submit", async e => {
@@ -77,106 +84,266 @@
     const base = await db(); if (base) await base.auth.signOut(); refreshAuth();
   });
 
-  // ---------- Créer / modifier un thème ----------
-  $("btnSauver").addEventListener("click", async () => {
-    const nom = $("thNom").value.trim();
-    const desc = $("thDesc").value.trim();
-    const mots = motsDepuisTexte($("thMots").value);
+  // ---------- Liste déroulante des thèmes ----------
+  async function remplirSelectThemes() {
+    const sel = $("chTheme");
+    if (!sel) return;
+    const base = await db();
+    if (!base) return;
+    const ent = await entrepriseId();
+    if (!ent) return;
+    const { data } = await base.from("themes").select("id, nom").eq("entreprise_id", ent).order("nom");
+    themesCache = data || [];
+    const courant = sel.value;
+    sel.innerHTML = '<option value="">— Choisir un thème existant —</option>'
+      + themesCache.map(t => '<option value="' + t.id + '">' + esc(t.nom) + '</option>').join("");
+    if (courant) sel.value = courant;
+    // Masquer le bloc "nouveau thème" si un thème est choisi
+    sel.onchange = () => {
+      const bloc = $("blocNouveauTheme");
+      if (bloc) bloc.style.display = sel.value ? "none" : "block";
+    };
+  }
 
-    if (nom.length < 2) { status("Donne un nom au thème.", "err"); return; }
-    if (mots.length < 10) { status("Il faut au moins 10 mots (tu en as " + mots.length + ").", "err"); return; }
+  // ---------- Créer / modifier un chapitre ----------
+  $("btnSauver").addEventListener("click", async () => {
+    const themeId = $("chTheme").value;
+    const themeNom = $("chThemeNom").value.trim();
+    const themeDesc = $("chThemeDesc").value.trim();
+    const nom = $("chNom").value.trim();
+    const ordre = parseInt($("chOrdre").value, 10) || 1;
+    const mots = motsDepuisTexte($("chMots").value);
+
+    if (!themeId && themeNom.length < 2) { status("Choisis un thème ou donne un nom au nouveau thème.", "err"); return; }
+    if (nom.length < 2) { status("Donne un nom au chapitre.", "err"); return; }
+    if (mots.length < 20) { status("Il faut au moins 20 mots (tu en as " + mots.length + ").", "err"); return; }
 
     status("Enregistrement…", "");
     const base = await db();
     const ent = await entrepriseId();
     if (!base || !ent) { status("Connexion impossible.", "err"); return; }
 
-    const donnees = { entreprise_id: ent, nom, description: desc || null, mots, publie: true };
+    // Créer le thème si nécessaire
+    let idTheme = themeId;
+    if (!idTheme) {
+      const { data, error } = await base.from("themes")
+        .insert({ entreprise_id: ent, nom: themeNom, description: themeDesc || null, mots: [], publie: true })
+        .select("id").single();
+      if (error) { status("Erreur thème : " + error.message, "err"); return; }
+      idTheme = data.id;
+    }
+
+    const donnees = { entreprise_id: ent, theme_id: idTheme, nom, ordre, mots, publie: true };
     let error;
-    if (editId) ({ error } = await base.from("themes").update(donnees).eq("id", editId));
-    else ({ error } = await base.from("themes").insert(donnees));
+    if (editId) ({ error } = await base.from("chapitres").update(donnees).eq("id", editId));
+    else ({ error } = await base.from("chapitres").insert(donnees));
 
     if (error) { status("Erreur : " + error.message, "err"); return; }
-    status(editId ? "Thème modifié !" : "Thème publié !", "ok");
+    status(editId ? "Chapitre modifié !" : "Chapitre publié !", "ok");
     reset();
+    remplirSelectThemes();
   });
 
   $("btnAnnuler").addEventListener("click", reset);
 
   function reset() {
     editId = null;
-    $("thNom").value = ""; $("thDesc").value = ""; $("thMots").value = "";
+    $("chTheme").value = ""; $("chThemeNom").value = ""; $("chThemeDesc").value = "";
+    $("chNom").value = ""; $("chOrdre").value = "1"; $("chMots").value = "";
     $("compteMots").textContent = "0 mot";
     $("compteMots").style.background = "var(--violet-glow)";
     $("compteMots").style.color = "var(--violet-c)";
-    $("formTitre").textContent = "Nouveau thème";
-    $("btnSauver").textContent = "Publier le thème";
+    $("formTitre").textContent = "Nouveau chapitre";
+    $("btnSauver").textContent = "Publier le chapitre";
     $("btnAnnuler").style.display = "none";
+    const bloc = $("blocNouveauTheme"); if (bloc) bloc.style.display = "block";
   }
 
-  // ---------- Liste des thèmes ----------
+  // ---------- Thèmes et chapitres ----------
   async function chargerThemes() {
     const box = $("themesList");
     try {
       const base = await db();
       const ent = await entrepriseId();
-      if (!ent) { box.innerHTML = "<p class='empty'>Entreprise BiZouk introuvable. Vérifie que le SQL est exécuté.</p>"; return; }
-      const { data, error } = await base.from("themes").select("*")
-        .eq("entreprise_id", ent).order("created_at", { ascending: false });
-      if (error) {
-        box.innerHTML = "<p class='empty' style='color:#fca5a5'>Erreur : " + esc(error.message)
-          + "<br><br>Si le message parle de permissions, ton compte n'est peut-être pas relié à BiZouk.</p>";
+      if (!ent) { box.innerHTML = "<p class='empty'>Entreprise BiZouk introuvable. Vérifie le SQL.</p>"; return; }
+
+      const [rT, rC] = await Promise.all([
+        base.from("themes").select("*").eq("entreprise_id", ent).order("nom"),
+        base.from("chapitres").select("*").eq("entreprise_id", ent).order("ordre")
+      ]);
+      if (rT.error) {
+        box.innerHTML = "<p class='empty' style='color:#fca5a5'>Erreur : " + esc(rT.error.message)
+          + "<br><br>Si le message parle de permissions, ton compte n'est pas relié à BiZouk.</p>";
         return;
       }
-      if (!data.length) { box.innerHTML = "<p class='empty'>Aucun thème. Crée le premier dans l'onglet « Créer un thème ».</p>"; return; }
+      const themes = rT.data || [];
+      const chaps = rC.data || [];
+      if (!themes.length) { box.innerHTML = "<p class='empty'>Aucun thème. Crée le premier chapitre dans l'onglet « Créer un chapitre ».</p>"; return; }
 
-      box.innerHTML = data.map(t => {
-        const nb = Array.isArray(t.mots) ? t.mots.length : 0;
-        const apercu = Array.isArray(t.mots) ? t.mots.slice(0,8).join(" · ") : "";
-        const niveaux = [];
-        if (nb >= 15) niveaux.push("15"); if (nb >= 20) niveaux.push("20"); if (nb >= 25) niveaux.push("25");
-        return '<div class="theme-item">'
-          + '<div class="ti-nom">' + esc(t.nom) + '</div>'
-          + '<div class="ti-meta"><span class="compte-mots">' + nb + ' mots</span> · '
-          + (niveaux.length ? 'niveaux ' + niveaux.join("/") : '<span style="color:#fca5a5">trop peu de mots</span>')
-          + ' · ' + dateFr(t.created_at) + '</div>'
-          + (apercu ? '<div class="ti-apercu">' + esc(apercu) + (nb > 8 ? ' …' : '') + '</div>' : '')
-          + '<div class="ti-act">'
-          + '<button class="mod" data-mod="' + t.id + '">Modifier</button>'
-          + '<button class="sup" data-sup="' + t.id + '">Supprimer</button>'
-          + '</div></div>';
+      box.innerHTML = themes.map(t => {
+        const mesChaps = chaps.filter(c => c.theme_id === t.id).sort((a,b)=>(a.ordre||0)-(b.ordre||0));
+        return '<div style="margin-bottom:26px">'
+          + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">'
+          + '<h3 style="font-family:var(--serif);font-size:1.2rem;color:var(--blanc)">' + esc(t.nom)
+          + ' <span style="font-size:.8rem;color:var(--texte-faible);font-weight:400">' + mesChaps.length + ' chapitre(s)</span></h3>'
+          + '<button class="ti-act sup" data-supth="' + t.id + '" style="font-family:inherit;font-weight:600;font-size:.78rem;padding:6px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--rouge);background:none;color:#fca5a5">Supprimer le thème</button>'
+          + '</div>'
+          + (mesChaps.length
+              ? mesChaps.map(c => {
+                  const nb = Array.isArray(c.mots) ? c.mots.length : 0;
+                  const apercu = Array.isArray(c.mots) ? c.mots.slice(0,6).join(" · ") : "";
+                  const ok = nb >= 20;
+                  return '<div class="theme-item">'
+                    + '<div class="ti-nom">' + c.ordre + '. ' + esc(c.nom) + '</div>'
+                    + '<div class="ti-meta"><span class="compte-mots">' + nb + ' mots</span> · '
+                    + (ok ? 'Découverte + Confirmé + Bombe' : '<span style="color:#fca5a5">trop peu de mots</span>')
+                    + ' · ' + dateFr(c.created_at) + '</div>'
+                    + (apercu ? '<div class="ti-apercu">' + esc(apercu) + (nb > 6 ? ' …' : '') + '</div>' : '')
+                    + '<div class="ti-act">'
+                    + '<button class="mod" data-mod="' + c.id + '">Modifier</button>'
+                    + '<button class="sup" data-sup="' + c.id + '">Supprimer</button>'
+                    + '</div></div>';
+                }).join("")
+              : '<p style="color:var(--texte-faible);font-style:italic;font-size:.88rem;padding:10px 0">Aucun chapitre dans ce thème.</p>')
+          + '</div>';
       }).join("");
 
       box.querySelectorAll("[data-mod]").forEach(b =>
-        b.onclick = () => modifier(data.find(x => x.id === b.getAttribute("data-mod"))));
+        b.onclick = () => modifier(chaps.find(x => x.id === b.getAttribute("data-mod"))));
       box.querySelectorAll("[data-sup]").forEach(b =>
-        b.onclick = () => supprimer(b.getAttribute("data-sup")));
+        b.onclick = () => supprimerChapitre(b.getAttribute("data-sup")));
+      box.querySelectorAll("[data-supth]").forEach(b =>
+        b.onclick = () => supprimerTheme(b.getAttribute("data-supth")));
     } catch (e) {
       box.innerHTML = "<p class='empty' style='color:#fca5a5'>Erreur : " + esc(String(e && e.message || e)) + "</p>";
     }
   }
 
-  function modifier(t) {
-    if (!t) return;
-    editId = t.id;
-    $("thNom").value = t.nom || "";
-    $("thDesc").value = t.description || "";
-    $("thMots").value = Array.isArray(t.mots) ? t.mots.join("\n") : "";
-    $("thMots").dispatchEvent(new Event("input"));
-    $("formTitre").textContent = "Modifier le thème";
+  function modifier(c) {
+    if (!c) return;
+    editId = c.id;
+    $("chTheme").value = c.theme_id || "";
+    const bloc = $("blocNouveauTheme"); if (bloc) bloc.style.display = "none";
+    $("chNom").value = c.nom || "";
+    $("chOrdre").value = c.ordre || 1;
+    $("chMots").value = Array.isArray(c.mots) ? c.mots.join("\n") : "";
+    $("chMots").dispatchEvent(new Event("input"));
+    $("formTitre").textContent = "Modifier le chapitre";
     $("btnSauver").textContent = "Enregistrer les modifications";
     $("btnAnnuler").style.display = "inline-flex";
     document.querySelector('.adm-tab[data-tab="creer"]').click();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  async function supprimer(id) {
-    if (!confirm("Supprimer ce thème définitivement ?")) return;
+  async function supprimerChapitre(id) {
+    if (!confirm("Supprimer ce chapitre définitivement ?")) return;
+    const base = await db();
+    const { error } = await base.from("chapitres").delete().eq("id", id);
+    if (error) { status("Suppression impossible : " + error.message, "err"); return; }
+    status("Chapitre supprimé.", "ok");
+    chargerThemes();
+  }
+
+  async function supprimerTheme(id) {
+    if (!confirm("Supprimer ce thème ET tous ses chapitres ?\n\nCette action est définitive.")) return;
     const base = await db();
     const { error } = await base.from("themes").delete().eq("id", id);
     if (error) { status("Suppression impossible : " + error.message, "err"); return; }
     status("Thème supprimé.", "ok");
     chargerThemes();
+    remplirSelectThemes();
+  }
+
+  // ---------- Contributions ----------
+  async function chargerContributions() {
+    const box = $("contribList");
+    try {
+      const base = await db();
+      const ent = await entrepriseId();
+      const { data, error } = await base.from("bizouk_contributions").select("*")
+        .eq("entreprise_id", ent).eq("statut","a_verifier").order("created_at",{ascending:false});
+      if (error) { box.innerHTML = "<p class='empty' style='color:#fca5a5'>Erreur : " + esc(error.message) + "</p>"; return; }
+      if (!data.length) { box.innerHTML = "<p class='empty'>Aucune proposition à examiner.</p>"; return; }
+
+      box.innerHTML = data.map(c => {
+        const nb = motsDepuisTexte(c.mots).length;
+        return '<div class="theme-item">'
+          + '<div class="ti-nom">' + esc(c.theme) + (c.chapitre ? ' · ' + esc(c.chapitre) : '') + '</div>'
+          + '<div class="ti-meta">Par ' + esc(c.auteur) + (c.contact ? ' · ' + esc(c.contact) : '')
+          + ' · <span class="compte-mots">' + nb + ' mots</span> · ' + dateFr(c.created_at) + '</div>'
+          + '<div class="ti-apercu">' + esc(motsDepuisTexte(c.mots).slice(0,10).join(" · ")) + (nb > 10 ? ' …' : '') + '</div>'
+          + '<div class="ti-act">'
+          + '<button class="mod" data-reprendre="' + c.id + '">Reprendre dans le formulaire</button>'
+          + '<button class="ok" data-recompenser="' + c.id + '" style="border-color:var(--vert);color:#6ee7b7">Accepter · +50 pierres</button>'
+          + '<button class="sup" data-rejeter="' + c.id + '">Rejeter</button>'
+          + '</div></div>';
+      }).join("");
+
+      box.querySelectorAll("[data-reprendre]").forEach(b =>
+        b.onclick = () => reprendre(data.find(x => x.id === b.getAttribute("data-reprendre"))));
+      box.querySelectorAll("[data-rejeter]").forEach(b =>
+        b.onclick = () => rejeter(b.getAttribute("data-rejeter")));
+      box.querySelectorAll("[data-recompenser]").forEach(b =>
+        b.onclick = () => recompenser(data.find(x => x.id === b.getAttribute("data-recompenser"))));
+    } catch (e) {
+      box.innerHTML = "<p class='empty' style='color:#fca5a5'>Erreur : " + esc(String(e && e.message || e)) + "</p>";
+    }
+  }
+
+  function reprendre(c) {
+    if (!c) return;
+    editId = null;
+    $("chTheme").value = "";
+    const bloc = $("blocNouveauTheme"); if (bloc) bloc.style.display = "block";
+    $("chThemeNom").value = c.theme || "";
+    $("chNom").value = c.chapitre || "Chapitre 1";
+    $("chMots").value = motsDepuisTexte(c.mots).join("\n");
+    $("chMots").dispatchEvent(new Event("input"));
+    $("formTitre").textContent = "Chapitre proposé par " + (c.auteur || "un joueur");
+    document.querySelector('.adm-tab[data-tab="creer"]').click();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    status("Proposition chargée. Vérifie et publie.", "ok");
+  }
+
+  async function recompenser(c) {
+    if (!c) return;
+    const email = (c.contact || "").trim();
+    if (!email || email.indexOf("@") < 0) {
+      alert("Ce contributeur n'a pas indiqué d'email de compte.\n\nImpossible de le créditer automatiquement.");
+      return;
+    }
+    if (!confirm("Accepter cette proposition et créditer 50 pierres BiZouk à " + (c.auteur||"ce contributeur") + " ?\n\nCompte : " + email)) return;
+
+    const base = await db();
+    const { data, error } = await base.rpc("crediter_contributeur", { email_cible: email, nb_pierres: 50 });
+
+    if (error) {
+      status("Crédit impossible : " + error.message, "err");
+      return;
+    }
+    if (data === "compte_introuvable") {
+      const suite = confirm(
+        "Aucun compte BiZouk n'existe pour « " + email + " ».\n\n"
+        + "Le contributeur doit d'abord créer son compte.\n\n"
+        + "Marquer quand même la proposition comme acceptée ?");
+      if (!suite) return;
+      await base.from("bizouk_contributions").update({ statut: "accepte_sans_credit" }).eq("id", c.id);
+      status("Proposition acceptée. Contributeur à créditer plus tard (pas de compte).", "err");
+      chargerContributions();
+      return;
+    }
+
+    await base.from("bizouk_contributions").update({ statut: "accepte" }).eq("id", c.id);
+    status("Proposition acceptée · 50 pierres créditées à " + esc(c.auteur) + " !", "ok");
+    chargerContributions();
+  }
+
+  async function rejeter(id) {
+    if (!confirm("Rejeter cette proposition ?")) return;
+    const base = await db();
+    await base.from("bizouk_contributions").update({ statut:"rejete" }).eq("id", id);
+    status("Proposition rejetée.", "ok");
+    chargerContributions();
   }
 
   // ---------- Parties jouées ----------
@@ -188,18 +355,18 @@
       const { data, error } = await base.from("parties").select("*")
         .eq("entreprise_id", ent).order("created_at", { ascending: false }).limit(60);
       if (error) { box.innerHTML = "<p class='empty' style='color:#fca5a5'>Erreur : " + esc(error.message) + "</p>"; return; }
-      if (!data.length) { box.innerHTML = "<p class='empty'>Aucune partie enregistrée pour l'instant.</p>"; return; }
+      if (!data.length) { box.innerHTML = "<p class='empty'>Aucune partie enregistrée.</p>"; return; }
 
       const fmt = s => Math.floor(s/60) + ":" + String(s%60).padStart(2,"0");
       box.innerHTML =
         '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px">'
-        + '<span style="color:var(--texte-doux);font-size:.9rem">' + data.length + ' partie(s) enregistrée(s)</span>'
+        + '<span style="color:var(--texte-doux);font-size:.9rem">' + data.length + ' partie(s)</span>'
         + '<button class="btn btn-g btn-sm" id="viderParties" style="border-color:var(--rouge);color:#fca5a5">Tout effacer</button>'
         + '</div>'
         + data.map(p =>
           '<div class="theme-item" style="border-left-color:var(--or)">'
           + '<div class="ti-nom">' + esc(p.joueur || "Joueur") + ' · <span style="color:var(--or)">' + fmt(p.temps_sec) + '</span></div>'
-          + '<div class="ti-meta">' + esc(p.theme_nom || "—") + ' · niveau ' + p.niveau
+          + '<div class="ti-meta">' + esc(p.chapitre_nom || p.theme_nom || "—") + ' · niveau ' + p.niveau
           + ' · ' + p.mots_total + ' mots · ' + dateFr(p.created_at) + '</div>'
           + '<div class="ti-act"><button class="sup" data-delp="' + p.id + '">Supprimer</button></div>'
           + '</div>'
@@ -207,15 +374,15 @@
 
       box.querySelectorAll("[data-delp]").forEach(b =>
         b.onclick = () => supprimerPartie(b.getAttribute("data-delp")));
-      const vider = $("viderParties");
-      if (vider) vider.onclick = () => viderToutesParties();
+      const v = $("viderParties");
+      if (v) v.onclick = () => viderToutesParties();
     } catch (e) {
       box.innerHTML = "<p class='empty' style='color:#fca5a5'>Erreur : " + esc(String(e && e.message || e)) + "</p>";
     }
   }
 
   async function supprimerPartie(id) {
-    if (!confirm("Supprimer ce score du classement ?")) return;
+    if (!confirm("Supprimer ce score ?")) return;
     const base = await db();
     const { error } = await base.from("parties").delete().eq("id", id);
     if (error) { status("Suppression impossible : " + error.message, "err"); return; }
@@ -224,13 +391,13 @@
   }
 
   async function viderToutesParties() {
-    if (!confirm("Effacer TOUS les scores enregistrés ?\n\nCette action est définitive et videra le classement.")) return;
-    if (!confirm("Vraiment sûr ? Tous les temps de tous les joueurs seront perdus.")) return;
+    if (!confirm("Effacer TOUS les scores ?\n\nCette action est définitive.")) return;
+    if (!confirm("Vraiment sûr ? Le classement sera vidé.")) return;
     const base = await db();
     const ent = await entrepriseId();
     const { error } = await base.from("parties").delete().eq("entreprise_id", ent);
     if (error) { status("Suppression impossible : " + error.message, "err"); return; }
-    status("Tous les scores ont été effacés.", "ok");
+    status("Tous les scores effacés.", "ok");
     chargerParties();
   }
 

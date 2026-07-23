@@ -65,8 +65,9 @@
   <div id="panel" style="display:none">
     <div class="adm-head">
       <div class="adm-tabs">
-        <button class="adm-tab on" data-tab="creer">Créer un thème</button>
-        <button class="adm-tab" data-tab="themes">Mes thèmes</button>
+        <button class="adm-tab on" data-tab="creer">Créer un chapitre</button>
+        <button class="adm-tab" data-tab="themes">Thèmes et chapitres</button>
+        <button class="adm-tab" data-tab="contrib">Contributions</button>
         <button class="adm-tab" data-tab="parties">Parties jouées</button>
       </div>
       <button class="btn btn-g btn-sm" id="logoutBtn">Déconnexion</button>
@@ -76,34 +77,50 @@
     <!-- Créer / modifier un thème -->
     <div id="tab-creer">
       <div class="form-carte">
-        <h2 style="font-family:var(--serif);font-size:1.3rem;color:var(--blanc);margin-bottom:16px" id="formTitre">Nouveau thème</h2>
+        <h2 style="font-family:var(--serif);font-size:1.3rem;color:var(--blanc);margin-bottom:16px" id="formTitre">Nouveau chapitre</h2>
 
         <div class="aide">
-          Un thème est une <b>banque de mots</b>. Le jeu pioche dedans selon le niveau choisi par le joueur
-          (15, 20 ou 25 mots). Pour que les trois niveaux fonctionnent, vise <b>au moins 25 mots</b>, et idéalement 40 ou plus pour varier les grilles.
+          Un <b>thème</b> (ex. Histoire d'Haïti) contient plusieurs <b>chapitres</b>.
+          Chaque chapitre a <b>35 mots</b>, qui génèrent automatiquement :
+          <b>Découverte</b> (15 mots), <b>Confirmé</b> (20 mots) et la <b>Bombe</b> (20 mots rebrassés).
         </div>
 
         <div class="field">
-          <label>Nom du thème</label>
-          <input type="text" id="thNom" placeholder="Ex. Histoire d'Haïti, Cuisine créole, Animaux">
+          <label>Thème</label>
+          <select id="chTheme">
+            <option value="">— Choisir un thème existant —</option>
+          </select>
+          <div class="hint">Ou crée un nouveau thème ci-dessous.</div>
+        </div>
+
+        <div class="field" id="blocNouveauTheme">
+          <label>Nouveau thème (si non listé au-dessus)</label>
+          <input type="text" id="chThemeNom" placeholder="Ex. Histoire d'Haïti, Cuisine créole, Nature">
+          <input type="text" id="chThemeDesc" placeholder="Description courte (facultatif)" style="margin-top:8px">
         </div>
 
         <div class="field">
-          <label>Description (facultatif)</label>
-          <input type="text" id="thDesc" placeholder="Une phrase pour présenter le thème">
+          <label>Nom du chapitre</label>
+          <input type="text" id="chNom" placeholder="Ex. Les héros de l'indépendance, Chapitre 1">
         </div>
 
         <div class="field">
-          <label>Les mots</label>
-          <textarea id="thMots" placeholder="Un mot par ligne, ou séparés par des virgules.&#10;&#10;DESSALINES&#10;TOUSSAINT&#10;ANACAONA&#10;VERTIERES"></textarea>
+          <label>Ordre du chapitre</label>
+          <input type="number" id="chOrdre" value="1" min="1" style="max-width:120px">
+          <div class="hint">Détermine l'ordre de déblocage : 1, puis 2, puis 3…</div>
+        </div>
+
+        <div class="field">
+          <label>Les 35 mots du chapitre</label>
+          <textarea id="chMots" placeholder="Un mot par ligne, ou séparés par des virgules.&#10;&#10;DESSALINES&#10;TOUSSAINT&#10;ANACAONA&#10;VERTIERES"></textarea>
           <div class="hint">
             <span class="compte-mots" id="compteMots">0 mot</span>
-            &nbsp; Les accents sont retirés automatiquement. Mots de 2 lettres minimum.
+            &nbsp; Vise 35 mots. Minimum 20 pour que les deux niveaux fonctionnent.
           </div>
         </div>
 
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn btn-v" id="btnSauver">Publier le thème</button>
+          <button class="btn btn-v" id="btnSauver">Publier le chapitre</button>
           <button class="btn btn-g" id="btnAnnuler" style="display:none">Annuler</button>
         </div>
       </div>
@@ -112,6 +129,11 @@
     <!-- Liste des thèmes -->
     <div id="tab-themes" style="display:none">
       <div id="themesList"><p class="empty">Chargement…</p></div>
+    </div>
+
+    <!-- Contributions -->
+    <div id="tab-contrib" style="display:none">
+      <div id="contribList"><p class="empty">Chargement…</p></div>
     </div>
 
     <!-- Parties jouées -->

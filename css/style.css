@@ -379,3 +379,63 @@ footer{border-top:1px solid var(--gris-line);background:var(--gris-2);margin-top
   .bz-compteur{padding:5px 10px;gap:6px}
   .bz-pierre{font-size:.8rem}
 }
+
+/* ============================================================
+   Thèmes et chapitres
+   ============================================================ */
+.recherche-box{max-width:440px;margin:0 auto 26px}
+.recherche-box input{width:100%;background:var(--gris-2);border:1px solid var(--gris-3);
+  border-radius:24px;padding:12px 20px;font-family:inherit;font-size:.95rem;color:var(--texte)}
+.recherche-box input:focus{outline:none;border-color:var(--violet)}
+.recherche-box input::placeholder{color:var(--texte-faible)}
+
+.theme-grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.theme-carte{background:var(--gris-2);border:1px solid var(--gris-line);border-radius:var(--r-lg);
+  padding:22px 24px;text-decoration:none;display:block;transition:all .2s;position:relative;overflow:hidden}
+.theme-carte::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--violet-c),var(--violet-d))}
+.theme-carte:hover{border-color:var(--violet);transform:translateY(-3px)}
+.tc-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.tc-head h3{font-family:var(--serif);font-size:1.2rem;color:var(--blanc);font-weight:600}
+.tc-fini{color:var(--vert);font-size:1.1rem}
+.tc-desc{color:var(--texte-doux);font-size:.88rem;line-height:1.5;margin-bottom:12px}
+.tc-meta{font-size:.8rem;color:var(--texte-faible);text-transform:uppercase;letter-spacing:.06em;
+  font-weight:700;margin-bottom:12px}
+.tc-barre{height:5px;background:var(--gris-3);border-radius:3px;overflow:hidden;margin-bottom:7px}
+.tc-barre span{display:block;height:100%;background:linear-gradient(90deg,var(--violet-c),var(--vert));
+  border-radius:3px;transition:width .4s}
+.tc-progres{font-size:.8rem;color:var(--texte-doux)}
+
+/* ============================================================
+   La pierre BiZouk
+   ============================================================ */
+.pierre{display:inline-block;vertical-align:middle;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+.bz-badge{display:inline-flex;align-items:center;gap:5px}
+.bz-badge .bz-nb{font-family:var(--serif);font-weight:700;font-size:.9rem;line-height:1}
+.bz-badge.bz-vert .bz-nb{color:var(--vert)}
+.bz-badge.bz-jaune .bz-nb{color:var(--or)}
+.bz-badge.bz-rose .bz-nb{color:var(--rose)}
+.bz-badge.bz-violet .bz-nb{color:var(--violet-c)}
+
+/* Compteur dans l'en-tête */
+.bz-compteur{display:flex;align-items:center;gap:11px;background:var(--gris-2);
+  border:1px solid var(--gris-line);border-radius:22px;padding:5px 14px}
+
+/* Pierre animée dans les écrans de gain */
+.pierre-gain{animation:pierreEclat .9s ease-out}
+@keyframes pierreEclat{
+  0%{transform:scale(.3) rotate(-25deg);opacity:0}
+  55%{transform:scale(1.18) rotate(6deg);opacity:1}
+  100%{transform:scale(1) rotate(0);opacity:1}
+}
+.gain-bizouk{display:flex;align-items:center;justify-content:center;gap:14px;
+  background:var(--gris-3);border-radius:14px;padding:16px;margin:16px 0}
+.gain-bizouk .gb-nb{font-family:var(--serif);font-size:1.7rem;font-weight:700;line-height:1}
+.gain-bizouk .gb-txt{font-size:.88rem;color:var(--texte-doux);text-align:left;line-height:1.45}
+
+/* Trésor : détail des pierres */
+.tresor{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:20px 0}
+.tresor-item{background:var(--gris-2);border:1px solid var(--gris-line);border-radius:14px;
+  padding:16px 22px;text-align:center;min-width:96px}
+.tresor-item .ti-nb{font-family:var(--serif);font-size:1.5rem;font-weight:700;line-height:1.2;margin-top:6px}
+.tresor-item .ti-nom{font-size:.75rem;color:var(--texte-faible);text-transform:uppercase;letter-spacing:.06em}

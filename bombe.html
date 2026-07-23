@@ -14,10 +14,10 @@
 <header>
   <div class="nav">
     <a href="index.html" class="logo"><span class="logo-mark">B</span><span class="logo-txt">Bi<b>Zouk</b></span></a>
-    <div class="bz-compteur">
-      <span class="bz-pierre bz-vert">◆ <span id="bzVert">0</span></span>
-      <span class="bz-pierre bz-jaune">◆ <span id="bzJaune">0</span></span>
-      <span class="bz-pierre bz-rose">◆ <span id="bzRose">0</span></span>
+    <div class="bz-compteur" id="bzCompteur" title="Tes pierres BiZouk">
+      <span class="bz-badge bz-vert" id="badgeVert"><span class="bz-nb" id="bzVert">0</span></span>
+      <span class="bz-badge bz-jaune" id="badgeJaune"><span class="bz-nb" id="bzJaune">0</span></span>
+      <span class="bz-badge bz-rose" id="badgeRose"><span class="bz-nb" id="bzRose">0</span></span>
     </div>
     <a href="parcours.html" class="btn-connexion">← Parcours</a>
   </div>
@@ -41,7 +41,7 @@
       <div class="mots-progres" id="motsProgres">0 / 2</div>
       <div class="mots-liste" id="motsListe"></div>
       <p style="font-size:.82rem;color:var(--texte-faible);margin-top:14px;line-height:1.5">
-        30 mots sont cachés dans cette grille. Seuls les 2 mots indiqués comptent.
+        20 mots sont cachés dans cette grille. Seuls les 2 mots indiqués comptent.
       </p>
     </div>
   </div>
@@ -68,6 +68,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-config.js"></script>
+<script src="js/pierre.js"></script>
 <script src="js/progression.js"></script>
 <script src="js/moteur.js"></script>
 <script src="js/bombe.js"></script>
