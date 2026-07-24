@@ -83,7 +83,7 @@
   $("btnLancer").addEventListener("click", () => {
     const chapId = $("selChapitre").value;
     if (!chapId) { alert("Choisis une grille."); return; }
-    const niv = (document.querySelector('input[name="niv"]:checked') || {}).value || "15";
+    const niv = (document.querySelector('input[name="niv"]:checked') || {}).value || "1";
     // On va jouer la grille, avec le mode duel activé
     location.href = "jeu.html?chapitre=" + chapId + "&niveau=" + niv + "&duel=1";
   });
@@ -142,7 +142,7 @@
         + '<span class="di-av">' + avatarDe(adversaire, 40) + '</span>'
         + '<span class="di-info"><span class="di-nom">' + (jeGagne ? '🏆 ' : '') + 'contre ' + esc(adversaire) + '</span>'
         + '<span class="di-detail">' + esc(d.chapitre_nom || "Grille") + ' · '
-        + (d.niveau === 20 ? "Confirmé" : "Découverte") + '</span></span>'
+        + ({1:"Découverte",2:"Confirmé",3:"Expert"}[d.niveau] || "Découverte") + '</span></span>'
         + '<span class="di-temps ' + (jeGagne ? 'gagne' : 'perdu') + '">'
         + '<b>' + fmt(monTemps) + '</b><span>contre ' + fmt(sonTemps) + '</span></span>'
         + '</div>';

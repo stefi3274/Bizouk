@@ -8,7 +8,7 @@
   const initiale = n => (n || "?").trim().charAt(0).toUpperCase();
 
   const code = (new URLSearchParams(location.search).get("code") || "").toUpperCase().trim();
-  const TAILLES = { 15: 10, 20: 12 };
+  const TAILLES = { 1: 9, 2: 10, 3: 11 };
 
   let duel = null, jeu = null, debut = null, minuteur = null, fini = false;
   let monNom = "", totalMots = 0, trouves = 0;
@@ -39,7 +39,7 @@
     poserAvatar($("avLui"), duel.lanceur_nom, 68);
     $("tempsLui").textContent = fmt(duel.lanceur_temps);
     $("infoGrille").textContent = duel.chapitre_nom || "Grille";
-    $("infoNiveau").textContent = (duel.niveau === 20 ? "Confirmé" : "Découverte") + " · 15 mots";
+    $("infoNiveau").textContent = ({1:"Découverte",2:"Confirmé",3:"Expert"}[duel.niveau] || "Découverte") + " · 15 mots";
     $("infoTemps").textContent = fmt(duel.lanceur_temps);
     $("duelCarte").style.display = "block";
 
@@ -128,7 +128,7 @@
       surVictoire: () => terminer()
     });
 
-    const pz = jeu.charger(duel.mots, TAILLES[duel.niveau] || 10);
+    const pz = jeu.charger(duel.mots, TAILLES[duel.niveau] || 9);
     totalMots = pz ? pz.placements.length : duel.mots.length;
     majCourse();
 

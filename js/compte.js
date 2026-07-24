@@ -184,7 +184,7 @@
       '<div class="prog-ligne">'
       + '<span class="prog-nom">' + esc(p.chapitre_nom || p.theme_nom || "Grille")
       + '<span style="font-size:.78rem;color:var(--texte-faible);display:block">'
-      + (p.niveau === 20 ? "Confirmé" : "Découverte") + ' · ' + p.mots_total + ' mots</span></span>'
+      + ({1:"Découverte",2:"Confirmé",3:"Expert"}[p.niveau] || "Découverte") + ' · ' + p.mots_total + ' mots</span></span>'
       + '<span style="font-family:var(--serif);font-weight:700;color:var(--or);font-size:1.05rem">'
       + fmt(p.temps_sec) + '</span></div>'
     ).join("");

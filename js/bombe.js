@@ -5,9 +5,9 @@
   const esc = s => (s || "").replace(/[&<>"']/g, c => (
     { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 
-  const DUREE = 120;          // 2 minutes
+  const DUREE = 60;           // 1 minute
   const NB_MOTS_GRILLE = 20;  // mots cachés (rebrassage des mots du chapitre)
-  const NB_CIBLES = 2;        // mots à trouver
+  const NB_CIBLES = 1;        // un seul mot à trouver
 
   const params = new URLSearchParams(location.search);
   const chapitreId = params.get("chapitre");
@@ -52,6 +52,37 @@
       $("chrono").classList.toggle("danger", reste <= 20);
       if (reste <= 0) { clearInterval(minuteur); explosion(); }
     }, 1000);
+  }
+
+  /* Le mot à trouver devient plus long à mesure que le joueur progresse.
+     0-5 niveaux réussis : mot court · 6-15 : moyen · 16+ : le plus long. */
+  function choisirCible(places) {
+    if (!places.length) return null;
+    const tries = places.slice().sort((a, b) => a.length - b.length);
+    const n = tries.length;
+
+    let reussis = 0;
+    if (window.Progression && window.Progression.totalNiveauxReussis) {
+      reussis = window.Progression.totalNiveauxReussis();
+    }
+
+    let vivier;
+    if (reussis <= 5)        vivier = tries.slice(0, Math.max(1, Math.ceil(n * 0.4)));       // les plus courts
+    else if (reussis <= 15)  vivier = tries.slice(Math.floor(n * 0.3), Math.ceil(n * 0.8));  // les moyens
+    else                     vivier = tries.slice(Math.max(0, n - Math.ceil(n * 0.4)));      // les plus longs
+
+    if (!vivier.length) vivier = tries;
+    return vivier[Math.floor(Math.random() * vivier.length)];
+  }
+
+  function paliersDifficulte() {
+    let r = 0;
+    if (window.Progression && window.Progression.totalNiveauxReussis) {
+      r = window.Progression.totalNiveauxReussis();
+    }
+    if (r <= 5) return "Échauffement";
+    if (r <= 15) return "Ça se corse";
+    return "Niveau expert";
   }
 
   // ---------- Chargement ----------
@@ -106,22 +137,16 @@
       });
     }
 
-    // Générer la grille une seule fois, puis choisir 2 cibles parmi les mots réellement placés
-    const puzzle = jeu.charger(res.mots, 15);
+    // Générer la grille, puis choisir LE mot cible selon la difficulté du joueur
+    const puzzle = jeu.charger(res.mots, 14);
     const places = puzzle.placements.map(p => p.mot);
-    cibles = [];
-    const copie = places.slice();
-    for (let i = 0; i < NB_CIBLES && copie.length; i++) {
-      const idx = Math.floor(Math.random() * copie.length);
-      cibles.push(copie.splice(idx, 1)[0]);
-    }
-    // Appliquer les cibles sans régénérer la grille
+    cibles = [choisirCible(places)];
     jeu.definirCibles(cibles);
 
     chapitreCourant = res.chapitre;
     themeNomCourant = res.themeNom || "";
     $("bombeSous").textContent = res.chapitre.nom + (res.themeNom ? " · " + res.themeNom : "")
-      + " · 20 mots cachés, 2 à trouver";
+      + " · " + paliersDifficulte() + " · 1 mot à trouver";
     majCibles();
     termine = false;
     demarrer();
@@ -146,9 +171,17 @@
       ? "Bravo <b>" + esc(nom) + "</b>, tu assures ! Il te restait " + fmt(Math.max(0,reste)) + "."
       : "Tu assures ! Il te restait " + fmt(Math.max(0,reste)) + ".";
     $("bfContenu").innerHTML =
-      (rb && rb.gain ? '<div class="gain-bizouk"><span class="pierre-gain">' + (window.BiZoukPierre ? window.BiZoukPierre.pierre("rose",42) : "") + '</span>'
-        + '<span class="gb-nb" style="color:var(--rose)">+' + rb.gain + '</span>'
-        + '<span class="gb-txt">pierres BiZouk gagnées<br><b style="color:var(--rose)">chapitre terminé</b></span></div>' : '')
+      (rb && rb.gain
+        ? '<div class="gain-bizouk" style="flex-direction:column;gap:8px">'
+          + '<div style="display:flex;gap:10px;align-items:center;justify-content:center">'
+          + ["vert","jaune","rose"].map(c =>
+              '<span class="pierre-gain" style="display:inline-flex;align-items:center;gap:3px">'
+              + (window.BiZoukPierre ? window.BiZoukPierre.pierre(c, 34) : "")
+              + '<b style="font-family:var(--serif);color:var(--' + (c==="jaune"?"or":c) + ')">+2</b></span>').join("")
+          + '</div>'
+          + '<span class="gb-txt" style="text-align:center">6 pierres gagnées<br>'
+          + '<b style="color:var(--violet-c)">chapitre terminé</b></span></div>'
+        : '')
       + '<div class="bf-options" id="bfBoutons">'
       + '<a class="btn btn-v" href="parcours.html" id="btnSuite">Continuer le parcours</a>'
       + '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px">'
@@ -162,7 +195,7 @@
     chapitreSuivant().then(suiv => {
       const b = $("btnSuite");
       if (b && suiv) {
-        b.href = "jeu.html?chapitre=" + suiv.id + "&niveau=15";
+        b.href = "jeu.html?chapitre=" + suiv.id + "&niveau=1";
         b.textContent = "Continuer · " + suiv.nom;
       }
     });

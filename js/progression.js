@@ -3,13 +3,14 @@
    Fonctionne sans compte (navigateur) et avec compte (synchronisé). */
 (function () {
   const CLE = "bizouk_progression";
-  const COULEURS = { 15: "vert", 20: "jaune" };
+  const COULEURS = { 1: "vert", 2: "jaune", 3: "rose" };
+  const GAINS = { 1: 3, 2: 3, 3: 5 };
   const PRIX_DEBLOCAGE = 5;
   const PRIX_INDICE = 1;
   const PRIX_SAUVETAGE = 1;                  // pierres pour sauver une série
   const PALIERS = [3, 7, 14, 30, 60, 100];   // jours qui donnent un bonus
   const BONUS = { 3: 3, 7: 7, 14: 10, 30: 20, 60: 35, 100: 60 };
-  const GAIN_PAR_NIVEAU = 3;
+
   const GAIN_BOMBE = 3;
   const BLOCAGE_MS = 2 * 60 * 1000;
 
@@ -138,28 +139,33 @@
     // Le niveau 15 est ouvert si le chapitre l'est ; le 20 si le 15 est réussi
     niveauOuvert(chapId, niveau, chapitreOuvert) {
       if (!chapitreOuvert) return false;
-      if (niveau === 15) return true;
-      return this.reussi(chapId, 15);
+      if (niveau === 1) return true;
+      return this.reussi(chapId, niveau - 1);
     },
     bombeOuverte(chapId, chapitreOuvert) {
-      return !!chapitreOuvert && this.reussi(chapId, 15) && this.reussi(chapId, 20);
+      return !!chapitreOuvert && this.reussi(chapId, 1) && this.reussi(chapId, 2) && this.reussi(chapId, 3);
     },
-    // Un chapitre est terminé quand ses 2 niveaux ET sa bombe sont passés
+    // Un chapitre est terminé quand ses 3 niveaux ET sa bombe sont passés
     chapitreFini(chapId) {
-      return this.reussi(chapId, 15) && this.reussi(chapId, 20) && this.bombeFaite(chapId);
+      return this.reussi(chapId, 1) && this.reussi(chapId, 2)
+        && this.reussi(chapId, 3) && this.bombeFaite(chapId);
     },
 
     async gagnerNiveau(chapId, niveau) {
       const cle = chapId + "-" + niveau;
       const nouveau = !etat.niveaux_reussis.includes(cle);
+      const gain = GAINS[niveau] || 3;
       if (nouveau) {
         etat.niveaux_reussis.push(cle);
         const coul = COULEURS[niveau] || "vert";
-        etat["bizouk_" + coul] += GAIN_PAR_NIVEAU;
+        etat["bizouk_" + coul] += gain;
         await sauver();
       }
-      return { nouveau, gain: nouveau ? GAIN_PAR_NIVEAU : 0, couleur: COULEURS[niveau] || "vert" };
+      return { nouveau, gain: nouveau ? gain : 0, couleur: COULEURS[niveau] || "vert" };
     },
+
+    /* Nombre total de niveaux réussis (sert à la difficulté de la Bombe) */
+    totalNiveauxReussis() { return (etat.niveaux_reussis || []).length; },
 
     // ---------- Bombe ----------
     bloque() { return !!etat.bloque_jusqua && new Date(etat.bloque_jusqua).getTime() > Date.now(); },
@@ -170,14 +176,18 @@
     async bombeReussie(chapId) {
       etat.bombes_reussies++;
       etat.bloque_jusqua = null;
-      let gain = 0;
+      let gain = 0, detail = null;
       if (chapId && !etat.bombes_reussies_ids.includes(chapId)) {
         etat.bombes_reussies_ids.push(chapId);
-        etat.bizouk_rose += GAIN_BOMBE;
-        gain = GAIN_BOMBE;
+        // La Bombe récompense avec un mélange des trois couleurs
+        etat.bizouk_vert += 2;
+        etat.bizouk_jaune += 2;
+        etat.bizouk_rose += 2;
+        gain = 6;
+        detail = { vert: 2, jaune: 2, rose: 2 };
       }
       await sauver();
-      return { gain };
+      return { gain, detail };
     },
     async bombeRatee() {
       etat.bombes_ratees++;

@@ -4,16 +4,17 @@
   async function db() { return window.DB || (window.attendreDB ? await window.attendreDB(8000) : null); }
 
   const params = new URLSearchParams(location.search);
-  const niveau = parseInt(params.get("niveau"), 10) || 15;
+  const niveau = parseInt(params.get("niveau"), 10) || 1;
   const chapitreId = params.get("chapitre");   // null = jeu libre
   const modeDuel = params.get("duel") === "1";
   const themeId = params.get("theme");
 
   const NIVEAUX = {
-    15: { nom: "Découverte", tailleMin: 10, mots: 15, longs: false },
-    20: { nom: "Confirmé",   tailleMin: 11, mots: 15, longs: true }
+    1: { nom: "Découverte", tailleMin: 9,  mots: 10, tri: "courts" },
+    2: { nom: "Confirmé",   tailleMin: 10, mots: 10, tri: "moyens" },
+    3: { nom: "Expert",     tailleMin: 11, mots: 15, tri: "longs"  }
   };
-  const conf = NIVEAUX[niveau] || NIVEAUX[15];
+  const conf = NIVEAUX[niveau] || NIVEAUX[1];
 
   let forcerNouvelle = false;
   let jeu = null, debut = null, minuteur = null, themeCourant = null, chapitreCourant = null, fini = false;
@@ -53,19 +54,29 @@
   }
 
   // ---------- Chargement des mots ----------
-  /* Choisit les mots selon le niveau.
-     Découverte : tirage libre. Confirmé : parmi les mots les plus longs. */
+  /* Choisit les mots selon le niveau :
+     Découverte prend les plus courts, Confirmé les moyens, Expert les plus longs. */
   function choisirMots(tous) {
     const liste = Array.isArray(tous) ? tous.slice() : [];
     if (!liste.length) return [];
+    if (liste.length <= conf.mots) return melanger(liste);
 
-    if (conf.longs && liste.length > conf.mots) {
-      // On garde la moitié des mots les plus longs, puis on pioche dedans
-      const tries = liste.slice().sort((a, b) => b.length - a.length);
-      const vivier = tries.slice(0, Math.max(conf.mots, Math.ceil(tries.length * 0.6)));
-      return melanger(vivier).slice(0, conf.mots);
+    const tries = liste.slice().sort((a, b) => a.length - b.length);
+    const n = tries.length;
+    let vivier;
+
+    if (conf.tri === "courts") {
+      vivier = tries.slice(0, Math.max(conf.mots, Math.ceil(n * 0.5)));
+    } else if (conf.tri === "moyens") {
+      const debut = Math.floor(n * 0.25);
+      const fin = Math.max(debut + conf.mots, Math.ceil(n * 0.8));
+      vivier = tries.slice(debut, fin);
+    } else {
+      vivier = tries.slice(Math.max(0, n - Math.max(conf.mots, Math.ceil(n * 0.5))));
     }
-    return melanger(liste).slice(0, conf.mots);
+
+    if (vivier.length < conf.mots) vivier = tries;
+    return melanger(vivier).slice(0, conf.mots);
   }
 
   function melanger(liste) {
@@ -358,16 +369,11 @@
   function prochaineEtape() {
     if (!chapitreId || !window.Progression) return null;
     const P = window.Progression;
-    // Après Découverte (15) → Confirmé (20)
-    if (niveau === 15) {
-      return { libelle: "Continuer · Confirmé (20 mots)",
-               lien: "jeu.html?chapitre=" + chapitreId + "&niveau=20" };
-    }
-    // Après Confirmé (20) → la Bombe
-    if (niveau === 20) {
+    if (niveau === 1) return { libelle: "Continuer · Confirmé", lien: "jeu.html?chapitre=" + chapitreId + "&niveau=2" };
+    if (niveau === 2) return { libelle: "Continuer · Expert", lien: "jeu.html?chapitre=" + chapitreId + "&niveau=3" };
+    if (niveau === 3) {
       if (P.bombeFaite && P.bombeFaite(chapitreId)) return null;
-      return { libelle: "Continuer · La Bombe 💣",
-               lien: "bombe.html?chapitre=" + chapitreId };
+      return { libelle: "Continuer · La Bombe 💣", lien: "bombe.html?chapitre=" + chapitreId };
     }
     return null;
   }

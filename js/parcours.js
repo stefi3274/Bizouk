@@ -44,8 +44,9 @@
 
     // Déterminer l'étape suivante dans ce chapitre
     let libelle, lien;
-    if (!P.reussi(chap.id, 15)) { libelle = "Découverte · 15 mots"; lien = "jeu.html?chapitre=" + chap.id + "&niveau=15"; }
-    else if (!P.reussi(chap.id, 20)) { libelle = "Confirmé · 20 mots"; lien = "jeu.html?chapitre=" + chap.id + "&niveau=20"; }
+    if (!P.reussi(chap.id, 1)) { libelle = "Découverte · 10 mots"; lien = "jeu.html?chapitre=" + chap.id + "&niveau=1"; }
+    else if (!P.reussi(chap.id, 2)) { libelle = "Confirmé · 10 mots"; lien = "jeu.html?chapitre=" + chap.id + "&niveau=2"; }
+    else if (!P.reussi(chap.id, 3)) { libelle = "Expert · 15 mots"; lien = "jeu.html?chapitre=" + chap.id + "&niveau=3"; }
     else if (!P.bombeFaite(chap.id)) { libelle = "La Bombe 💣"; lien = "bombe.html?chapitre=" + chap.id; }
     else {
       // Chapitre fini : proposer le suivant
@@ -53,8 +54,8 @@
       const suiv = theme.chapitres[idx + 1];
       if (!suiv) { zone.innerHTML = ""; return; }
       chap = suiv;
-      libelle = "Découverte · 15 mots";
-      lien = "jeu.html?chapitre=" + suiv.id + "&niveau=15";
+      libelle = "Découverte · 10 mots";
+      lien = "jeu.html?chapitre=" + suiv.id + "&niveau=1";
     }
 
     zone.innerHTML = '<div class="reprise">'
@@ -175,25 +176,22 @@
             : 'Termine le chapitre précédent pour ouvrir') + '</div></div>'
         + '</div><div class="niv-liste">';
 
-      // Niveau Découverte (15)
-      const d15 = P.reussi(chap.id, 15);
-      const o15 = P.niveauOuvert(chap.id, 15, ouvert);
-      html += '<a class="niv-case niv-decouverte' + (d15 ? ' fait' : '') + (o15 ? '' : ' verrou') + '" '
-        + 'href="' + (o15 ? 'jeu.html?chapitre=' + chap.id + '&niveau=15' : '#') + '">'
-        + '<div class="nc-head"><span class="nc-nom">Découverte</span>'
-        + '<span class="nc-etat">' + (d15 ? '✓' : (o15 ? '' : '🔒')) + '</span></div>'
-        + '<div class="nc-mots">15 mots à trouver</div>'
-        + '<div class="nc-gain">' + (d15 ? 'Réussi · 3 pierres' : '+3 pierres vertes') + '</div></a>';
-
-      // Niveau Confirmé (20)
-      const d20 = P.reussi(chap.id, 20);
-      const o20 = P.niveauOuvert(chap.id, 20, ouvert);
-      html += '<a class="niv-case niv-confirme' + (d20 ? ' fait' : '') + (o20 ? '' : ' verrou') + '" '
-        + 'href="' + (o20 ? 'jeu.html?chapitre=' + chap.id + '&niveau=20' : '#') + '">'
-        + '<div class="nc-head"><span class="nc-nom">Confirmé</span>'
-        + '<span class="nc-etat">' + (d20 ? '✓' : (o20 ? '' : '🔒')) + '</span></div>'
-        + '<div class="nc-mots">15 mots · les plus longs</div>'
-        + '<div class="nc-gain">' + (d20 ? 'Réussi · 3 pierres' : '+3 pierres jaunes') + '</div></a>';
+      // Les trois niveaux
+      const NIVS = [
+        { n: 1, nom: "Découverte", classe: "niv-decouverte", mots: 10, gain: 3, coul: "vertes" },
+        { n: 2, nom: "Confirmé",   classe: "niv-confirme",   mots: 10, gain: 3, coul: "jaunes" },
+        { n: 3, nom: "Expert",     classe: "niv-expertn",    mots: 15, gain: 5, coul: "roses" }
+      ];
+      NIVS.forEach(niv => {
+        const fait = P.reussi(chap.id, niv.n);
+        const ouv = P.niveauOuvert(chap.id, niv.n, ouvert);
+        html += '<a class="niv-case ' + niv.classe + (fait ? ' fait' : '') + (ouv ? '' : ' verrou') + '" '
+          + 'href="' + (ouv ? 'jeu.html?chapitre=' + chap.id + '&niveau=' + niv.n : '#') + '">'
+          + '<div class="nc-head"><span class="nc-nom">' + niv.nom + '</span>'
+          + '<span class="nc-etat">' + (fait ? '✓' : (ouv ? '' : '🔒')) + '</span></div>'
+          + '<div class="nc-mots">' + niv.mots + ' mots à trouver</div>'
+          + '<div class="nc-gain">' + (fait ? 'Réussi · ' + niv.gain + ' pierres' : '+' + niv.gain + ' pierres ' + niv.coul) + '</div></a>';
+      });
 
       html += '</div>';
 
