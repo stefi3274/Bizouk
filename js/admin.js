@@ -22,9 +22,10 @@
     tab.addEventListener("click", () => {
       const t = tab.getAttribute("data-tab");
       document.querySelectorAll(".adm-tab").forEach(x => x.classList.toggle("on", x === tab));
-      ["creer","themes","contrib","parties"].forEach(k => {
+      ["bord","creer","themes","contrib","parties"].forEach(k => {
         const el = $("tab-" + k); if (el) el.style.display = (t === k) ? "block" : "none";
       });
+      if (t === "bord") lancerAvecDB("bordContenu", chargerBord);
       if (t === "themes") lancerAvecDB("themesList", chargerThemes);
       if (t === "contrib") lancerAvecDB("contribList", chargerContributions);
       if (t === "parties") lancerAvecDB("partiesList", chargerParties);
@@ -46,6 +47,199 @@
     }
   });
 
+
+
+  // ---------- Tableau de bord ----------
+  async function chargerBord() {
+    const box = $("bordContenu");
+    try {
+      const base = await db();
+      const ent = await entrepriseId();
+      if (!ent) { box.innerHTML = "<p class='empty'>Entreprise introuvable.</p>"; return; }
+
+      const [rTh, rCh, rPa, rPr, rDu, rDf, rCo] = await Promise.all([
+        base.from("themes").select("id, nom").eq("entreprise_id", ent),
+        base.from("chapitres").select("id, theme_id, nom, mots").eq("entreprise_id", ent),
+        base.from("parties").select("chapitre_nom, theme_nom, niveau, temps_sec, joueur, created_at").eq("entreprise_id", ent),
+        base.from("progression").select("joueur, serie_jours, serie_record, niveaux_reussis, bombes_reussies_ids").eq("entreprise_id", ent),
+        base.from("duels").select("statut, created_at").eq("entreprise_id", ent),
+        base.from("defis_jour").select("jour, joueur, temps_sec").eq("entreprise_id", ent),
+        base.from("bizouk_contributions").select("statut").eq("entreprise_id", ent)
+      ]);
+
+      const themes = rTh.data || [], chaps = rCh.data || [], parties = rPa.data || [];
+      const joueurs = rPr.data || [], duels = rDu.data || [], defis = rDf.data || [];
+      const contribs = rCo.data || [];
+
+      const totalMots = chaps.reduce((s,c) => s + (Array.isArray(c.mots) ? c.mots.length : 0), 0);
+      const duelsFinis = duels.filter(d => d.statut === "termine").length;
+      const contribsAttente = contribs.filter(c => c.statut === "a_verifier").length;
+
+      // Parties des 7 derniers jours
+      const il7 = new Date(); il7.setDate(il7.getDate() - 7);
+      const recentes = parties.filter(p => new Date(p.created_at) >= il7).length;
+
+      // Chapitres les plus joués
+      const parChapitre = {};
+      parties.forEach(p => {
+        const n = p.chapitre_nom || p.theme_nom || "—";
+        parChapitre[n] = (parChapitre[n] || 0) + 1;
+      });
+      const topChapitres = Object.entries(parChapitre).sort((a,b) => b[1]-a[1]).slice(0, 8);
+      const maxJoue = topChapitres.length ? topChapitres[0][1] : 1;
+
+      // Chapitres jamais joués
+      const jamais = chaps.filter(c => !parChapitre[c.nom]);
+
+      // Joueurs les plus assidus
+      const topSeries = joueurs.slice()
+        .sort((a,b) => (b.serie_record||0) - (a.serie_record||0)).slice(0, 5)
+        .filter(j => (j.serie_record||0) > 0);
+
+      // Défi du jour
+      const defiAuj = defis.filter(d => d.jour === new Date().toISOString().slice(0,10)).length;
+
+      box.innerHTML =
+        '<div class="bord-grille">'
+        + '<div class="bord-c"><b>' + joueurs.length + '</b><span>joueurs inscrits</span></div>'
+        + '<div class="bord-c or"><b>' + parties.length + '</b><span>parties jouées</span></div>'
+        + '<div class="bord-c vert"><b>' + recentes + '</b><span>ces 7 jours</span></div>'
+        + '<div class="bord-c"><b>' + themes.length + '</b><span>thèmes</span></div>'
+        + '<div class="bord-c"><b>' + chaps.length + '</b><span>chapitres</span></div>'
+        + '<div class="bord-c"><b>' + totalMots + '</b><span>mots au total</span></div>'
+        + '<div class="bord-c or"><b>' + duelsFinis + '</b><span>duels joués</span></div>'
+        + '<div class="bord-c vert"><b>' + defiAuj + '</b><span>défis aujourd\'hui</span></div>'
+        + '</div>'
+
+        + (contribsAttente
+            ? '<div class="bord-section" style="border-color:var(--or)">'
+              + '<h3 style="color:var(--or)">' + contribsAttente + ' contribution'
+              + (contribsAttente > 1 ? 's' : '') + ' en attente</h3>'
+              + '<p style="font-size:.88rem;color:var(--texte-doux)">Va dans l\'onglet Contributions pour les examiner.</p>'
+              + '</div>'
+            : '')
+
+        + '<div class="bord-section"><h3>Chapitres les plus joués</h3>'
+        + (topChapitres.length
+            ? topChapitres.map(([nom, nb]) =>
+                '<div style="padding:8px 0">'
+                + '<div class="bord-ligne" style="border:0;padding:0">'
+                + '<span class="bord-nom">' + esc(nom) + '</span>'
+                + '<span class="bord-val">' + nb + '</span></div>'
+                + '<div class="bord-barre"><span style="width:' + Math.round(100*nb/maxJoue) + '%"></span></div>'
+                + '</div>').join("")
+            : '<p style="color:var(--texte-faible);font-style:italic;font-size:.88rem">Aucune partie enregistrée.</p>')
+        + '</div>'
+
+        + (jamais.length
+            ? '<div class="bord-section"><h3>Chapitres jamais joués (' + jamais.length + ')</h3>'
+              + '<p style="font-size:.85rem;color:var(--texte-doux);line-height:1.7">'
+              + jamais.slice(0, 12).map(c => esc(c.nom)).join(" · ")
+              + (jamais.length > 12 ? " …" : "") + '</p></div>'
+            : '')
+
+        + '<div class="bord-section"><h3>Joueurs les plus assidus</h3>'
+        + (topSeries.length
+            ? topSeries.map(j =>
+                '<div class="bord-ligne"><span class="bord-nom">' + esc(j.joueur || "—") + '</span>'
+                + '<span class="bord-val">' + (j.serie_record||0) + ' jours 🔥</span></div>').join("")
+            : '<p style="color:var(--texte-faible);font-style:italic;font-size:.88rem">Aucune série en cours.</p>')
+        + '</div>';
+
+    } catch (e) {
+      box.innerHTML = "<p class='empty' style='color:#fca5a5'>Erreur : " + esc(String(e && e.message || e)) + "</p>";
+    }
+  }
+
+  // ---------- Extraction de mots depuis un texte ----------
+  /* Mots trop courants pour faire de bons mots mêlés */
+  const MOTS_COURANTS = new Set([
+    "AVEC","POUR","DANS","SOUS","SANS","MAIS","DONC","AINSI","ALORS","APRES","AVANT",
+    "CETTE","CETTE","CELUI","CELLE","LEURS","NOTRE","VOTRE","MEME","AUSSI","ENCORE",
+    "TOUT","TOUS","TOUTE","TOUTES","PLUS","MOINS","TRES","BIEN","ETRE","AVOIR","FAIRE",
+    "DIRE","POUVOIR","VOULOIR","DEVOIR","QUAND","COMME","PARCE","QUE","QUI","QUOI",
+    "DONT","LEQUEL","AUCUN","CHAQUE","PLUSIEURS","QUELQUE","AUTRE","AUTRES","ENTRE",
+    "PENDANT","DEPUIS","VERS","CHEZ","CONTRE","SELON","MALGRE","PARMI","AUPRES",
+    "CELA","CECI","VOILA","VOICI","AUJOURD","HUI","DEJA","JAMAIS","TOUJOURS","SOUVENT",
+    "PEUT","FAIT","DEUX","TROIS","QUATRE","CINQ","LEUR","ELLE","ELLES","NOUS","VOUS",
+    "SONT","ETAIT","ETAIENT","SERA","SERONT","AVAIT","AVAIENT","AURA","AURONT"
+  ]);
+
+  function extraireMots(texte, lgMin, lgMax, ignorerCourants) {
+    const brut = (texte || "")
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .toUpperCase()
+      .split(/[^A-Z]+/)
+      .filter(Boolean);
+
+    const vus = new Set();
+    const sortie = [];
+    for (const m of brut) {
+      if (m.length < lgMin || m.length > lgMax) continue;
+      if (ignorerCourants && MOTS_COURANTS.has(m)) continue;
+      if (vus.has(m)) continue;
+      vus.add(m);
+      sortie.push(m);
+    }
+    return sortie;
+  }
+
+  if ($("btnImport")) {
+    $("btnImport").onclick = () => {
+      const b = $("blocImport");
+      b.style.display = (b.style.display === "none") ? "block" : "none";
+      if (b.style.display === "block") $("texteSource").focus();
+    };
+  }
+  if ($("btnFermerImport")) {
+    $("btnFermerImport").onclick = () => { $("blocImport").style.display = "none"; };
+  }
+
+  if ($("btnExtraire")) {
+    $("btnExtraire").onclick = () => {
+      const texte = $("texteSource").value || "";
+      const lgMin = parseInt($("lgMin").value, 10) || 4;
+      const lgMax = parseInt($("lgMax").value, 10) || 12;
+      const ignorer = $("sansCourants").checked;
+
+      const mots = extraireMots(texte, lgMin, lgMax, ignorer);
+      const zone = $("apercuImport");
+
+      if (!mots.length) {
+        zone.innerHTML = '<p style="color:#fca5a5;font-size:.88rem">'
+          + 'Aucun mot trouvé. Essaie de réduire la longueur minimale.</p>';
+        return;
+      }
+
+      zone.innerHTML =
+        '<div style="background:var(--gris-2);border-radius:10px;padding:14px">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">'
+        + '<span class="compte-mots">' + mots.length + ' mots extraits</span>'
+        + '<div style="display:flex;gap:6px;flex-wrap:wrap">'
+        + '<button type="button" class="btn btn-v btn-sm" id="btnRemplacer">Remplacer</button>'
+        + '<button type="button" class="btn btn-g btn-sm" id="btnAjouter">Ajouter</button>'
+        + '</div></div>'
+        + '<div style="max-height:150px;overflow:auto;font-size:.84rem;color:var(--texte-doux);line-height:1.7">'
+        + mots.map(m => esc(m)).join(" · ")
+        + '</div></div>';
+
+      $("btnRemplacer").onclick = () => {
+        $("chMots").value = mots.join("\n");
+        $("chMots").dispatchEvent(new Event("input"));
+        $("blocImport").style.display = "none";
+        status(mots.length + " mots importés.", "ok");
+      };
+      $("btnAjouter").onclick = () => {
+        const actuels = motsDepuisTexte($("chMots").value);
+        const fusion = [...new Set([...actuels, ...mots])];
+        $("chMots").value = fusion.join("\n");
+        $("chMots").dispatchEvent(new Event("input"));
+        $("blocImport").style.display = "none";
+        status((fusion.length - actuels.length) + " nouveaux mots ajoutés.", "ok");
+      };
+    };
+  }
+
   async function lancerAvecDB(zoneId, fn) {
     const box = $(zoneId);
     if (box) box.innerHTML = "<p class='empty'>Chargement…</p>";
@@ -66,6 +260,7 @@
     if (data.session) {
       $("loginCard").style.display="none"; $("panel").style.display="block";
       remplirSelectThemes();
+      lancerAvecDB("bordContenu", chargerBord);
     } else { $("loginCard").style.display="block"; $("panel").style.display="none"; }
   }
 

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Défi du jour · BiZouk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="index.html" class="logo"><span class="logo-mark">B</span><span class="logo-txt">Bi<b>Zouk</b></span></a>
+    <nav class="nav-liens">
+      <a href="index.html">Jouer</a>
+      <a href="parcours.html">Parcours</a>
+      <a href="defi.html" class="on">Défi du jour</a>
+      <a href="duels.html">Duels</a>
+      <a href="classement.html">Classement</a>
+    </nav>
+    <a href="connexion.html" class="btn-connexion" id="navAuth">Se connecter</a>
+  </div>
+</header>
+
+<!-- Présentation -->
+<main class="page" id="ecranAccueil" style="max-width:560px">
+  <div style="text-align:center">
+    <p class="page-kicker" style="text-align:center">☀️ Défi du jour</p>
+    <h1 style="font-family:var(--serif);font-size:clamp(1.8rem,5vw,2.4rem);color:var(--blanc);line-height:1.15"
+      id="defiTitre">La grille du jour</h1>
+    <p style="color:var(--texte-doux);margin-top:10px;max-width:420px;margin-left:auto;margin-right:auto">
+      La même grille pour tout le monde, chaque jour. Une seule tentative. Qui sera le plus rapide ?
+    </p>
+  </div>
+
+  <div class="defi-carte" id="defiCarte" style="display:none">
+    <div class="dc-date" id="dcDate">—</div>
+    <div class="dc-theme" id="dcTheme">—</div>
+    <div class="dc-mots" id="dcMots">— mots à trouver</div>
+    <button class="btn btn-v" id="btnJouer" style="width:100%;margin-top:18px;font-size:1.05rem;padding:15px">
+      Relever le défi
+    </button>
+    <p style="font-size:.82rem;color:var(--texte-faible);margin-top:12px;text-align:center">
+      Une seule tentative par jour. Prends ton temps pour te préparer.
+    </p>
+  </div>
+
+  <!-- Déjà joué -->
+  <div id="dejaJoue" style="display:none">
+    <div class="defi-carte" style="border-color:var(--vert)">
+      <div style="font-size:2.4rem;margin-bottom:8px">✓</div>
+      <div class="dc-date">Défi du jour terminé</div>
+      <div class="dc-temps" id="djTemps">0:00</div>
+      <div class="dc-theme" id="djPlace">—</div>
+      <p style="font-size:.85rem;color:var(--texte-faible);margin-top:14px">
+        Reviens demain pour un nouveau défi.
+      </p>
+    </div>
+  </div>
+
+  <!-- Classement du jour -->
+  <div style="margin-top:26px">
+    <h2 style="font-family:var(--serif);font-size:1.2rem;color:var(--blanc);margin-bottom:12px">
+      Classement du jour</h2>
+    <div id="clsJour">
+      <p style="text-align:center;color:var(--texte-faible);font-style:italic;padding:20px">Chargement…</p>
+    </div>
+  </div>
+</main>
+
+<!-- Compte à rebours -->
+<div class="rebours" id="rebours">
+  <div class="rebours-nb" id="reboursNb">3</div>
+  <div class="rebours-txt" id="reboursTxt">Prépare-toi…</div>
+</div>
+
+<!-- Le jeu -->
+<main class="jeu" id="ecranJeu" style="display:none">
+  <div class="jeu-head">
+    <div class="jeu-titre">
+      <h1 id="jeuTitre">Défi du jour</h1>
+      <div class="jeu-meta" id="jeuMeta"></div>
+    </div>
+    <div class="jeu-stats">
+      <div class="stat chrono"><b id="chrono">0:00</b><span>Temps</span></div>
+      <div class="stat"><b id="statTrouves">0</b><span>Trouvés</span></div>
+      <div class="stat"><b id="statRestants">0</b><span>Restants</span></div>
+    </div>
+  </div>
+
+  <div class="jeu-corps">
+    <div class="grille-box"><div class="grille" id="grille"></div></div>
+    <div class="mots-box">
+      <h3>Mots à trouver</h3>
+      <div class="mots-progres" id="motsProgres">—</div>
+      <div class="mots-liste" id="motsListe"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Résultat -->
+<div class="victoire" id="resultat">
+  <div class="vic-carte">
+    <div class="vic-emoji">🎉</div>
+    <h2>Défi <b style="color:var(--vert)">relevé</b></h2>
+    <div class="vic-temps" id="resTemps">0:00</div>
+    <p class="vic-sous" id="resSous">—</p>
+    <div class="vic-invite" id="resInvite"></div>
+    <div class="vic-actions">
+      <button class="btn btn-v btn-sm" id="btnPartagerDefi">Partager</button>
+      <a class="btn btn-g btn-sm" href="defi.html">Voir le classement</a>
+    </div>
+    <div class="partage-liens" id="resLiens"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-inner">
+    <div class="foot-bas" style="border:0;padding-top:0">
+      <span>© 2026 BiZouk</span>
+      <span>Conçu par <a href="https://stefi-services.vercel.app/" target="_blank" rel="noopener">SteFi Services</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/avatar.js"></script>
+<script src="js/pierre.js"></script>
+<script src="js/progression.js"></script>
+<script src="js/moteur.js"></script>
+<script src="js/partage.js"></script>
+<script src="js/defi.js"></script>
+<script src="js/defi-page.js"></script>
+</body>
+</html>

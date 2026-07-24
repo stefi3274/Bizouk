@@ -686,3 +686,47 @@ input[name="niv"]:checked + .niv-radio{background:var(--violet);border-color:var
   letter-spacing:.07em;font-weight:700;margin-bottom:4px}
 .reprise-txt h3{font-family:var(--serif);font-size:1.15rem;color:var(--blanc);margin-bottom:2px}
 .reprise-txt p{font-size:.85rem;color:var(--texte-doux)}
+
+/* ============================================================
+   Défi du jour
+   ============================================================ */
+.defi-carte{background:linear-gradient(150deg,rgba(124,58,237,.18),var(--gris-2));
+  border:1px solid var(--violet);border-radius:var(--r-lg);padding:26px;text-align:center;margin-top:24px}
+.dc-date{font-size:.78rem;color:var(--violet-c);text-transform:uppercase;letter-spacing:.08em;
+  font-weight:700;margin-bottom:8px}
+.dc-theme{font-family:var(--serif);font-size:1.3rem;color:var(--blanc);margin-bottom:4px}
+.dc-mots{color:var(--texte-doux);font-size:.92rem}
+.dc-temps{font-family:var(--serif);font-size:2.6rem;font-weight:700;color:var(--or);
+  line-height:1.1;margin:10px 0 4px}
+
+/* Classement du jour */
+.cj-ligne{display:flex;align-items:center;gap:12px;background:var(--gris-2);
+  border:1px solid var(--gris-line);border-radius:12px;padding:11px 15px;margin-bottom:8px}
+.cj-ligne.podium{background:rgba(124,58,237,.1);border-color:var(--violet)}
+.cj-ligne.moi{border-color:var(--vert);background:rgba(52,211,153,.09)}
+.cj-place{font-family:var(--serif);font-weight:700;font-size:1.05rem;color:var(--texte-doux);
+  min-width:32px;text-align:center}
+.cj-av{flex:0 0 auto}
+.cj-nom{flex:1;font-weight:600;color:var(--blanc);font-size:.92rem;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cj-temps{font-family:var(--serif);font-weight:700;color:var(--or);font-variant-numeric:tabular-nums}
+.cj-vide{text-align:center;color:var(--texte-faible);font-style:italic;padding:24px;
+  background:var(--gris-2);border:1px dashed var(--gris-3);border-radius:14px}
+
+/* Tableau de bord admin */
+.bord-grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:22px}
+.bord-c{background:var(--gris-2);border:1px solid var(--gris-line);border-radius:14px;padding:18px;text-align:center}
+.bord-c b{display:block;font-family:var(--serif);font-size:1.9rem;font-weight:700;color:var(--violet-c);line-height:1.1}
+.bord-c span{font-size:.76rem;color:var(--texte-faible);text-transform:uppercase;letter-spacing:.05em}
+.bord-c.or b{color:var(--or)}
+.bord-c.vert b{color:var(--vert)}
+.bord-section{background:var(--gris-2);border:1px solid var(--gris-line);border-radius:var(--r);
+  padding:20px;margin-bottom:18px}
+.bord-section h3{font-family:var(--serif);font-size:1.1rem;color:var(--blanc);margin-bottom:14px}
+.bord-ligne{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:9px 0;border-bottom:1px solid var(--gris-line);font-size:.9rem}
+.bord-ligne:last-child{border-bottom:0}
+.bord-nom{color:var(--texte);min-width:0;overflow:hidden;text-overflow:ellipsis}
+.bord-val{font-weight:700;color:var(--violet-c);flex:0 0 auto}
+.bord-barre{height:6px;background:var(--gris-3);border-radius:4px;overflow:hidden;margin-top:5px}
+.bord-barre span{display:block;height:100%;background:linear-gradient(90deg,var(--violet-d),var(--violet-c))}

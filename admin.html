@@ -65,7 +65,8 @@
   <div id="panel" style="display:none">
     <div class="adm-head">
       <div class="adm-tabs">
-        <button class="adm-tab on" data-tab="creer">Créer un chapitre</button>
+        <button class="adm-tab on" data-tab="bord">Tableau de bord</button>
+        <button class="adm-tab" data-tab="creer">Créer un chapitre</button>
         <button class="adm-tab" data-tab="themes">Thèmes et chapitres</button>
         <button class="adm-tab" data-tab="contrib">Contributions</button>
         <button class="adm-tab" data-tab="parties">Parties jouées</button>
@@ -75,7 +76,13 @@
     <div class="msg" id="admMsg"></div>
 
     <!-- Créer / modifier un thème -->
-    <div id="tab-creer">
+    <div id="tab-bord">
+      <div id="bordContenu">
+        <p class="empty">Chargement…</p>
+      </div>
+    </div>
+
+    <div id="tab-creer" style="display:none">
       <div class="form-carte">
         <h2 style="font-family:var(--serif);font-size:1.3rem;color:var(--blanc);margin-bottom:16px" id="formTitre">Nouveau chapitre</h2>
 
@@ -111,12 +118,51 @@
         </div>
 
         <div class="field">
-          <label>Les 35 mots du chapitre</label>
+          <label style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+            <span>Les 35 mots du chapitre</span>
+            <button type="button" class="btn btn-g btn-sm" id="btnImport" style="padding:6px 12px;font-size:.8rem">
+              Extraire d'un texte
+            </button>
+          </label>
           <textarea id="chMots" placeholder="Un mot par ligne, ou séparés par des virgules.&#10;&#10;DESSALINES&#10;TOUSSAINT&#10;ANACAONA&#10;VERTIERES"></textarea>
           <div class="hint">
             <span class="compte-mots" id="compteMots">0 mot</span>
             &nbsp; Vise 35 mots. Minimum 20 pour que les deux niveaux fonctionnent.
           </div>
+        </div>
+
+        <div id="blocImport" style="display:none;background:var(--gris);border:1px solid var(--violet);
+          border-radius:12px;padding:18px;margin-bottom:18px">
+          <h3 style="font-family:var(--serif);font-size:1.05rem;color:var(--blanc);margin-bottom:6px">
+            Extraire les mots d'un texte</h3>
+          <p style="font-size:.85rem;color:var(--texte-doux);margin-bottom:12px">
+            Colle un texte (article, liste, paragraphe). Les mots seront extraits automatiquement.</p>
+
+          <textarea id="texteSource" placeholder="Colle ton texte ici…"
+            style="width:100%;min-height:130px;background:var(--gris-2);border:1px solid var(--gris-3);
+            border-radius:10px;padding:12px;font-family:inherit;font-size:.95rem;color:var(--texte);
+            resize:vertical;line-height:1.5"></textarea>
+
+          <div style="display:flex;gap:14px;flex-wrap:wrap;margin:12px 0;align-items:center">
+            <label style="font-size:.85rem;color:var(--texte);display:flex;align-items:center;gap:6px">
+              Longueur min. <input type="number" id="lgMin" value="4" min="2" max="12"
+                style="width:60px;background:var(--gris-2);border:1px solid var(--gris-3);border-radius:8px;
+                padding:6px 8px;color:var(--texte);font-family:inherit"></label>
+            <label style="font-size:.85rem;color:var(--texte);display:flex;align-items:center;gap:6px">
+              max. <input type="number" id="lgMax" value="12" min="4" max="20"
+                style="width:60px;background:var(--gris-2);border:1px solid var(--gris-3);border-radius:8px;
+                padding:6px 8px;color:var(--texte);font-family:inherit"></label>
+            <label style="font-size:.85rem;color:var(--texte);display:flex;align-items:center;gap:6px">
+              <input type="checkbox" id="sansCourants" checked> Ignorer les mots courants
+            </label>
+          </div>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button type="button" class="btn btn-v btn-sm" id="btnExtraire">Extraire les mots</button>
+            <button type="button" class="btn btn-g btn-sm" id="btnFermerImport">Fermer</button>
+          </div>
+
+          <div id="apercuImport" style="margin-top:14px"></div>
         </div>
 
         <div style="display:flex;gap:10px;flex-wrap:wrap">
