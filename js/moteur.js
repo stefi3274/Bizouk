@@ -269,6 +269,35 @@
         return { mot: choisi.mot, lettre: puzzle.grille[pos.r][pos.c], position: pos };
       },
 
+      /* Exporte l'état complet de la partie (pour la sauvegarde) */
+      exporter() {
+        if (!puzzle) return null;
+        return {
+          grille: puzzle.grille,
+          taille: puzzle.taille,
+          placements: puzzle.placements,
+          trouves: trouves.map(f => f.mot),
+          cibles: cibles
+        };
+      },
+
+      /* Restaure une partie sauvegardée */
+      restaurer(etat) {
+        if (!etat || !etat.grille || !etat.placements) return false;
+        puzzle = {
+          grille: etat.grille,
+          taille: etat.taille,
+          placements: etat.placements,
+          nonPlaces: []
+        };
+        cibles = etat.cibles || null;
+        const set = new Set(etat.trouves || []);
+        trouves = puzzle.placements.filter(p => set.has(p.mot));
+        dessiner();
+        majListe();
+        return true;
+      },
+
       definirCibles(liste) {
         cibles = liste && liste.length ? liste : null;
         majListe();

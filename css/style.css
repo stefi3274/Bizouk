@@ -730,3 +730,10 @@ input[name="niv"]:checked + .niv-radio{background:var(--violet);border-color:var
 .bord-val{font-weight:700;color:var(--violet-c);flex:0 0 auto}
 .bord-barre{height:6px;background:var(--gris-3);border-radius:4px;overflow:hidden;margin-top:5px}
 .bord-barre span{display:block;height:100%;background:linear-gradient(90deg,var(--violet-d),var(--violet-c))}
+
+/* Bouton retour */
+.btn-retour{background:var(--gris-2);border:1px solid var(--gris-line);color:var(--texte-doux);
+  width:38px;height:38px;border-radius:11px;cursor:pointer;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;padding:0}
+.btn-retour:hover{border-color:var(--violet);color:var(--violet-c);background:var(--gris-3)}
+.btn-retour svg{width:19px;height:19px;display:block}

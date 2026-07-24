@@ -15,8 +15,21 @@
   };
   const conf = NIVEAUX[niveau] || NIVEAUX[15];
 
+  let forcerNouvelle = false;
   let jeu = null, debut = null, minuteur = null, themeCourant = null, chapitreCourant = null, fini = false;
   let nomCourant = null;
+  let sauvMinuteur = null;
+
+  function contexteSauv() {
+    return { type: "jeu", chapitre: chapitreId || "libre", niveau: niveau };
+  }
+
+  function sauverPartie() {
+    if (!jeu || fini || !window.BiZoukSauvegarde) return;
+    const etat = jeu.exporter();
+    if (!etat) return;
+    window.BiZoukSauvegarde.sauver(contexteSauv(), etat, tempsEcoule());
+  }
 
   function fmt(s) {
     const m = Math.floor(s / 60), r = s % 60;
@@ -100,18 +113,54 @@
       jeu = window.BiZouk.creerJeu({
         conteneur: $("grille"),
         listeMots: $("motsListe"),
-        surTrouve: (m, tr, total) => majStats(tr, total),
+        surTrouve: (m, tr, total) => { majStats(tr, total); sauverPartie(); },
         surVictoire: () => victoire()
       });
     }
-    const puzzle = jeu.charger(res.mots, conf.tailleMin);
-    if (puzzle) {
-      majStats(0, puzzle.placements.length);
-      if (puzzle.nonPlaces && puzzle.nonPlaces.length) {
-        $("jeuMeta").textContent = conf.nom + " · " + puzzle.placements.length + " mots à trouver";
+    // Reprendre une partie interrompue ?
+    let restauree = false;
+    if (window.BiZoukSauvegarde && !forcerNouvelle) {
+      const sauv = window.BiZoukSauvegarde.lire(contexteSauv());
+      if (sauv && sauv.etat) {
+        const tot = (sauv.etat.placements || []).length;
+        const tr = (sauv.etat.trouves || []).length;
+        if (tr > 0 && confirm("Tu avais commencé cette grille (" + tr + "/" + tot + " mots trouvés).\n\nReprendre où tu en étais ?")) {
+          restauree = jeu.restaurer(sauv.etat);
+          if (restauree) {
+            majStats(tr, tot);
+            debut = Date.now() - (sauv.temps || 0) * 1000;
+            fini = false;
+            clearInterval(minuteur);
+            minuteur = setInterval(() => {
+              if (fini) return;
+              $("chrono").textContent = fmt(Math.floor((Date.now() - debut) / 1000));
+            }, 1000);
+            $("chrono").textContent = fmt(sauv.temps || 0);
+          }
+        } else {
+          window.BiZoukSauvegarde.effacer(contexteSauv());
+        }
       }
     }
-    demarrerChrono();
+    forcerNouvelle = false;
+
+    if (!restauree) {
+      const puzzle = jeu.charger(res.mots, conf.tailleMin);
+      if (puzzle) {
+        majStats(0, puzzle.placements.length);
+        if (puzzle.nonPlaces && puzzle.nonPlaces.length) {
+          $("jeuMeta").textContent = conf.nom + " · " + puzzle.placements.length + " mots à trouver";
+        }
+      }
+      demarrerChrono();
+      sauverPartie();
+    }
+
+    // Sauvegarde régulière (chrono qui avance) et à la fermeture
+    clearInterval(sauvMinuteur);
+    sauvMinuteur = setInterval(sauverPartie, 5000);
+    window.addEventListener("beforeunload", sauverPartie);
+    document.addEventListener("visibilitychange", () => { if (document.hidden) sauverPartie(); });
     if (window.Progression) { window.Progression.init().then(majBoutonIndice); }
   }
 
@@ -119,6 +168,8 @@
   async function victoire() {
     fini = true;
     clearInterval(minuteur);
+    clearInterval(sauvMinuteur);
+    if (window.BiZoukSauvegarde) window.BiZoukSauvegarde.effacer(contexteSauv());
     const t = tempsEcoule();
     $("vicTemps").textContent = fmt(t);
     const et = jeu.etat();
@@ -420,7 +471,11 @@
   });
 
   // ---------- Actions ----------
-  $("btnNouvelle").addEventListener("click", () => { $("victoire").classList.remove("on"); lancer(); });
+  $("btnNouvelle").addEventListener("click", () => {
+    if (window.BiZoukSauvegarde) window.BiZoukSauvegarde.effacer(contexteSauv());
+    forcerNouvelle = true;
+    $("victoire").classList.remove("on"); lancer();
+  });
   const _vr = $("vicRejouer"); if (_vr) _vr.addEventListener("click", () => { $("victoire").classList.remove("on"); lancer(); });
   $("btnRecommencer").addEventListener("click", () => {
     if (jeu) { jeu.recommencer(); const e = jeu.etat(); if (e) majStats(0, e.total); demarrerChrono(); }
