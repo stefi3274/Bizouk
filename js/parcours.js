@@ -192,7 +192,7 @@
         + 'href="' + (o20 ? 'jeu.html?chapitre=' + chap.id + '&niveau=20' : '#') + '">'
         + '<div class="nc-head"><span class="nc-nom">Confirmé</span>'
         + '<span class="nc-etat">' + (d20 ? '✓' : (o20 ? '' : '🔒')) + '</span></div>'
-        + '<div class="nc-mots">20 mots à trouver</div>'
+        + '<div class="nc-mots">15 mots · les plus longs</div>'
         + '<div class="nc-gain">' + (d20 ? 'Réussi · 3 pierres' : '+3 pierres jaunes') + '</div></a>';
 
       html += '</div>';

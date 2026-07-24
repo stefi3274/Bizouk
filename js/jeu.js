@@ -10,8 +10,8 @@
   const themeId = params.get("theme");
 
   const NIVEAUX = {
-    15: { nom: "Découverte", tailleMin: 10, mots: 15 },
-    20: { nom: "Confirmé",   tailleMin: 12, mots: 20 }
+    15: { nom: "Découverte", tailleMin: 10, mots: 15, longs: false },
+    20: { nom: "Confirmé",   tailleMin: 11, mots: 15, longs: true }
   };
   const conf = NIVEAUX[niveau] || NIVEAUX[15];
 
@@ -53,6 +53,21 @@
   }
 
   // ---------- Chargement des mots ----------
+  /* Choisit les mots selon le niveau.
+     Découverte : tirage libre. Confirmé : parmi les mots les plus longs. */
+  function choisirMots(tous) {
+    const liste = Array.isArray(tous) ? tous.slice() : [];
+    if (!liste.length) return [];
+
+    if (conf.longs && liste.length > conf.mots) {
+      // On garde la moitié des mots les plus longs, puis on pioche dedans
+      const tries = liste.slice().sort((a, b) => b.length - a.length);
+      const vivier = tries.slice(0, Math.max(conf.mots, Math.ceil(tries.length * 0.6)));
+      return melanger(vivier).slice(0, conf.mots);
+    }
+    return melanger(liste).slice(0, conf.mots);
+  }
+
   function melanger(liste) {
     const a = liste.slice();
     for (let i = a.length - 1; i > 0; i--) {
@@ -75,8 +90,7 @@
       const { data: th } = await base.from("themes").select("nom").eq("id", chap.theme_id).maybeSingle();
       chapitreCourant = chap;
       themeCourant = { id: chap.theme_id, nom: (th && th.nom) || "" };
-      const mots = melanger(Array.isArray(chap.mots) ? chap.mots : []);
-      return { theme: themeCourant, chapitre: chap, mots: mots.slice(0, conf.mots) };
+      return { theme: themeCourant, chapitre: chap, mots: choisirMots(chap.mots) };
     }
 
     // Mode libre : on pioche dans un thème (via ses chapitres)
@@ -88,8 +102,7 @@
     const { data: th } = await base.from("themes").select("nom").eq("id", chap.theme_id).maybeSingle();
     chapitreCourant = chap;
     themeCourant = { id: chap.theme_id, nom: (th && th.nom) || "" };
-    const mots = melanger(Array.isArray(chap.mots) ? chap.mots : []);
-    return { theme: themeCourant, chapitre: chap, mots: mots.slice(0, conf.mots) };
+    return { theme: themeCourant, chapitre: chap, mots: choisirMots(chap.mots) };
   }
 
   async function lancer() {
