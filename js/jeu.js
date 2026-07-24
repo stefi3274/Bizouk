@@ -162,60 +162,79 @@
         + '<span class="gb-nb" style="color:' + cl + '">+' + gain.gain + '</span>'
         + '<span class="gb-txt">pierres BiZouk<br><b style="color:' + cl + '">' + gain.couleur + '</b></span></div>';
     } else if (gain && !gain.nouveau) {
-      bloc = '<div class="gain-bizouk"><span class="gb-txt" style="text-align:center">'
-        + 'Niveau déjà réussi : pas de nouvelles pierres.</span></div>';
+      bloc = '<p style="font-size:.85rem;color:var(--texte-faible);margin:10px 0">'
+        + 'Niveau déjà réussi · pas de nouvelles pierres</p>';
     }
 
     $("vicInvite").innerHTML = bloc + (connecte
-      ? 'Ton temps a été enregistré. <b>Va voir le classement !</b><br>'
-        + '<a href="classement.html" style="color:var(--violet-c);font-weight:600">Voir le classement →</a>'
-      : 'Tu joues sans compte : ce temps ne compte pas au classement.<br><br>'
-        + '<b>Avec un compte</b>, tes pierres et ta progression te suivent partout.<br>'
-        + '<a href="inscription.html" style="color:var(--violet-c);font-weight:600">Créer un compte →</a>');
+      ? '<a href="classement.html" style="color:var(--violet-c);font-weight:600;font-size:.88rem">Voir le classement →</a>'
+      : '<span style="font-size:.86rem">Sans compte, ta progression reste sur cet appareil. '
+        + '<a href="inscription.html" style="color:var(--violet-c);font-weight:600">Créer un compte →</a></span>');
 
-    // Boutons de l'écran de victoire
+    // ---------- Boutons de l'écran de victoire ----------
     const act = document.querySelector(".vic-actions");
     if (act) {
-      // Partager ce niveau
-      if (!document.getElementById("vicPartager")) {
-        const bp = document.createElement("button");
-        bp.id = "vicPartager"; bp.className = "btn btn-v btn-sm";
-        bp.textContent = "Partager";
-        act.insertBefore(bp, act.firstChild);
-        bp.onclick = async () => {
-          const info = {
-            chapitre: chapitreCourant ? chapitreCourant.nom : (themeCourant ? themeCourant.nom : ""),
-            theme: themeCourant ? themeCourant.nom : "",
-            niveau: conf.nom,
-            temps: fmt(t),
-            mots: et.total,
-            pierres: (gain && gain.gain) ? gain.gain : 0,
-            joueur: nomCourant || null
-          };
-          const avant = bp.textContent;
-          bp.textContent = "Préparation…"; bp.disabled = true;
-          let r = "telecharge";
-          try { r = await window.BiZoukPartage.partagerNiveau(info); } catch (e) { r = "telecharge"; }
-          bp.textContent = (r === "telecharge") ? "Image téléchargée" : avant;
-          if (r === "telecharge") afficherLiensPartage(info);
-          setTimeout(() => { bp.textContent = avant; bp.disabled = false; }, 2200);
+      act.innerHTML = "";   // on repart propre à chaque victoire
+
+      // 1) L'action principale : continuer vers la suite
+      const suite = prochaineEtape();
+      if (suite) {
+        const b = document.createElement("a");
+        b.className = "btn btn-v";
+        b.href = suite.lien;
+        b.textContent = suite.libelle;
+        b.style.width = "100%";
+        act.appendChild(b);
+      }
+
+      // 2) Les actions secondaires, sur une ligne
+      const ligne = document.createElement("div");
+      ligne.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;justify-content:center;width:100%;margin-top:4px";
+
+      const bp = document.createElement("button");
+      bp.className = "btn btn-g btn-sm";
+      bp.textContent = "Partager";
+      bp.onclick = async () => {
+        const info = {
+          chapitre: chapitreCourant ? chapitreCourant.nom : (themeCourant ? themeCourant.nom : ""),
+          theme: themeCourant ? themeCourant.nom : "",
+          niveau: conf.nom, temps: fmt(t), mots: et.total,
+          pierres: (gain && gain.gain) ? gain.gain : 0,
+          joueur: nomCourant || null
         };
-      }
-      // Défier un ami
-      if (!document.getElementById("vicDuel") && chapitreCourant) {
+        const avant = bp.textContent;
+        bp.textContent = "Préparation…"; bp.disabled = true;
+        let r = "telecharge";
+        try { r = await window.BiZoukPartage.partagerNiveau(info); } catch (e) { r = "telecharge"; }
+        bp.textContent = (r === "telecharge") ? "Téléchargé" : avant;
+        if (r === "telecharge") afficherLiensPartage(info);
+        setTimeout(() => { bp.textContent = avant; bp.disabled = false; }, 2200);
+      };
+      ligne.appendChild(bp);
+
+      if (chapitreCourant) {
         const bd = document.createElement("button");
-        bd.id = "vicDuel"; bd.className = "btn btn-g btn-sm";
+        bd.className = "btn btn-g btn-sm";
         bd.textContent = "Défier un ami";
-        act.insertBefore(bd, act.children[1] || null);
         bd.onclick = () => lancerDuel(t, et.total);
+        ligne.appendChild(bd);
       }
-      // Retour au parcours
-      if (chapitreId && !document.getElementById("vicParcours")) {
+
+      // Rejouer la même grille
+      const br = document.createElement("button");
+      br.className = "btn btn-g btn-sm";
+      br.textContent = "Rejouer";
+      br.onclick = () => { $("victoire").classList.remove("on"); lancer(); };
+      ligne.appendChild(br);
+
+      if (chapitreId) {
         const a = document.createElement("a");
-        a.id = "vicParcours"; a.className = "btn btn-g btn-sm";
-        a.href = "parcours.html"; a.textContent = "Retour au parcours";
-        act.appendChild(a);
+        a.className = "btn btn-g btn-sm";
+        a.href = "parcours.html"; a.textContent = "Parcours";
+        ligne.appendChild(a);
       }
+
+      act.appendChild(ligne);
     }
 
     let zoneL = document.getElementById("vicLiens");
@@ -247,6 +266,25 @@
       + '</div>';
   }
 
+
+
+  /* Détermine ce qui vient après le niveau qu'on vient de réussir */
+  function prochaineEtape() {
+    if (!chapitreId || !window.Progression) return null;
+    const P = window.Progression;
+    // Après Découverte (15) → Confirmé (20)
+    if (niveau === 15) {
+      return { libelle: "Continuer · Confirmé (20 mots)",
+               lien: "jeu.html?chapitre=" + chapitreId + "&niveau=20" };
+    }
+    // Après Confirmé (20) → la Bombe
+    if (niveau === 20) {
+      if (P.bombeFaite && P.bombeFaite(chapitreId)) return null;
+      return { libelle: "Continuer · La Bombe 💣",
+               lien: "bombe.html?chapitre=" + chapitreId };
+    }
+    return null;
+  }
 
   // ---------- Lancer un duel ----------
   async function lancerDuel(temps, nbMots) {
@@ -304,7 +342,7 @@
 
   // ---------- Actions ----------
   $("btnNouvelle").addEventListener("click", () => { $("victoire").classList.remove("on"); lancer(); });
-  $("vicRejouer").addEventListener("click", () => { $("victoire").classList.remove("on"); lancer(); });
+  const _vr = $("vicRejouer"); if (_vr) _vr.addEventListener("click", () => { $("victoire").classList.remove("on"); lancer(); });
   $("btnRecommencer").addEventListener("click", () => {
     if (jeu) { jeu.recommencer(); const e = jeu.etat(); if (e) majStats(0, e.total); demarrerChrono(); }
   });

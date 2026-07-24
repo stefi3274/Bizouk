@@ -148,12 +148,23 @@
       (rb && rb.gain ? '<div class="gain-bizouk"><span class="pierre-gain">' + (window.BiZoukPierre ? window.BiZoukPierre.pierre("rose",42) : "") + '</span>'
         + '<span class="gb-nb" style="color:var(--rose)">+' + rb.gain + '</span>'
         + '<span class="gb-txt">pierres BiZouk gagnées<br><b style="color:var(--rose)">chapitre terminé</b></span></div>' : '')
-      + '<div class="bf-options">'
-      + '<button class="btn btn-v" id="btnPartager">Partager ma victoire</button>'
-      + '<a class="btn btn-g" href="parcours.html">Continuer le parcours</a>'
-      + (nom ? '' : '<a class="btn btn-g" href="inscription.html">Créer un compte pour garder ta progression</a>')
+      + '<div class="bf-options" id="bfBoutons">'
+      + '<a class="btn btn-v" href="parcours.html" id="btnSuite">Continuer le parcours</a>'
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px">'
+      + '<button class="btn btn-g btn-sm" id="btnPartager">Partager</button>'
+      + (nom ? '' : '<a class="btn btn-g btn-sm" href="inscription.html">Créer un compte</a>')
+      + '</div>'
       + '</div>'
       + '<div class="partage-liens" id="partageLiens"></div>';
+
+    // Proposer directement le chapitre suivant s'il existe
+    chapitreSuivant().then(suiv => {
+      const b = $("btnSuite");
+      if (b && suiv) {
+        b.href = "jeu.html?chapitre=" + suiv.id + "&niveau=15";
+        b.textContent = "Continuer · " + suiv.nom;
+      }
+    });
 
     // Bouton de partage
     const bp = $("btnPartager");
@@ -188,6 +199,23 @@
       + '<a class="share-btn share-x" href="' + l.x + '" target="_blank" rel="noopener">X</a>'
       + '<a class="share-btn share-tg" href="' + l.telegram + '" target="_blank" rel="noopener">Telegram</a>'
       + '</div>';
+  }
+
+
+  /* Cherche le chapitre suivant dans le même thème */
+  async function chapitreSuivant() {
+    if (!chapitreCourant) return null;
+    const base = await db();
+    if (!base) return null;
+    const { data } = await base.from("chapitres")
+      .select("id, nom, ordre")
+      .eq("theme_id", chapitreCourant.theme_id)
+      .eq("publie", true)
+      .order("ordre");
+    if (!data || !data.length) return null;
+    const idx = data.findIndex(c => c.id === chapitreCourant.id);
+    if (idx < 0 || idx + 1 >= data.length) return null;
+    return data[idx + 1];
   }
 
   async function nomJoueur() {
