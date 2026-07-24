@@ -21,9 +21,28 @@
     <div class="msg" id="msg"></div>
     <div class="field"><label>Email</label><input type="email" id="email" required autocomplete="email"></div>
     <div class="field"><label>Mot de passe</label><input type="password" id="pass" required autocomplete="current-password"></div>
+    <div style="text-align:right;margin:-8px 0 14px">
+      <a href="#" id="lienOubli" style="font-size:.83rem;color:var(--texte-doux);text-decoration:none">Mot de passe oublié ?</a>
+    </div>
     <button type="submit" class="btn btn-v" style="width:100%">Se connecter</button>
   </form>
   <p class="lien-bas">Pas encore de compte ? <a href="inscription.html">Créer un compte</a></p>
+
+  <div id="blocOubli" style="display:none">
+    <div style="border-top:1px solid var(--gris-line);margin:22px 0 18px"></div>
+    <h2 style="font-family:var(--serif);font-size:1.15rem;color:var(--blanc);margin-bottom:6px">Mot de passe oublié</h2>
+    <p style="color:var(--texte-doux);font-size:.88rem;margin-bottom:14px">
+      Entre ton email : nous t'enverrons un lien pour choisir un nouveau mot de passe.</p>
+    <div class="msg" id="msgOubli"></div>
+    <div class="field">
+      <label>Ton email</label>
+      <input type="email" id="mailOubli" autocomplete="email">
+    </div>
+    <button class="btn btn-v" id="btnOubli" style="width:100%">Envoyer le lien</button>
+    <p style="text-align:center;margin-top:12px">
+      <a href="#" id="annulerOubli" style="font-size:.85rem;color:var(--texte-doux);text-decoration:none">← Retour à la connexion</a>
+    </p>
+  </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-config.js"></script>

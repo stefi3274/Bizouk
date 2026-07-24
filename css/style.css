@@ -628,3 +628,20 @@ input[name="niv"]:checked + .niv-radio{background:var(--violet);border-color:var
 .di-action{flex:0 0 auto}
 .di-action button{background:var(--violet);border:0;color:#fff;font-family:inherit;font-weight:600;
   font-size:.78rem;padding:7px 12px;border-radius:8px;cursor:pointer}
+
+/* Indice : case révélée */
+.case.indice{background:var(--violet)!important;color:#fff!important;
+  animation:indiceEclat 1.4s ease-out;position:relative;z-index:3}
+.case.indice-pose{animation:none;background:var(--violet-d)!important;
+  box-shadow:inset 0 0 0 2px var(--violet-c)}
+@keyframes indiceEclat{
+  0%{transform:scale(1);box-shadow:0 0 0 0 var(--violet-glow)}
+  35%{transform:scale(1.35);box-shadow:0 0 0 12px rgba(124,58,237,0)}
+  100%{transform:scale(1);box-shadow:0 0 0 0 rgba(124,58,237,0)}
+}
+
+/* Bouton d'indice */
+.btn-indice{display:inline-flex;align-items:center;gap:7px}
+.btn-indice .bi-cout{display:inline-flex;align-items:center;gap:3px;
+  background:rgba(255,255,255,.12);padding:2px 7px;border-radius:10px;font-size:.78rem}
+.btn-indice svg{width:14px;height:14px}

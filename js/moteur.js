@@ -244,6 +244,31 @@
         majListe();
         return puzzle;
       },
+      /* Révèle la première lettre d'un mot non trouvé.
+         Retourne le mot ciblé, ou null s'il n'y a plus rien à révéler. */
+      indice() {
+        if (!puzzle) return null;
+        const dejaTrouves = new Set(trouves.map(f => f.mot));
+        const candidats = puzzle.placements.filter(p => {
+          if (dejaTrouves.has(p.mot)) return false;
+          if (cibles && !cibles.includes(p.mot)) return false;
+          return true;
+        });
+        if (!candidats.length) return null;
+
+        // On prend le mot le plus court (le plus facile à finir)
+        candidats.sort((a, b) => a.mot.length - b.mot.length);
+        const choisi = candidats[0];
+        const pos = choisi.cases[0];
+        const el = conteneur.querySelector('[data-r="' + pos.r + '"][data-c="' + pos.c + '"]');
+        if (el) {
+          el.classList.add("indice");
+          // L'éclat s'estompe mais la case reste marquée
+          setTimeout(() => el.classList.add("indice-pose"), 1400);
+        }
+        return { mot: choisi.mot, lettre: puzzle.grille[pos.r][pos.c], position: pos };
+      },
+
       definirCibles(liste) {
         cibles = liste && liste.length ? liste : null;
         majListe();

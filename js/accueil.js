@@ -66,7 +66,7 @@
       const coul = COULEURS[i % COULEURS.length];
       const nbChap = info.chapitres;
       const premier = info.premierChapitre;
-      const lien = premier ? ('jeu.html?chapitre=' + premier + '&niveau=15') : 'parcours.html';
+      const lien = 'parcours.html?theme=' + t.id;
       return '<a class="niv-carte" href="' + lien + '" style="--nc:' + coul + '">'
         + '<h3 style="margin-top:6px">' + esc(t.nom) + '</h3>'
         + (t.description ? '<p>' + esc(t.description) + '</p>' : '')
@@ -74,7 +74,7 @@
         + nbChap + (nbChap > 1 ? ' chapitres' : ' chapitre')
         + ' · ' + info.mots + (info.mots > 1 ? ' mots' : ' mot')
         + '</div>'
-        + '<div style="margin-top:12px;font-size:.85rem;font-weight:600;color:var(--nc)">Jouer →</div>'
+        + '<div style="margin-top:12px;font-size:.85rem;font-weight:600;color:var(--nc)">Voir les chapitres →</div>'
         + '</a>';
     }).join("");
   }

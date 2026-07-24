@@ -112,6 +112,7 @@
       }
     }
     demarrerChrono();
+    if (window.Progression) { window.Progression.init().then(majBoutonIndice); }
   }
 
   // ---------- Victoire ----------
@@ -339,6 +340,63 @@
       }
     };
   }
+
+
+  // ---------- Indices ----------
+  function restaurerBoutonIndice() {
+    const b = $("btnIndice");
+    if (!b) return;
+    b.innerHTML = 'Indice <span class="bi-cout" id="coutIndice"></span>';
+    majBoutonIndice();
+  }
+
+  function majBoutonIndice() {
+    const b = $("btnIndice");
+    if (!b || !window.Progression) return;
+    const P = window.Progression;
+    const c = $("coutIndice");
+    if (c && window.BiZoukPierre) {
+      c.innerHTML = P.prixIndice() + " " + window.BiZoukPierre.pierre("violet", 13);
+    }
+    const peut = P.peutIndice();
+    b.disabled = !peut;
+    b.title = peut
+      ? "Révèle la première lettre d'un mot (coûte " + P.prixIndice() + " pierre)"
+      : "Il te faut au moins " + P.prixIndice() + " pierre BiZouk";
+    b.style.opacity = peut ? "1" : "0.5";
+  }
+
+  const bi = $("btnIndice");
+  if (bi) bi.addEventListener("click", async () => {
+    if (!jeu || fini) return;
+    const P = window.Progression;
+    await P.init();
+
+    if (!P.peutIndice()) {
+      bi.textContent = "Pas assez de pierres";
+      setTimeout(() => { restaurerBoutonIndice(); }, 1800);
+      return;
+    }
+
+    const res = jeu.indice();
+    if (!res) {
+      bi.textContent = "Plus rien à révéler";
+      setTimeout(() => { restaurerBoutonIndice(); }, 1800);
+      return;
+    }
+
+    await P.payerIndice();
+    majBoutonIndice();
+
+    // Message discret sur le mot ciblé
+    const meta = $("jeuMeta");
+    if (meta) {
+      const avant = meta.textContent;
+      meta.innerHTML = '<span style="color:var(--violet-c)">Indice : un mot de '
+        + res.mot.length + ' lettres commence là</span>';
+      setTimeout(() => { meta.textContent = avant; }, 3500);
+    }
+  });
 
   // ---------- Actions ----------
   $("btnNouvelle").addEventListener("click", () => { $("victoire").classList.remove("on"); lancer(); });

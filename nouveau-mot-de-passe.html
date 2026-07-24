@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nouveau mot de passe · BiZouk</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="index.html" class="logo"><span class="logo-mark">B</span><span class="logo-txt">Bi<b>Zouk</b></span></a>
+    <a href="index.html" class="btn-connexion">← Retour</a>
+  </div>
+</header>
+
+<div class="auth">
+  <h1>Nouveau mot de passe</h1>
+  <p class="sub" id="sousTitre">Choisis un nouveau mot de passe pour ton compte.</p>
+
+  <div class="msg" id="msg"></div>
+
+  <div id="formZone">
+    <div class="field">
+      <label>Nouveau mot de passe</label>
+      <input type="password" id="mdp1" autocomplete="new-password">
+      <div class="hint">6 caractères minimum.</div>
+    </div>
+    <div class="field">
+      <label>Confirme le mot de passe</label>
+      <input type="password" id="mdp2" autocomplete="new-password">
+    </div>
+    <button class="btn btn-v" id="btnValider" style="width:100%">Enregistrer</button>
+  </div>
+
+  <div id="lienInvalide" style="display:none">
+    <p style="color:var(--texte-doux);font-size:.9rem;line-height:1.6;margin-bottom:16px">
+      Ce lien n'est plus valide. Les liens de récupération expirent après un certain temps.
+    </p>
+    <a href="connexion.html" class="btn btn-v" style="width:100%">Demander un nouveau lien</a>
+  </div>
+
+  <p class="lien-bas"><a href="connexion.html">Retour à la connexion</a></p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/nouveau-mdp.js"></script>
+<script src="js/passeye.js"></script>
+</body>
+</html>

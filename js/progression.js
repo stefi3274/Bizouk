@@ -5,6 +5,7 @@
   const CLE = "bizouk_progression";
   const COULEURS = { 15: "vert", 20: "jaune" };
   const PRIX_DEBLOCAGE = 5;
+  const PRIX_INDICE = 1;
   const GAIN_PAR_NIVEAU = 3;
   const GAIN_BOMBE = 3;
   const BLOCAGE_MS = 2 * 60 * 1000;
@@ -184,6 +185,23 @@
       etat["bizouk_" + cible] += (nb || 0);
       await sauver();
       return { gain: nb, couleur: cible };
+    },
+
+    // ---------- Indices ----------
+    prixIndice() { return PRIX_INDICE; },
+    peutIndice() { return this.total() >= PRIX_INDICE; },
+
+    async payerIndice() {
+      if (!this.peutIndice()) return false;
+      let reste = PRIX_INDICE;
+      const ordre = ["vert","jaune","rose"].sort((a,b) => etat["bizouk_"+b] - etat["bizouk_"+a]);
+      for (const c of ordre) {
+        const pris = Math.min(etat["bizouk_"+c], reste);
+        etat["bizouk_"+c] -= pris; reste -= pris;
+        if (reste <= 0) break;
+      }
+      await sauver();
+      return true;
     },
 
     async reinitialiser() { etat = vide(); await sauver(); }

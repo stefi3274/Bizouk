@@ -8,6 +8,7 @@
   let themes = [];       // [{id, nom, description, chapitres:[...]}]
   let themeActif = null;
   let recherche = "";
+  const themeDemande = new URLSearchParams(location.search).get("theme");
 
   function majCompteur() {
     const d = window.Progression.detail();
@@ -83,7 +84,9 @@
     zone.querySelectorAll("[data-theme]").forEach(a => {
       a.addEventListener("click", e => {
         e.preventDefault();
-        themeActif = themes.find(t => t.id === a.getAttribute("data-theme"));
+        const id = a.getAttribute("data-theme");
+        themeActif = themes.find(t => t.id === id);
+        history.replaceState(null, "", "parcours.html?theme=" + id);
         dessinerChapitres();
         window.scrollTo({ top: 0, behavior: "smooth" });
       });
@@ -159,7 +162,11 @@
 
     zone.innerHTML = html;
     const r = $("retourThemes");
-    if (r) r.onclick = () => { themeActif = null; dessinerThemes(); };
+    if (r) r.onclick = () => {
+      themeActif = null;
+      history.replaceState(null, "", "parcours.html");
+      dessinerThemes();
+    };
   }
 
   // ---------- Recherche ----------
@@ -185,7 +192,14 @@
         + '<p>Vérifie ta connexion internet, puis recharge la page.</p></div>';
       return;
     }
-    dessinerThemes();
+    // Si un thème est demandé dans l'URL, on l'ouvre directement
+    if (themeDemande) {
+      const t = themes.find(x => x.id === themeDemande);
+      if (t) { themeActif = t; dessinerChapitres(); }
+      else dessinerThemes();
+    } else {
+      dessinerThemes();
+    }
 
     if (!window.Progression.connecte()) $("inviteCompte").style.display = "block";
     else {

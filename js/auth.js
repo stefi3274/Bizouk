@@ -48,6 +48,56 @@
     rendreAvatar();
   }
 
+
+  // ---------- Mot de passe oublié ----------
+  if ($("lienOubli")) {
+    $("lienOubli").addEventListener("click", e => {
+      e.preventDefault();
+      $("loginForm").style.display = "none";
+      const lb = document.querySelector(".lien-bas");
+      if (lb) lb.style.display = "none";
+      $("blocOubli").style.display = "block";
+      const mo = $("mailOubli"), em = $("email");
+      if (mo && em && em.value) mo.value = em.value;
+      if (mo) mo.focus();
+    });
+  }
+
+  if ($("annulerOubli")) {
+    $("annulerOubli").addEventListener("click", e => {
+      e.preventDefault();
+      $("blocOubli").style.display = "none";
+      $("loginForm").style.display = "block";
+      const lb = document.querySelector(".lien-bas");
+      if (lb) lb.style.display = "block";
+    });
+  }
+
+  if ($("btnOubli")) {
+    $("btnOubli").addEventListener("click", async () => {
+      const mail = ($("mailOubli").value || "").trim();
+      const mo = $("msgOubli");
+      const dire = (t, k) => { if (mo) { mo.textContent = t; mo.className = "msg on " + (k||""); } };
+
+      if (!mail || mail.indexOf("@") < 0) { dire("Entre une adresse email valide.", "err"); return; }
+
+      const base = await db();
+      if (!base) { dire("Service indisponible. Réessaie dans un instant.", "err"); return; }
+
+      dire("Envoi en cours…");
+      $("btnOubli").disabled = true;
+
+      const retourVers = location.origin + location.pathname.replace(/[^/]*$/, "") + "nouveau-mot-de-passe.html";
+      const { error } = await base.auth.resetPasswordForEmail(mail, { redirectTo: retourVers });
+
+      $("btnOubli").disabled = false;
+      if (error) { dire("Erreur : " + error.message, "err"); return; }
+
+      dire("Email envoyé ! Regarde ta boîte de réception (et les spams).", "ok");
+      $("mailOubli").value = "";
+    });
+  }
+
   // Connexion
   const lf = $("loginForm");
   if (lf) lf.addEventListener("submit", async e => {
