@@ -58,10 +58,50 @@
     }
   }
 
+  function afficherSerie() {
+    const P = window.Progression;
+    const zone = $("carteSerie");
+    if (!zone) return;
+
+    const s = P.serie();
+    const rec = P.record();
+    const prochain = P.prochainPalier();
+    const danger = P.serieEnDanger();
+
+    zone.innerHTML = '<div class="serie-carte">'
+      + '<div style="font-size:2.2rem;line-height:1">' + (s >= 7 ? "🔥" : (s > 0 ? "✨" : "💤")) + '</div>'
+      + '<div class="sc-nb">' + s + '</div>'
+      + '<div class="sc-lab">' + (s > 1 ? "jours de suite" : (s === 1 ? "jour" : "aucune série en cours")) + '</div>'
+      + (rec > 0 ? '<div class="sc-record">Ton record : ' + rec + (rec > 1 ? " jours" : " jour") + '</div>' : '')
+      + (P.aJoueAujourdhui()
+          ? '<div class="sc-prochain" style="color:var(--vert)">✓ Tu as déjà joué aujourd\'hui</div>'
+          : '<div class="sc-prochain">Joue une grille aujourd\'hui pour ' + (s > 0 ? "continuer" : "démarrer") + ' ta série</div>')
+      + (prochain
+          ? '<div class="sc-prochain">Prochain bonus dans <b>' + prochain.reste
+            + (prochain.reste > 1 ? " jours" : " jour") + '</b> : <b>+' + prochain.bonus + ' pierres</b></div>'
+          : '')
+      + (danger
+          ? '<div class="serie-danger"><b>Ta série est en danger !</b><br>'
+            + 'Tu as manqué hier. Dépense ' + P.prixSauvetage() + ' pierre pour la sauver.'
+            + '<br><button class="btn btn-v btn-sm" id="btnSauver" style="margin-top:10px"'
+            + (P.peutSauverSerie() ? '' : ' disabled') + '>Sauver ma série</button></div>'
+          : '')
+      + '</div>';
+
+    const bs = $("btnSauver");
+    if (bs) bs.onclick = async () => {
+      bs.disabled = true;
+      const ok = await P.sauverSerie();
+      if (ok) { afficherSerie(); chargerProgression(); }
+      else bs.disabled = false;
+    };
+  }
+
   async function chargerProgression() {
     await window.Progression.init();
     const P = window.Progression;
     const etat = P.etat();
+    afficherSerie();
 
     // Trésor
     const d = P.detail();

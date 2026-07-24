@@ -10,6 +10,61 @@
   let recherche = "";
   const themeDemande = new URLSearchParams(location.search).get("theme");
 
+  function majSerie() {
+    const P = window.Progression;
+    const b = $("serieBadge"), n = $("serieNb");
+    if (!b || !n) return;
+    const s = P.serie();
+    if (s > 0) {
+      b.style.display = "inline-flex";
+      n.textContent = s;
+      b.classList.toggle("eteinte", !P.aJoueAujourdhui());
+      b.title = P.aJoueAujourdhui()
+        ? s + " jours de suite · déjà joué aujourd'hui"
+        : s + " jours de suite · joue aujourd'hui pour continuer !";
+    } else {
+      b.style.display = "none";
+    }
+  }
+
+  async function afficherReprise() {
+    const P = window.Progression;
+    const zone = $("zoneReprise");
+    if (!zone) return;
+    const pos = P.dernierePosition();
+    if (!pos || !themes.length) { zone.innerHTML = ""; return; }
+
+    // Retrouver le chapitre et son thème
+    let chap = null, theme = null;
+    for (const t of themes) {
+      const c = t.chapitres.find(x => x.id === pos.chapitre);
+      if (c) { chap = c; theme = t; break; }
+    }
+    if (!chap) { zone.innerHTML = ""; return; }
+
+    // Déterminer l'étape suivante dans ce chapitre
+    let libelle, lien;
+    if (!P.reussi(chap.id, 15)) { libelle = "Découverte · 15 mots"; lien = "jeu.html?chapitre=" + chap.id + "&niveau=15"; }
+    else if (!P.reussi(chap.id, 20)) { libelle = "Confirmé · 20 mots"; lien = "jeu.html?chapitre=" + chap.id + "&niveau=20"; }
+    else if (!P.bombeFaite(chap.id)) { libelle = "La Bombe 💣"; lien = "bombe.html?chapitre=" + chap.id; }
+    else {
+      // Chapitre fini : proposer le suivant
+      const idx = theme.chapitres.findIndex(x => x.id === chap.id);
+      const suiv = theme.chapitres[idx + 1];
+      if (!suiv) { zone.innerHTML = ""; return; }
+      chap = suiv;
+      libelle = "Découverte · 15 mots";
+      lien = "jeu.html?chapitre=" + suiv.id + "&niveau=15";
+    }
+
+    zone.innerHTML = '<div class="reprise">'
+      + '<div class="reprise-txt"><div class="rp-lab">Reprendre</div>'
+      + '<h3>' + esc(chap.nom) + '</h3>'
+      + '<p>' + esc(theme.nom) + ' · ' + libelle + '</p></div>'
+      + '<a class="btn btn-v" href="' + lien + '">Continuer</a>'
+      + '</div>';
+  }
+
   function majCompteur() {
     const d = window.Progression.detail();
     ["vert","jaune","rose"].forEach(c => {
@@ -197,6 +252,8 @@
       const t = themes.find(x => x.id === themeDemande);
       if (t) { themeActif = t; dessinerChapitres(); }
       else dessinerThemes();
+      majSerie();
+      afficherReprise();
     } else {
       dessinerThemes();
     }

@@ -14,6 +14,9 @@
 <header>
   <div class="nav">
     <a href="index.html" class="logo"><span class="logo-mark">B</span><span class="logo-txt">Bi<b>Zouk</b></span></a>
+    <a href="compte.html" class="serie-badge" id="serieBadge" title="Ta série de jours consécutifs" style="display:none">
+      <span class="sbf">🔥</span><span id="serieNb">0</span>
+    </a>
     <div class="bz-compteur" id="bzCompteur" title="Tes pierres BiZouk">
       <span class="bz-badge bz-vert" id="badgeVert"><span class="bz-nb" id="bzVert">0</span></span>
       <span class="bz-badge bz-jaune" id="badgeJaune"><span class="bz-nb" id="bzJaune">0</span></span>
@@ -33,6 +36,8 @@
       Chaque victoire te rapporte 3 pierres BiZouk.
     </p>
   </div>
+
+  <div id="zoneReprise"></div>
 
   <div class="recherche-box">
     <input type="search" id="chercheTheme" placeholder="Rechercher un thème…" autocomplete="off">

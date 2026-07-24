@@ -127,10 +127,14 @@
       : et.total + " mots trouvés · niveau " + conf.nom;
 
     // Attribuer les pierres BiZouk si c'est un niveau du parcours
-    let gain = null;
-    if (chapitreId && window.Progression) {
+    let gain = null, serie = null;
+    if (window.Progression) {
       await window.Progression.init();
-      gain = await window.Progression.gagnerNiveau(chapitreId, niveau);
+      if (chapitreId) {
+        gain = await window.Progression.gagnerNiveau(chapitreId, niveau);
+        await window.Progression.memoriserPosition(chapitreId, niveau);
+      }
+      serie = await window.Progression.marquerJour();
     }
 
     // Enregistrer si connecté
@@ -167,7 +171,24 @@
         + 'Niveau déjà réussi · pas de nouvelles pierres</p>';
     }
 
-    $("vicInvite").innerHTML = bloc + (connecte
+    // Bandeau de série
+    let blocSerie = "";
+    if (serie && !serie.deja) {
+      const flamme = serie.serie >= 7 ? "🔥" : "✨";
+      blocSerie = '<div class="serie-bandeau">'
+        + '<span class="sb-flamme">' + flamme + '</span>'
+        + '<span class="sb-txt"><b>' + serie.serie + (serie.serie > 1 ? ' jours' : ' jour') + ' de suite</b>'
+        + (serie.nouveauRecord && serie.serie > 2 ? '<br><span style="color:var(--or)">Nouveau record !</span>' : '')
+        + '</span></div>';
+      if (serie.bonus) {
+        blocSerie += '<div class="gain-bizouk" style="margin-top:8px">'
+          + '<span class="pierre-gain">' + (window.BiZoukPierre ? window.BiZoukPierre.pierre("rose", 36) : "") + '</span>'
+          + '<span class="gb-nb" style="color:var(--rose)">+' + serie.bonus + '</span>'
+          + '<span class="gb-txt">bonus série<br><b style="color:var(--rose)">' + serie.palier + ' jours</b></span></div>';
+      }
+    }
+
+    $("vicInvite").innerHTML = blocSerie + bloc + (connecte
       ? '<a href="classement.html" style="color:var(--violet-c);font-weight:600;font-size:.88rem">Voir le classement →</a>'
       : '<span style="font-size:.86rem">Sans compte, ta progression reste sur cet appareil. '
         + '<a href="inscription.html" style="color:var(--violet-c);font-weight:600">Créer un compte →</a></span>');

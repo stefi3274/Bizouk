@@ -645,3 +645,44 @@ input[name="niv"]:checked + .niv-radio{background:var(--violet);border-color:var
 .btn-indice .bi-cout{display:inline-flex;align-items:center;gap:3px;
   background:rgba(255,255,255,.12);padding:2px 7px;border-radius:10px;font-size:.78rem}
 .btn-indice svg{width:14px;height:14px}
+
+/* ============================================================
+   Série quotidienne
+   ============================================================ */
+.serie-bandeau{display:flex;align-items:center;justify-content:center;gap:12px;
+  background:linear-gradient(135deg,rgba(240,180,41,.16),var(--gris-3));
+  border:1px solid rgba(240,180,41,.35);border-radius:14px;padding:14px 18px;margin-bottom:10px}
+.sb-flamme{font-size:1.9rem;line-height:1;animation:flammeVibre 1.4s ease-in-out infinite}
+@keyframes flammeVibre{0%,100%{transform:scale(1) rotate(-2deg)}50%{transform:scale(1.12) rotate(3deg)}}
+.sb-txt{text-align:left;font-size:.95rem;color:var(--texte);line-height:1.4}
+.sb-txt b{color:var(--or);font-family:var(--serif);font-size:1.15rem}
+
+/* Compteur de série dans l'en-tête */
+.serie-badge{display:inline-flex;align-items:center;gap:5px;background:var(--gris-2);
+  border:1px solid var(--gris-line);border-radius:20px;padding:5px 12px;
+  font-weight:700;font-size:.88rem;color:var(--or);text-decoration:none;transition:border-color .2s}
+.serie-badge:hover{border-color:var(--or)}
+.serie-badge.eteinte{color:var(--texte-faible)}
+.serie-badge .sbf{font-size:1rem}
+
+/* Carte de série sur le compte */
+.serie-carte{background:linear-gradient(135deg,rgba(240,180,41,.12),var(--gris-2));
+  border:1px solid rgba(240,180,41,.3);border-radius:var(--r-lg);padding:22px;margin-bottom:20px;
+  text-align:center}
+.serie-carte .sc-nb{font-family:var(--serif);font-size:3rem;font-weight:700;color:var(--or);line-height:1}
+.serie-carte .sc-lab{color:var(--texte-doux);font-size:.92rem;margin-top:4px}
+.serie-carte .sc-record{font-size:.85rem;color:var(--texte-faible);margin-top:10px}
+.serie-carte .sc-prochain{background:var(--gris-3);border-radius:10px;padding:12px;margin-top:14px;
+  font-size:.86rem;color:var(--texte-doux)}
+.serie-carte .sc-prochain b{color:var(--or)}
+.serie-danger{background:rgba(239,68,68,.14);border:1px solid var(--rouge);border-radius:12px;
+  padding:14px;margin-top:14px;font-size:.88rem;color:var(--texte)}
+
+/* Reprendre où on s'est arrêté */
+.reprise{background:var(--gris-2);border:1px solid var(--violet);border-radius:var(--r-lg);
+  padding:20px 22px;margin-bottom:22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.reprise-txt{flex:1;min-width:180px}
+.reprise-txt .rp-lab{font-size:.76rem;color:var(--violet-c);text-transform:uppercase;
+  letter-spacing:.07em;font-weight:700;margin-bottom:4px}
+.reprise-txt h3{font-family:var(--serif);font-size:1.15rem;color:var(--blanc);margin-bottom:2px}
+.reprise-txt p{font-size:.85rem;color:var(--texte-doux)}

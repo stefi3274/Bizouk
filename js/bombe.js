@@ -133,6 +133,7 @@
     termine = true;
     clearInterval(minuteur);
     const rb = await window.Progression.bombeReussie(chapitreId);
+    const serieB = await window.Progression.marquerJour();
     majCompteur();
 
     const et = window.Progression.etat();
