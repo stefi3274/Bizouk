@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mon compte · BiZouk</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .profil{display:flex;align-items:center;gap:20px;background:var(--gris-2);
+    border:1px solid var(--gris-line);border-radius:var(--r-lg);padding:24px;margin-bottom:20px}
+  .profil-av{flex:0 0 auto}
+  .profil-av svg{border:3px solid var(--gris-line);border-radius:50%}
+  .profil-info{flex:1;min-width:0}
+  .profil-nom{font-family:var(--serif);font-size:1.5rem;font-weight:700;color:var(--blanc);
+    margin-bottom:3px;overflow:hidden;text-overflow:ellipsis}
+  .profil-mail{font-size:.85rem;color:var(--texte-faible);overflow:hidden;text-overflow:ellipsis}
+  .profil-depuis{font-size:.8rem;color:var(--texte-faible);margin-top:6px}
+  .stats-grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px}
+  .stat-c{background:var(--gris-2);border:1px solid var(--gris-line);border-radius:14px;
+    padding:18px;text-align:center}
+  .stat-c b{display:block;font-family:var(--serif);font-size:1.8rem;font-weight:700;
+    color:var(--violet-c);line-height:1.1}
+  .stat-c span{font-size:.78rem;color:var(--texte-faible);text-transform:uppercase;letter-spacing:.05em}
+  .bloc{background:var(--gris-2);border:1px solid var(--gris-line);border-radius:var(--r-lg);
+    padding:22px;margin-bottom:20px}
+  .bloc h2{font-family:var(--serif);font-size:1.2rem;color:var(--blanc);margin-bottom:14px}
+  .tresor-ligne{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .tresor-c{text-align:center;min-width:88px}
+  .tresor-c .tc-nb{font-family:var(--serif);font-size:1.4rem;font-weight:700;margin-top:6px}
+  .tresor-c .tc-lab{font-size:.74rem;color:var(--texte-faible);text-transform:uppercase;letter-spacing:.05em}
+  .prog-ligne{display:flex;justify-content:space-between;align-items:center;gap:10px;
+    padding:10px 0;border-bottom:1px solid var(--gris-line);font-size:.92rem}
+  .prog-ligne:last-child{border-bottom:0}
+  .prog-nom{color:var(--texte)}
+  .prog-etat{font-weight:600;font-size:.85rem}
+  .prog-etat.fait{color:var(--vert)}
+  .prog-etat.encours{color:var(--or)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="index.html" class="logo"><span class="logo-mark">B</span><span class="logo-txt">Bi<b>Zouk</b></span></a>
+    <nav class="nav-liens">
+      <a href="index.html">Jouer</a>
+      <a href="parcours.html">Parcours</a>
+      <a href="duels.html">Duels</a>
+      <a href="classement.html">Classement</a>
+    </nav>
+    <a href="index.html" class="btn-connexion">← Retour</a>
+  </div>
+</header>
+
+<main class="page" style="max-width:620px">
+
+  <!-- Non connecté -->
+  <div id="nonConnecte" style="display:none">
+    <div class="cls-vide">
+      <h3>Tu n'es pas connecté</h3>
+      <p>Connecte-toi pour voir ton profil, tes pierres et ta progression.</p>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px">
+        <a href="connexion.html" class="btn btn-v btn-sm">Se connecter</a>
+        <a href="inscription.html" class="btn btn-g btn-sm">Créer un compte</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connecté -->
+  <div id="connecte" style="display:none">
+    <div class="profil">
+      <div class="profil-av" id="profilAv"></div>
+      <div class="profil-info">
+        <div class="profil-nom" id="profilNom">—</div>
+        <div class="profil-mail" id="profilMail">—</div>
+        <div class="profil-depuis" id="profilDepuis"></div>
+      </div>
+    </div>
+
+    <div class="stats-grille">
+      <div class="stat-c"><b id="statNiveaux">0</b><span>niveaux réussis</span></div>
+      <div class="stat-c"><b id="statChapitres">0</b><span>chapitres finis</span></div>
+      <div class="stat-c"><b id="statDuels">0</b><span>duels gagnés</span></div>
+    </div>
+
+    <div class="bloc">
+      <h2>Mon trésor</h2>
+      <div class="tresor-ligne" id="tresor"></div>
+      <p style="text-align:center;color:var(--texte-doux);font-size:.86rem;margin-top:14px">
+        Total : <b id="tresorTotal" style="color:var(--violet-c)">0</b> pierres BiZouk
+      </p>
+    </div>
+
+    <div class="bloc">
+      <h2>Ma progression</h2>
+      <div id="progression"><p style="color:var(--texte-faible);font-style:italic">Chargement…</p></div>
+    </div>
+
+    <div class="bloc">
+      <h2>Mes meilleurs temps</h2>
+      <div id="mesTemps"><p style="color:var(--texte-faible);font-style:italic">Chargement…</p></div>
+    </div>
+
+    <div style="text-align:center;margin-top:26px">
+      <button class="btn btn-g" id="btnDeconnexion">Se déconnecter</button>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="foot-inner">
+    <div class="foot-bas" style="border:0;padding-top:0">
+      <span>© 2026 BiZouk</span>
+      <span>Conçu par <a href="https://stefi-services.vercel.app/" target="_blank" rel="noopener">SteFi Services</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/avatar.js"></script>
+<script src="js/pierre.js"></script>
+<script src="js/progression.js"></script>
+<script src="js/duel.js"></script>
+<script src="js/compte.js"></script>
+</body>
+</html>
