@@ -599,3 +599,32 @@ div[style*="position:relative"] > button svg {
 .cls-nom .av-inline{margin-right:7px}
 .cls-nom{display:flex;align-items:center;gap:0;flex-wrap:wrap}
 .cls-nom .cls-theme{flex-basis:100%;margin-left:33px}
+
+/* Sélecteur de niveau pour les duels */
+.niv-radio{display:block;text-align:center;padding:12px;border-radius:10px;
+  border:1.5px solid var(--gris-3);color:var(--texte-doux);font-size:.88rem;font-weight:600;
+  transition:all .2s}
+input[name="niv"]:checked + .niv-radio{background:var(--violet);border-color:var(--violet);color:#fff}
+.niv-radio:hover{border-color:var(--violet)}
+
+/* Liste des duels */
+.duel-item{background:var(--gris-2);border:1px solid var(--gris-line);border-radius:14px;
+  padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:13px}
+.duel-item.gagne{border-left:4px solid var(--vert)}
+.duel-item.perdu{border-left:4px solid var(--rouge)}
+.duel-item.attente{border-left:4px solid var(--or)}
+.di-av{flex:0 0 auto}
+.di-av svg{display:block}
+.di-info{flex:1;min-width:0}
+.di-nom{font-weight:600;color:var(--blanc);font-size:.95rem;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.di-detail{font-size:.8rem;color:var(--texte-faible);margin-top:2px}
+.di-temps{flex:0 0 auto;text-align:right}
+.di-temps b{display:block;font-family:var(--serif);font-size:1.05rem;font-weight:700;line-height:1.2}
+.di-temps.gagne b{color:var(--vert)}
+.di-temps.perdu b{color:var(--texte-doux)}
+.di-temps span{font-size:.72rem;color:var(--texte-faible)}
+.di-code{font-family:var(--serif);font-weight:700;color:var(--violet-c);letter-spacing:.1em;font-size:.9rem}
+.di-action{flex:0 0 auto}
+.di-action button{background:var(--violet);border:0;color:#fff;font-family:inherit;font-weight:600;
+  font-size:.78rem;padding:7px 12px;border-radius:8px;cursor:pointer}

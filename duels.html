@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Duels · BiZouk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="index.html" class="logo"><span class="logo-mark">B</span><span class="logo-txt">Bi<b>Zouk</b></span></a>
+    <nav class="nav-liens">
+      <a href="index.html">Jouer</a>
+      <a href="parcours.html">Parcours</a>
+      <a href="duels.html" class="on">Duels</a>
+      <a href="classement.html">Classement</a>
+    </nav>
+    <a href="connexion.html" class="btn-connexion" id="navAuth">Se connecter</a>
+  </div>
+</header>
+
+<main class="page" style="max-width:640px">
+  <div style="text-align:center;margin-bottom:26px">
+    <p class="page-kicker" style="text-align:center">⚔️ Duels</p>
+    <h1 style="font-family:var(--serif);font-size:clamp(1.8rem,5vw,2.4rem);color:var(--blanc);line-height:1.15">
+      Défie tes amis</h1>
+    <p style="color:var(--texte-doux);margin-top:8px;max-width:440px;margin-left:auto;margin-right:auto">
+      Joue une grille, envoie ton temps à un ami, et vois qui est le plus rapide.
+    </p>
+  </div>
+
+  <!-- Rejoindre un duel avec un code -->
+  <div class="form-carte" style="margin-bottom:22px">
+    <h2 style="font-family:var(--serif);font-size:1.2rem;color:var(--blanc);margin-bottom:6px">
+      Tu as reçu un code ?</h2>
+    <p style="color:var(--texte-doux);font-size:.9rem;margin-bottom:16px">
+      Entre le code que ton ami t'a envoyé pour relever son défi.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <input type="text" id="codeSaisi" placeholder="Ex. 4HDNWK" maxlength="8"
+        style="flex:1;min-width:150px;background:var(--gris);border:1px solid var(--gris-3);border-radius:10px;
+        padding:13px 16px;font-family:var(--serif);font-size:1.2rem;font-weight:700;color:var(--texte);
+        letter-spacing:.12em;text-transform:uppercase;text-align:center">
+      <button class="btn btn-v" id="btnRejoindre">Rejoindre</button>
+    </div>
+    <div class="msg" id="msgCode" style="margin-top:12px"></div>
+  </div>
+
+  <!-- Lancer un nouveau duel -->
+  <div class="form-carte" style="margin-bottom:22px">
+    <h2 style="font-family:var(--serif);font-size:1.2rem;color:var(--blanc);margin-bottom:6px">
+      Lancer un duel</h2>
+    <p style="color:var(--texte-doux);font-size:.9rem;margin-bottom:16px">
+      Choisis une grille et un niveau. Tu joues d'abord, puis tu envoies ton temps à défier.</p>
+
+    <div class="field">
+      <label>La grille</label>
+      <select id="selChapitre">
+        <option value="">Chargement…</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Le niveau</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <label style="flex:1;cursor:pointer">
+          <input type="radio" name="niv" value="15" checked style="display:none">
+          <span class="niv-radio" data-niv="15">Découverte · 15 mots</span>
+        </label>
+        <label style="flex:1;cursor:pointer">
+          <input type="radio" name="niv" value="20" style="display:none">
+          <span class="niv-radio" data-niv="20">Confirmé · 20 mots</span>
+        </label>
+      </div>
+    </div>
+
+    <button class="btn btn-v" id="btnLancer" style="width:100%">Jouer et défier</button>
+  </div>
+
+  <!-- Mes duels -->
+  <div>
+    <h2 style="font-family:var(--serif);font-size:1.2rem;color:var(--blanc);margin-bottom:12px">
+      Mes duels</h2>
+    <div id="mesDuels">
+      <p style="text-align:center;color:var(--texte-faible);font-style:italic;padding:24px">Chargement…</p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="foot-inner">
+    <div class="foot-bas" style="border:0;padding-top:0">
+      <span>© 2026 BiZouk</span>
+      <span>Conçu par <a href="https://stefi-services.vercel.app/" target="_blank" rel="noopener">SteFi Services</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/avatar.js"></script>
+<script src="js/duel.js"></script>
+<script src="js/duels-liste.js"></script>
+</body>
+</html>

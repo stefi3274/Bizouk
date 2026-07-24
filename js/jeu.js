@@ -6,6 +6,7 @@
   const params = new URLSearchParams(location.search);
   const niveau = parseInt(params.get("niveau"), 10) || 15;
   const chapitreId = params.get("chapitre");   // null = jeu libre
+  const modeDuel = params.get("duel") === "1";
   const themeId = params.get("theme");
 
   const NIVEAUX = {
@@ -120,7 +121,9 @@
     const t = tempsEcoule();
     $("vicTemps").textContent = fmt(t);
     const et = jeu.etat();
-    $("vicSous").textContent = et.total + " mots trouvés · niveau " + conf.nom;
+    $("vicSous").textContent = modeDuel
+      ? "Ton temps est prêt à être défié !"
+      : et.total + " mots trouvés · niveau " + conf.nom;
 
     // Attribuer les pierres BiZouk si c'est un niveau du parcours
     let gain = null;
@@ -222,6 +225,11 @@
       document.querySelector(".vic-carte").appendChild(zoneL);
     }
     $("victoire").classList.add("on");
+
+    // En mode duel, on crée le défi tout de suite
+    if (modeDuel && chapitreCourant) {
+      setTimeout(() => lancerDuel(t, et.total), 400);
+    }
   }
 
   function afficherLiensPartage(info) {
