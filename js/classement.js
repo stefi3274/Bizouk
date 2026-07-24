@@ -51,7 +51,10 @@
           const cle = p.user_id || p.joueur;
           return '<div class="cls-row' + (i < 3 ? ' cls-podium' : '') + '">'
             + '<span class="cls-place">' + (i < 3 ? MEDAILLES[i] : (i+1)) + '</span>'
-            + '<span class="cls-nom">' + esc(p.joueur)
+            + '<span class="cls-nom">'
+            + (window.BiZoukAvatar ? '<span class="av-inline">' + window.BiZoukAvatar.avatar(
+                Object.assign(window.BiZoukAvatar.configDepuisNom(p.joueur), {initiales: window.BiZoukAvatar.initialesDe(p.joueur)}), 26) + '</span>' : '')
+            + esc(p.joueur)
             + '<span class="cls-theme">' + esc(p.theme_nom || "—") + ' · ' + p.niveau + ' mots</span></span>'
             + '<span class="cls-temps">' + fmt(p.temps_sec) + '</span>'
             + '<span class="cls-niv">' + (compte[cle]||1) + '</span>'

@@ -28,8 +28,8 @@
     const [rT, rC] = await Promise.all([
       base.from("themes").select("id, nom, description")
         .eq("entreprise_id", ent).eq("publie", true).order("created_at", { ascending: false }),
-      base.from("chapitres").select("id, theme_id, mots")
-        .eq("entreprise_id", ent).eq("publie", true)
+      base.from("chapitres").select("id, theme_id, mots, ordre")
+        .eq("entreprise_id", ent).eq("publie", true).order("ordre")
     ]);
 
     if (rT.error || !rT.data || !rT.data.length) {
@@ -42,9 +42,14 @@
     const parTheme = {};
     (rC.data || []).forEach(c => {
       const n = Array.isArray(c.mots) ? c.mots.length : 0;
-      if (!parTheme[c.theme_id]) parTheme[c.theme_id] = { mots: 0, chapitres: 0 };
+      if (!parTheme[c.theme_id]) parTheme[c.theme_id] = { mots: 0, chapitres: 0, premierChapitre: null, ordreMin: 1e9 };
       parTheme[c.theme_id].mots += n;
       parTheme[c.theme_id].chapitres += 1;
+      const o = (c.ordre === null || c.ordre === undefined) ? 1e9 : c.ordre;
+      if (o < parTheme[c.theme_id].ordreMin) {
+        parTheme[c.theme_id].ordreMin = o;
+        parTheme[c.theme_id].premierChapitre = c.id;
+      }
     });
 
     // N'afficher que les thèmes qui ont au moins un chapitre
@@ -55,17 +60,22 @@
       return;
     }
 
+    // Les cartes mènent directement au premier chapitre jouable du thème
     box.innerHTML = themes.map((t, i) => {
       const info = parTheme[t.id];
       const coul = COULEURS[i % COULEURS.length];
       const nbChap = info.chapitres;
-      return '<a class="niv-carte" href="parcours.html" style="--nc:' + coul + '">'
+      const premier = info.premierChapitre;
+      const lien = premier ? ('jeu.html?chapitre=' + premier + '&niveau=15') : 'parcours.html';
+      return '<a class="niv-carte" href="' + lien + '" style="--nc:' + coul + '">'
         + '<h3 style="margin-top:6px">' + esc(t.nom) + '</h3>'
         + (t.description ? '<p>' + esc(t.description) + '</p>' : '')
         + '<div class="niv-taille">'
         + nbChap + (nbChap > 1 ? ' chapitres' : ' chapitre')
         + ' · ' + info.mots + (info.mots > 1 ? ' mots' : ' mot')
-        + '</div></a>';
+        + '</div>'
+        + '<div style="margin-top:12px;font-size:.85rem;font-weight:600;color:var(--nc)">Jouer →</div>'
+        + '</a>';
     }).join("");
   }
 

@@ -19,7 +19,33 @@
   <p class="sub">Rejoins BiZouk pour le classement et les concours.</p>
   <form id="signupForm">
     <div class="msg" id="msg"></div>
-    <div class="field"><label>Ton pseudo (affiché au classement)</label><input type="text" id="nom" required></div>
+    <div class="field"><label>Ton pseudo (affiché au classement)</label><input type="text" id="nom" required maxlength="20"></div>
+
+    <div class="field">
+      <label>Ton avatar</label>
+      <div class="avatar-choix">
+        <div class="avatar-apercu" id="avApercu"></div>
+        <div class="avatar-reglages">
+          <div class="av-ligne">
+            <span class="av-lab">Couleur</span>
+            <div class="av-fleches">
+              <button type="button" class="av-fl" id="palMoins">‹</button>
+              <span class="av-nom" id="palNom">—</span>
+              <button type="button" class="av-fl" id="palPlus">›</button>
+            </div>
+          </div>
+          <div class="av-ligne">
+            <span class="av-lab">Motif</span>
+            <div class="av-fleches">
+              <button type="button" class="av-fl" id="motMoins">‹</button>
+              <span class="av-nom" id="motNom">—</span>
+              <button type="button" class="av-fl" id="motPlus">›</button>
+            </div>
+          </div>
+          <button type="button" class="btn btn-g btn-sm" id="avHasard" style="width:100%;margin-top:4px">Au hasard</button>
+        </div>
+      </div>
+    </div>
     <div class="field"><label>Email</label><input type="email" id="email" required autocomplete="email"></div>
     <div class="field"><label>Mot de passe</label><input type="password" id="pass" required autocomplete="new-password"></div>
     <button type="submit" class="btn btn-v" style="width:100%">Créer mon compte</button>
@@ -28,6 +54,7 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-config.js"></script>
+<script src="js/avatar.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/passeye.js"></script>
 </body>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Duel · BiZouk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="index.html" class="logo"><span class="logo-mark">B</span><span class="logo-txt">Bi<b>Zouk</b></span></a>
+    <nav class="nav-liens">
+      <a href="index.html">Jouer</a>
+      <a href="parcours.html">Parcours</a>
+      <a href="classement.html">Classement</a>
+    </nav>
+    <a href="connexion.html" class="btn-connexion" id="navAuth">Se connecter</a>
+  </div>
+</header>
+
+<!-- ÉCRAN 1 : présentation du duel -->
+<main class="duel-arene" id="ecranDefi">
+  <div style="text-align:center;margin-bottom:6px">
+    <p class="page-kicker" style="text-align:center">⚔️ Duel</p>
+    <h1 style="font-family:var(--serif);font-size:clamp(1.7rem,5vw,2.2rem);color:var(--blanc);line-height:1.15" id="duelTitre">
+      Un défi t'attend</h1>
+    <p style="color:var(--texte-doux);margin-top:8px" id="duelSous">Chargement…</p>
+  </div>
+
+  <div id="duelCarte" style="display:none">
+    <div class="face-a-face">
+      <div class="combattant lui">
+        <div class="comb-avatar" id="avLui">?</div>
+        <div class="comb-nom" id="nomLui">—</div>
+        <div class="comb-role">te défie</div>
+        <div class="comb-temps" id="tempsLui">0:00</div>
+      </div>
+      <div class="vs">VS<span>DUEL</span></div>
+      <div class="combattant moi">
+        <div class="comb-avatar" id="avMoi">?</div>
+        <div class="comb-nom" id="nomMoi">Toi</div>
+        <div class="comb-role">à toi de jouer</div>
+        <div class="comb-temps" style="color:var(--texte-faible)">—</div>
+      </div>
+    </div>
+
+    <div style="background:var(--gris-2);border:1px solid var(--gris-line);border-radius:16px;padding:18px;margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:.9rem">
+        <span style="color:var(--texte-faible)">Grille</span>
+        <span style="color:var(--texte);font-weight:600" id="infoGrille">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:.9rem;margin-top:8px">
+        <span style="color:var(--texte-faible)">Niveau</span>
+        <span style="color:var(--texte);font-weight:600" id="infoNiveau">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:.9rem;margin-top:8px">
+        <span style="color:var(--texte-faible)">Temps à battre</span>
+        <span style="color:var(--or);font-weight:700;font-family:var(--serif);font-size:1.1rem" id="infoTemps">0:00</span>
+      </div>
+    </div>
+
+    <div class="field" id="champNom">
+      <label>Ton nom de combattant</label>
+      <input type="text" id="duelNom" placeholder="Comment tu veux apparaître" maxlength="20">
+    </div>
+
+    <button class="btn btn-v" id="btnRelever" style="width:100%;font-size:1.05rem;padding:15px">
+      Relever le défi
+    </button>
+    <p style="font-size:.82rem;color:var(--texte-faible);margin-top:12px;text-align:center">
+      Tu joueras exactement la même grille, avec les mêmes mots.
+    </p>
+  </div>
+
+  <div id="duelErreur" style="display:none">
+    <div class="cls-vide">
+      <h3 id="errTitre">Duel introuvable</h3>
+      <div id="errTexte">Ce défi n'existe pas ou a déjà été relevé.</div>
+      <a href="index.html" class="btn btn-v btn-sm" style="margin-top:16px">Jouer une grille</a>
+    </div>
+  </div>
+</main>
+
+<!-- Compte à rebours -->
+<div class="rebours" id="rebours">
+  <div class="rebours-nb" id="reboursNb">3</div>
+  <div class="rebours-txt" id="reboursTxt">Prépare-toi…</div>
+</div>
+
+<!-- ÉCRAN 2 : le jeu -->
+<main class="jeu" id="ecranJeu" style="display:none">
+  <div class="duel-chrono">
+    <div class="dc-temps" id="chrono">0:00</div>
+    <div class="dc-cible" id="chronoCible">à battre : 0:00</div>
+  </div>
+
+  <div class="course">
+    <div class="course-head">
+      <span class="course-titre">La course</span>
+      <span class="course-etat" id="courseEtat">—</span>
+    </div>
+    <div class="course-piste">
+      <div class="course-barre moi" id="barreMoi" style="width:0%"></div>
+    </div>
+    <div class="course-piste adv">
+      <div class="course-barre lui" id="barreLui" style="width:0%"></div>
+    </div>
+    <div class="course-legende">
+      <span><span class="pastille moi"></span><b id="legMoi">Toi</b> <span id="legMoiNb">0/0</span></span>
+      <span><span class="pastille lui"></span><b id="legLui">Adversaire</b> <span id="legLuiNb">rythme estimé</span></span>
+    </div>
+  </div>
+
+  <div class="jeu-corps">
+    <div class="grille-box"><div class="grille" id="grille"></div></div>
+    <div class="mots-box">
+      <h3>Mots à trouver</h3>
+      <div class="mots-progres" id="motsProgres">—</div>
+      <div class="mots-liste" id="motsListe"></div>
+    </div>
+  </div>
+</main>
+
+<!-- ÉCRAN 3 : résultat -->
+<div class="victoire" id="resultat">
+  <div class="vic-carte" id="resCarte" style="max-width:460px">
+    <div class="vic-emoji" id="resEmoji">🏆</div>
+    <h2 id="resTitre">Duel terminé</h2>
+    <div id="resContenu"></div>
+    <div class="vic-actions" style="margin-top:20px">
+      <button class="btn btn-v btn-sm" id="btnPartagerRes">Partager le résultat</button>
+      <a class="btn btn-g btn-sm" href="index.html">Jouer une grille</a>
+    </div>
+    <div class="partage-liens" id="resLiens"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-inner">
+    <div class="foot-bas" style="border:0;padding-top:0">
+      <span>© 2026 BiZouk</span>
+      <span>Conçu par <a href="https://stefi-services.vercel.app/" target="_blank" rel="noopener">SteFi Services</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/moteur.js"></script>
+<script src="js/partage.js"></script>
+<script src="js/avatar.js"></script>
+<script src="js/duel.js"></script>
+<script src="js/duel-page.js"></script>
+</body>
+</html>
