@@ -162,6 +162,13 @@ header{position:sticky;top:0;z-index:100;background:rgba(28,27,33,.88);
   touch-action:none;font-family:var(--sans)}
 .case:hover{background:var(--gris-line)}
 .case.select{background:var(--violet);color:#fff}
+
+.lettre-bulle{position:fixed;display:flex;align-items:center;justify-content:center;
+  transform:translate(-50%,-50%) scale(.7);background:var(--violet);color:#fff;
+  border-radius:20%;font-weight:800;opacity:0;pointer-events:none;z-index:999;
+  box-shadow:0 10px 28px rgba(0,0,0,.45);
+  transition:opacity .1s ease,left .05s linear,top .05s linear,transform .1s ease}
+.lettre-bulle.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
 .case.trouve{color:#1c1b21;font-weight:700}
 
 /* Liste des mots */

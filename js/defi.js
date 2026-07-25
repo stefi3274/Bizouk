@@ -2,7 +2,7 @@
 (function () {
   async function db() { return window.DB || (window.attendreDB ? await window.attendreDB(8000) : null); }
 
-  const NB_MOTS = 18;   // taille du défi quotidien
+  const NB_MOTS = 15;   // taille du défi quotidien (maximum d'une grille)
 
   /* Date du jour au format AAAA-MM-JJ */
   function jour() {
@@ -50,10 +50,15 @@
       const ent = await entrepriseId();
       if (!ent) return null;
 
-      const { data: chaps } = await base.from("chapitres")
+      const { data: chapsTous } = await base.from("chapitres")
         .select("id, theme_id, nom, mots")
         .eq("entreprise_id", ent).eq("publie", true).order("id");
-      if (!chaps || !chaps.length) return null;
+      if (!chapsTous || !chapsTous.length) return null;
+
+      // Seuls les chapitres ayant au moins NB_MOTS mots peuvent alimenter le défi du jour,
+      // pour garantir une grille toujours complète (15 mots)
+      const chaps = chapsTous.filter(c => Array.isArray(c.mots) && c.mots.length >= NB_MOTS);
+      if (!chaps.length) return null;
 
       // La graine vient de la date : tout le monde a la même grille le même jour
       const rnd = alea(graineDepuis("bizouk-" + jour()));
@@ -63,8 +68,7 @@
       const { data: th } = await base.from("themes").select("nom").eq("id", chap.theme_id).maybeSingle();
 
       const tous = Array.isArray(chap.mots) ? chap.mots : [];
-      if (tous.length < 8) return null;
-      const mots = melangerAvec(tous, rnd).slice(0, Math.min(NB_MOTS, tous.length));
+      const mots = melangerAvec(tous, rnd).slice(0, NB_MOTS);
 
       return {
         jour: jour(),

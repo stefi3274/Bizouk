@@ -73,6 +73,40 @@
     let trouves = [];
     let cibles = null;   // si défini, seuls ces mots comptent
     let glisse = false, depart = null, courant = null;
+    let tailleCase = 32;
+    let bulle = null;
+
+    function assurerBulle() {
+      if (!bulle) {
+        bulle = document.createElement("div");
+        bulle.className = "lettre-bulle";
+        document.body.appendChild(bulle);
+      }
+      return bulle;
+    }
+
+    function afficherBulle(pos) {
+      if (!pos) return;
+      const el = conteneur.querySelector('[data-r="'+pos.r+'"][data-c="'+pos.c+'"]');
+      if (!el) return;
+      const b = assurerBulle();
+      const taille = Math.round(tailleCase * 3);
+      const rect = el.getBoundingClientRect();
+      b.style.width = taille + "px";
+      b.style.height = taille + "px";
+      b.style.fontSize = Math.round(taille * 0.52) + "px";
+      b.textContent = el.textContent;
+      const cx = rect.left + rect.width / 2;
+      let cy = rect.top - taille / 2 - 10;
+      if (cy - taille / 2 < 4) cy = rect.bottom + taille / 2 + 10; // évite le débordement en haut d'écran
+      b.style.left = Math.min(Math.max(taille/2 + 4, cx), window.innerWidth - taille/2 - 4) + "px";
+      b.style.top = cy + "px";
+      b.classList.add("on");
+    }
+
+    function cacherBulle() {
+      if (bulle) bulle.classList.remove("on");
+    }
 
     function couleurMot(i) { return "var(--f" + ((i % NB_COULEURS) + 1) + ")"; }
 
@@ -89,6 +123,7 @@
       const maxPx = estMobile ? 34 : 38;
       let taillePx = Math.floor((dispo - (t-1)*2) / t);
       taillePx = Math.max(minPx, Math.min(maxPx, taillePx));
+      tailleCase = taillePx;
 
       conteneur.style.gridTemplateColumns = "repeat(" + t + ", " + taillePx + "px)";
       conteneur.style.fontSize = Math.max(8, Math.round(taillePx * 0.5)) + "px";
@@ -206,14 +241,16 @@
       depart = { r: Number(el.dataset.r), c: Number(el.dataset.c) };
       courant = { ...depart };
       surligner();
+      afficherBulle(courant);
     });
     conteneur.addEventListener("mouseover", e => {
       if (!glisse) return;
       const el = e.target.closest(".case"); if (!el) return;
       courant = { r: Number(el.dataset.r), c: Number(el.dataset.c) };
       surligner();
+      afficherBulle(courant);
     });
-    window.addEventListener("mouseup", () => { if (glisse) valider(); });
+    window.addEventListener("mouseup", () => { if (glisse) { valider(); cacherBulle(); } });
 
     // Tactile
     conteneur.addEventListener("touchstart", e => {
@@ -223,15 +260,16 @@
       depart = { r: Number(el.dataset.r), c: Number(el.dataset.c) };
       courant = { ...depart };
       surligner();
+      afficherBulle(courant);
     }, { passive: false });
     conteneur.addEventListener("touchmove", e => {
       if (!glisse) return;
       e.preventDefault();
       const t = e.touches[0];
       const pos = caseDepuisPoint(t.clientX, t.clientY);
-      if (pos) { courant = pos; surligner(); }
+      if (pos) { courant = pos; surligner(); afficherBulle(courant); }
     }, { passive: false });
-    window.addEventListener("touchend", () => { if (glisse) valider(); });
+    window.addEventListener("touchend", () => { if (glisse) { valider(); cacherBulle(); } });
 
     window.addEventListener("resize", () => { if (puzzle) dessiner(); });
 
