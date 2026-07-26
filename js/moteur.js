@@ -119,14 +119,14 @@
       const estMobile = window.innerWidth < 700;
       // Sur mobile on accepte des cases plus petites pour éviter le défilement ;
       // en dessous de 15px on laisse défiler plutôt que de rendre illisible.
-      const minPx = estMobile ? 15 : 18;
-      const maxPx = estMobile ? 34 : 38;
+      const minPx = estMobile ? 20 : 26;
+      const maxPx = estMobile ? 46 : 56;
       let taillePx = Math.floor((dispo - (t-1)*2) / t);
       taillePx = Math.max(minPx, Math.min(maxPx, taillePx));
       tailleCase = taillePx;
 
       conteneur.style.gridTemplateColumns = "repeat(" + t + ", " + taillePx + "px)";
-      conteneur.style.fontSize = Math.max(8, Math.round(taillePx * 0.5)) + "px";
+      conteneur.style.fontSize = Math.max(10, Math.round(taillePx * 0.6)) + "px";
       // Indiquer si la grille dépasse (défilement horizontal)
       const largeurTotale = t * taillePx + (t-1) * 2;
       boite.classList.toggle("defile", largeurTotale > dispo + 4);

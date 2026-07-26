@@ -12,19 +12,7 @@
 <body>
 
 <header class="no-print">
-  <div class="nav">
-    <a href="index.html" class="logo"><span class="logo-mark">B</span><span class="logo-txt">Bi<b>Zouk</b></span></a>
-    <nav class="nav-liens">
-      <a href="index.html">Jouer</a>
-      <a href="parcours.html">Parcours</a>
-      <a href="defi.html">Défi du jour</a>
-      <a href="duels.html">Duels</a>
-      <a href="classement.html">Classement</a>
-      <a href="a-propos.html">À propos</a>
-      <a href="contact.html">Contact</a>
-    </nav>
-    <a href="connexion.html" class="btn-connexion" id="navAuth">Se connecter</a>
-  </div>
+  <div class="nav nav-jeu"></div>
 </header>
 
 <main class="jeu">
@@ -33,7 +21,7 @@
       <h1 id="jeuTitre">Chargement…</h1>
       <div class="jeu-meta" id="jeuMeta"></div>
     </div>
-    <div class="jeu-stats no-print">
+    <div class="jeu-stats no-print" style="display:none">
       <div class="stat chrono" id="statChrono"><b id="chrono">0:00</b><span>Temps</span></div>
       <div class="stat"><b id="statTrouves">0</b><span>Trouvés</span></div>
       <div class="stat"><b id="statRestants">0</b><span>Restants</span></div>
