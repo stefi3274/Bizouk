@@ -228,9 +228,19 @@
     }
 
     function caseDepuisPoint(x, y) {
-      const el = document.elementFromPoint(x, y);
-      if (!el || el.dataset.r === undefined) return null;
-      return { r: Number(el.dataset.r), c: Number(el.dataset.c) };
+      if (!puzzle) return null;
+      const rect = conteneur.getBoundingClientRect();
+      const gap = 2; // doit correspondre au gap CSS de la grille (.grille{gap:2px})
+      const pas = tailleCase + gap;
+      if (pas <= 0) return null;
+      let c = Math.floor((x - rect.left) / pas);
+      let r = Math.floor((y - rect.top) / pas);
+      const t = puzzle.taille;
+      // On "colle" le doigt à la case la plus proche même s'il déborde du cadre,
+      // au lieu de perdre le tracé quand le doigt glisse hors de la grille.
+      if (r < 0) r = 0; else if (r > t - 1) r = t - 1;
+      if (c < 0) c = 0; else if (c > t - 1) c = t - 1;
+      return { r, c };
     }
 
     // Souris

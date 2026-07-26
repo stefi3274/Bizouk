@@ -125,7 +125,7 @@
       surVictoire: () => terminer()
     });
 
-    const pz = jeu.charger(defi.mots, 12);
+    const pz = jeu.charger(defi.mots, 11);
     totalMots = pz ? pz.placements.length : defi.mots.length;
     $("statRestants").textContent = totalMots;
 

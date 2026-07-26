@@ -6,7 +6,7 @@
     { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 
   const DUREE = 60;           // 1 minute
-  const NB_MOTS_GRILLE = 20;  // mots cachés (rebrassage des mots du chapitre)
+  const NB_MOTS_GRILLE = 10;  // mots cachés (rebrassage des mots du chapitre)
   const NB_CIBLES = 1;        // un seul mot à trouver
 
   const params = new URLSearchParams(location.search);
@@ -104,7 +104,7 @@
     if (!chap) return null;
 
     const { data: th } = await base.from("themes").select("nom").eq("id", chap.theme_id).maybeSingle();
-    // Rebrassage : on mélange tous les mots du chapitre et on en prend 20
+    // Rebrassage : on mélange tous les mots du chapitre et on en prend 10
     let liste = Array.isArray(chap.mots) ? chap.mots.slice() : [];
     for (let i = liste.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -138,7 +138,7 @@
     }
 
     // Générer la grille, puis choisir LE mot cible selon la difficulté du joueur
-    const puzzle = jeu.charger(res.mots, 14);
+    const puzzle = jeu.charger(res.mots, 9);
     const places = puzzle.placements.map(p => p.mot);
     cibles = [choisirCible(places)];
     jeu.definirCibles(cibles);
