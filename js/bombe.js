@@ -1,4 +1,4 @@
-/* BiZouk — La Bombe : 30 mots cachés, 2 à trouver, 2 minutes */
+/* BiZouk — La Bombe : 10 mots cachés, 1 à trouver, 1 minute */
 (function () {
   const $ = id => document.getElementById(id);
   async function db() { return window.DB || (window.attendreDB ? await window.attendreDB(6000) : null); }

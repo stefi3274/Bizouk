@@ -207,8 +207,10 @@
         const s = chemin.map(p => puzzle.grille[p.r][p.c]).join("");
         const inv = s.split("").reverse().join("");
         const dejaTrouves = new Set(trouves.map(f => f.mot));
+        // Le mot compte même si le tracé dépasse d'une ou plusieurs lettres :
+        // on cherche le mot comme sous-chaîne du tracé, dans les deux sens.
         const match = puzzle.placements.find(p =>
-          !dejaTrouves.has(p.mot) && (p.mot === s || p.mot === inv));
+          !dejaTrouves.has(p.mot) && (s.includes(p.mot) || inv.includes(p.mot)));
         if (match) {
           trouves.push(match);
           appliquerTrouves();

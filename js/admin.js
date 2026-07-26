@@ -240,6 +240,78 @@
     };
   }
 
+  /* Découpe une liste de mots en chapitres de `taille` mots max.
+     Si le dernier morceau est trop petit (< minimum requis), il est fusionné
+     avec le précédent pour que chaque chapitre reste jouable. */
+  function decouperEnChapitres(mots, taille, minimum) {
+    const morceaux = [];
+    for (let i = 0; i < mots.length; i += taille) morceaux.push(mots.slice(i, i + taille));
+    if (morceaux.length > 1 && morceaux[morceaux.length - 1].length < minimum) {
+      const dernier = morceaux.pop();
+      morceaux[morceaux.length - 1] = morceaux[morceaux.length - 1].concat(dernier);
+    }
+    return morceaux;
+  }
+
+  if ($("btnCreerAuto")) {
+    $("btnCreerAuto").onclick = async () => {
+      const texte = $("texteSource").value || "";
+      const lgMin = parseInt($("lgMin").value, 10) || 4;
+      const lgMax = parseInt($("lgMax").value, 10) || 12;
+      const ignorer = $("sansCourants").checked;
+      const mots = extraireMots(texte, lgMin, lgMax, ignorer);
+
+      if (mots.length < 20) {
+        status("Il faut au moins 20 mots exploitables pour créer un chapitre (tu en as " + mots.length + ").", "err");
+        return;
+      }
+
+      const themeIdChoisi = $("chTheme").value;
+      const themeNomSaisi = $("themeAuto").value.trim();
+      if (!themeIdChoisi && themeNomSaisi.length < 2) {
+        status("Choisis un thème existant en haut, ou donne un nom au nouveau thème.", "err");
+        return;
+      }
+
+      status("Création en cours…", "");
+      const base = await db();
+      const ent = await entrepriseId();
+      if (!base || !ent) { status("Connexion impossible.", "err"); return; }
+
+      // Réutiliser le thème choisi, sinon en créer un nouveau
+      let idTheme = themeIdChoisi;
+      if (!idTheme) {
+        const { data, error } = await base.from("themes")
+          .insert({ entreprise_id: ent, nom: themeNomSaisi, mots: [], publie: true })
+          .select("id").single();
+        if (error) { status("Erreur thème : " + error.message, "err"); return; }
+        idTheme = data.id;
+      }
+
+      // Découper en chapitres de 35 mots max (minimum 20 par chapitre)
+      const morceaux = decouperEnChapitres(mots, 35, 20);
+
+      // Continuer la numérotation après les chapitres déjà existants de ce thème
+      const { data: existants } = await base.from("chapitres")
+        .select("ordre").eq("theme_id", idTheme).order("ordre", { ascending: false }).limit(1);
+      let ordreDepart = (existants && existants[0] ? existants[0].ordre : 0) + 1;
+
+      const lignes = morceaux.map((chunk, i) => ({
+        entreprise_id: ent, theme_id: idTheme,
+        nom: "Chapitre " + (ordreDepart + i),
+        ordre: ordreDepart + i, mots: chunk, publie: true
+      }));
+
+      const { error } = await base.from("chapitres").insert(lignes);
+      if (error) { status("Erreur chapitres : " + error.message, "err"); return; }
+
+      status(morceaux.length + " chapitre(s) créé(s) avec " + mots.length + " mots au total.", "ok");
+      $("blocImport").style.display = "none";
+      $("texteSource").value = ""; $("themeAuto").value = "";
+      remplirSelectThemes();
+    };
+  }
+
   async function lancerAvecDB(zoneId, fn) {
     const box = $(zoneId);
     if (box) box.innerHTML = "<p class='empty'>Chargement…</p>";

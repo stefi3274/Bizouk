@@ -99,6 +99,12 @@
       ...t,
       chapitres: (chapsParTheme[t.id] || []).sort((a,b) => (a.ordre||0) - (b.ordre||0))
     })).filter(t => t.chapitres.length > 0);
+
+    // "Thèmes Libres" reste toujours affiché en premier
+    const estLibre = n => (n || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .trim().toLowerCase() === "themes libres";
+    themes.sort((a, b) => (estLibre(b.nom) ? 1 : 0) - (estLibre(a.nom) ? 1 : 0));
+
     return true;
   }
 
@@ -149,77 +155,139 @@
     });
   }
 
-  function dessinerChapitres() {
+  /* Construit la liste plate des nœuds du chemin (niveau 1, 2, 3, bombe, pour chaque chapitre) */
+  function construireNoeuds(t) {
     const P = window.Progression;
+    const noeuds = [];
+    t.chapitres.forEach((chap, ci) => {
+      const ouvertChap = (ci === 0) || P.chapitreFini(t.chapitres[ci - 1].id);
+      const NIVS = [
+        { n: 1, nom: "Découverte", icone: "1" },
+        { n: 2, nom: "Confirmé",   icone: "2" },
+        { n: 3, nom: "Expert",     icone: "3" }
+      ];
+      NIVS.forEach(niv => {
+        noeuds.push({
+          type: "niveau", chapitreId: chap.id, chapitreNom: chap.nom, chapitreIndex: ci,
+          label: niv.nom, icone: niv.icone,
+          fait: P.reussi(chap.id, niv.n),
+          ouvert: P.niveauOuvert(chap.id, niv.n, ouvertChap),
+          lien: "jeu.html?chapitre=" + chap.id + "&niveau=" + niv.n
+        });
+      });
+      noeuds.push({
+        type: "bombe", chapitreId: chap.id, chapitreNom: chap.nom, chapitreIndex: ci,
+        label: "La Bombe", icone: "💣",
+        fait: P.bombeFaite(chap.id),
+        ouvert: P.bombeOuverte(chap.id, ouvertChap),
+        lien: "bombe.html?chapitre=" + chap.id
+      });
+    });
+    return noeuds;
+  }
+
+  /* Calcule les positions (zigzag) des nœuds et dessine le tracé SVG */
+  function positionnerChemin(noeuds) {
+    const cont = $("chemin");
+    if (!cont) return;
+    const larg = cont.clientWidth || 320;
+    const pas = 108;          // espacement vertical entre deux nœuds
+    const rayon = 32;         // demi-taille d'un nœud
+    const marge = 50;
+    const motif = [0.5, 0.76, 0.5, 0.24]; // positions horizontales en fraction de la largeur (sinueux)
+
+    const pts = noeuds.map((n, i) => ({
+      x: Math.min(larg - rayon - 6, Math.max(rayon + 6, motif[i % motif.length] * larg)),
+      y: marge + i * pas
+    }));
+
+    const hauteur = marge + noeuds.length * pas + 30;
+    cont.style.height = hauteur + "px";
+
+    cont.querySelectorAll(".noeud").forEach(el => {
+      const i = Number(el.dataset.idx);
+      el.style.left = pts[i].x + "px";
+      el.style.top = pts[i].y + "px";
+    });
+    cont.querySelectorAll(".chemin-etiquette").forEach(el => {
+      const i = Number(el.dataset.idx);
+      const surDroite = pts[i].x <= larg / 2;
+      el.style.top = (pts[i].y - 40) + "px";
+      el.style.left = surDroite ? "10px" : "auto";
+      el.style.right = surDroite ? "auto" : "10px";
+      el.style.textAlign = surDroite ? "left" : "right";
+    });
+
+    const svg = $("cheminSvg");
+    if (svg && pts.length) {
+      svg.setAttribute("width", larg);
+      svg.setAttribute("height", hauteur);
+      svg.setAttribute("viewBox", "0 0 " + larg + " " + hauteur);
+      // Partie déjà parcourue (violet plein) jusqu'au premier niveau non réussi, puis à venir (pointillé gris)
+      let idxFin = noeuds.findIndex(n => !n.fait);
+      if (idxFin === -1) idxFin = pts.length - 1;
+      const versD = (arr) => arr.map((p, i) => (i === 0 ? "M " : "L ") + p.x + " " + p.y).join(" ");
+      const faits = pts.slice(0, idxFin + 1);
+      const restants = pts.slice(idxFin);
+      svg.innerHTML =
+        '<path d="' + versD(restants) + '" fill="none" stroke="var(--gris-3)" stroke-width="6" stroke-linecap="round" stroke-dasharray="2 14"/>'
+        + (faits.length > 1 ? '<path d="' + versD(faits) + '" fill="none" stroke="var(--violet)" stroke-width="6" stroke-linecap="round"/>' : "");
+    }
+  }
+
+  function dessinerChemin(t) {
     const zone = $("parcoursZone");
-    const t = themeActif;
-    if (!t) return dessinerThemes();
+    const noeuds = construireNoeuds(t);
 
     let html = '<button class="btn btn-g btn-sm" id="retourThemes" style="margin-bottom:20px">← Tous les thèmes</button>'
-      + '<div style="margin-bottom:24px">'
+      + '<div style="margin-bottom:10px;text-align:center">'
       + '<h2 style="font-family:var(--serif);font-size:1.7rem;color:var(--blanc);margin-bottom:6px">' + esc(t.nom) + '</h2>'
       + (t.description ? '<p style="color:var(--texte-doux)">' + esc(t.description) + '</p>' : '')
       + '</div>';
 
-    t.chapitres.forEach((chap, i) => {
-      // Le chapitre est ouvert si c'est le premier, ou si le précédent est fini
-      const ouvert = (i === 0) || P.chapitreFini(t.chapitres[i-1].id);
-      const fini = P.chapitreFini(chap.id);
-      const nbMots = Array.isArray(chap.mots) ? chap.mots.length : 0;
-
-      html += '<section class="partie' + (ouvert ? '' : ' verrou') + '">'
-        + '<div class="partie-head">'
-        + '<span class="partie-num">' + (i+1) + '</span>'
-        + '<div><h2>' + esc(chap.nom) + (fini ? ' ✓' : '') + '</h2>'
-        + '<div class="ph-sous">' + (ouvert
-            ? nbMots + ' mots · 2 niveaux + bombe'
-            : 'Termine le chapitre précédent pour ouvrir') + '</div></div>'
-        + '</div><div class="niv-liste">';
-
-      // Les trois niveaux
-      const NIVS = [
-        { n: 1, nom: "Découverte", classe: "niv-decouverte", mots: 10, gain: 3, coul: "vertes" },
-        { n: 2, nom: "Confirmé",   classe: "niv-confirme",   mots: 10, gain: 3, coul: "jaunes" },
-        { n: 3, nom: "Expert",     classe: "niv-expertn",    mots: 15, gain: 5, coul: "roses" }
-      ];
-      NIVS.forEach(niv => {
-        const fait = P.reussi(chap.id, niv.n);
-        const ouv = P.niveauOuvert(chap.id, niv.n, ouvert);
-        html += '<a class="niv-case ' + niv.classe + (fait ? ' fait' : '') + (ouv ? '' : ' verrou') + '" '
-          + 'href="' + (ouv ? 'jeu.html?chapitre=' + chap.id + '&niveau=' + niv.n : '#') + '">'
-          + '<div class="nc-head"><span class="nc-nom">' + niv.nom + '</span>'
-          + '<span class="nc-etat">' + (fait ? '✓' : (ouv ? '' : '🔒')) + '</span></div>'
-          + '<div class="nc-mots">' + niv.mots + ' mots à trouver</div>'
-          + '<div class="nc-gain">' + (fait ? 'Réussi · ' + niv.gain + ' pierres' : '+' + niv.gain + ' pierres ' + niv.coul) + '</div></a>';
-      });
-
-      html += '</div>';
-
-      // La Bombe du chapitre
-      const oB = P.bombeOuverte(chap.id, ouvert);
-      const fB = P.bombeFaite(chap.id);
-      const bloque = P.bloque();
-      html += '<div class="bombe-sep' + (oB ? '' : ' verrou') + '">'
-        + '<span class="bombe-icone">' + (fB ? '✅' : '💣') + '</span>'
-        + '<div class="bombe-txt"><h3>La Bombe' + (fB ? ' · neutralisée' : '') + '</h3>'
-        + '<p>' + (fB ? 'Chapitre terminé. Bravo !'
-            : (oB ? (bloque ? 'Explosée. Attends ou dépense 5 pierres.' : '20 mots cachés, 2 à trouver en 2 minutes.')
-                  : 'Réussis les deux niveaux pour l\'affronter.')) + '</p></div>'
-        + (oB && !fB
-            ? '<a class="btn btn-v btn-sm" href="bombe.html?chapitre=' + chap.id + '">'
-              + (bloque ? 'Voir' : 'Affronter') + '</a>'
-            : (fB ? '<span class="bz-badge bz-rose">' + (window.BiZoukPierre ? window.BiZoukPierre.pierre("rose",16) : "") + '<span class="bz-nb">+3</span></span>'
-                  : '<button class="btn btn-g btn-sm" disabled>Verrouillé</button>'))
-        + '</div></section>';
+    html += '<div class="chemin" id="chemin"><svg class="chemin-svg" id="cheminSvg"></svg>';
+    let chapCourant = -1;
+    noeuds.forEach((no, i) => {
+      if (no.chapitreIndex !== chapCourant) {
+        chapCourant = no.chapitreIndex;
+        html += '<div class="chemin-etiquette" data-idx="' + i + '">' + esc(no.chapitreNom) + '</div>';
+      }
+      const classes = ["noeud"];
+      if (no.type === "bombe") classes.push("noeud-bombe");
+      if (no.fait) classes.push("fait");
+      else if (!no.ouvert) classes.push("verrou");
+      else classes.push("dispo");
+      html += '<a class="' + classes.join(" ") + '" data-idx="' + i + '" '
+        + 'href="' + (no.ouvert ? no.lien : "#") + '" title="' + esc(no.chapitreNom + " · " + no.label) + '">'
+        + '<span class="noeud-ic">' + (no.fait ? "✓" : (no.ouvert ? no.icone : "🔒")) + '</span>'
+        + '</a>';
     });
+    html += '</div>';
 
     zone.innerHTML = html;
+    positionnerChemin(noeuds);
+
+    zone.querySelectorAll(".noeud.verrou").forEach(el => el.addEventListener("click", e => e.preventDefault()));
+
     const r = $("retourThemes");
     if (r) r.onclick = () => {
       themeActif = null;
       history.replaceState(null, "", "parcours.html");
       dessinerThemes();
     };
+
+    const redessiner = () => { if (themeActif === t) positionnerChemin(noeuds); };
+    window.addEventListener("resize", redessiner);
+
+    // Défiler jusqu'au premier nœud disponible non terminé (reprendre là où on en était)
+    const idxCible = noeuds.findIndex(n => n.ouvert && !n.fait);
+    const elCible = zone.querySelector('.noeud[data-idx="' + (idxCible >= 0 ? idxCible : noeuds.length - 1) + '"]');
+    if (elCible) setTimeout(() => elCible.scrollIntoView({ behavior: "smooth", block: "center" }), 200);
+  }
+
+  function dessinerChapitres() {
+    if (!themeActif) return dessinerThemes();
+    dessinerChemin(themeActif);
   }
 
   // ---------- Recherche ----------

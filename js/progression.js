@@ -1,5 +1,5 @@
 /* BiZouk — progression : chapitres, niveaux, pierres BiZouk, bombes
-   Un chapitre = 2 niveaux (15 et 20 mots) + 1 bombe.
+   Un chapitre = 3 niveaux (10, 10 et 15 mots) + 1 bombe.
    Fonctionne sans compte (navigateur) et avec compte (synchronisé). */
 (function () {
   const CLE = "bizouk_progression";

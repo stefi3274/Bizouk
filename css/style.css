@@ -342,6 +342,25 @@ footer{border-top:1px solid var(--gris-line);background:var(--gris-2);margin-top
 .niv-confirme{--nc:var(--or)}
 .niv-expertn{--nc:var(--rose)}
 
+/* Chemin sinueux façon Candy Crush */
+.chemin{position:relative;max-width:480px;margin:0 auto;padding:0 10px}
+.chemin-svg{position:absolute;top:0;left:0;pointer-events:none}
+.noeud{position:absolute;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;text-decoration:none;z-index:2;
+  background:var(--gris-2);border:3px solid var(--gris-3);transition:transform .15s;box-shadow:0 6px 16px rgba(0,0,0,.3)}
+.noeud:active{transform:scale(.94)}
+.noeud-ic{font-size:1.5rem;font-weight:800;color:var(--texte)}
+.noeud.dispo{background:linear-gradient(135deg,var(--violet-c),var(--violet-d));border-color:var(--violet-c);
+  box-shadow:0 0 0 6px var(--violet-glow),0 6px 18px rgba(0,0,0,.35)}
+.noeud.dispo .noeud-ic{color:#fff}
+.noeud.fait{background:var(--vert);border-color:var(--vert)}
+.noeud.fait .noeud-ic{color:#0b3b2c}
+.noeud.verrou{opacity:.45;pointer-events:none}
+.noeud.verrou .noeud-ic{font-size:1.2rem}
+.noeud.noeud-bombe{border-radius:22%}
+.chemin-etiquette{position:absolute;font-size:.72rem;font-weight:700;color:var(--texte-doux);
+  max-width:130px;z-index:2;text-transform:uppercase;letter-spacing:.02em}
+
 /* Bombe entre les parties */
 .bombe-sep{display:flex;align-items:center;gap:14px;margin:28px 0;padding:18px 20px;
   background:linear-gradient(135deg,rgba(239,68,68,.14),var(--gris-2));

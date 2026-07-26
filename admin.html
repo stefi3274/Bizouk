@@ -89,7 +89,8 @@
         <div class="aide">
           Un <b>thème</b> (ex. Histoire d'Haïti) contient plusieurs <b>chapitres</b>.
           Chaque chapitre a <b>35 mots</b>, qui génèrent automatiquement :
-          <b>Découverte</b> (15 mots au hasard), <b>Confirmé</b> (15 mots les plus longs) et la <b>Bombe</b> (20 mots rebrassés, 2 à trouver).
+          <b>Découverte</b> (10 mots courts), <b>Confirmé</b> (10 mots moyens), <b>Expert</b> (15 mots longs)
+          et la <b>Bombe</b> (10 mots rebrassés, 1 à trouver).
         </div>
 
         <div class="field">
@@ -163,6 +164,18 @@
           </div>
 
           <div id="apercuImport" style="margin-top:14px"></div>
+
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--gris-3)">
+            <label style="font-size:.85rem;color:var(--texte);display:block;margin-bottom:6px">
+              Créer automatiquement plusieurs chapitres (si le texte est long)</label>
+            <input type="text" id="themeAuto" placeholder="Nom du thème (ex. Histoire d'Haïti)"
+              style="width:100%;background:var(--gris-2);border:1px solid var(--gris-3);border-radius:8px;
+              padding:8px 10px;color:var(--texte);font-family:inherit;margin-bottom:8px">
+            <div class="hint" style="margin-bottom:8px">
+              Utilise le thème sélectionné plus haut s'il y en a un, sinon crée celui-ci.
+              Les mots extraits sont répartis en chapitres de 35 mots maximum.</div>
+            <button type="button" class="btn btn-v btn-sm" id="btnCreerAuto">Créer le thème et les chapitres</button>
+          </div>
         </div>
 
         <div style="display:flex;gap:10px;flex-wrap:wrap">
