@@ -6,6 +6,7 @@
     { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   const fmt = s => Math.floor(s/60) + ":" + String(s%60).padStart(2,"0");
   const MEDAILLES = ["🥇","🥈","🥉"];
+  const NOMS_NIV = { 1: "Découverte", 2: "Confirmé", 3: "Expert" };
 
   let niveauActif = "tous";
 
@@ -55,7 +56,9 @@
             + (window.BiZoukAvatar ? '<span class="av-inline">' + window.BiZoukAvatar.avatar(
                 Object.assign(window.BiZoukAvatar.configDepuisNom(p.joueur), {initiales: window.BiZoukAvatar.initialesDe(p.joueur)}), 26) + '</span>' : '')
             + esc(p.joueur)
-            + '<span class="cls-theme">' + esc(p.theme_nom || "—") + ' · ' + p.niveau + ' mots</span></span>'
+            + '<span class="cls-theme">' + esc(p.theme_nom || "—") + ' · '
+              + (NOMS_NIV[p.niveau] || ("Niveau " + p.niveau))
+              + (p.mots_total ? " (" + p.mots_total + " mots)" : "") + '</span></span>'
             + '<span class="cls-temps">' + fmt(p.temps_sec) + '</span>'
             + '<span class="cls-niv">' + (compte[cle]||1) + '</span>'
             + '</div>';
