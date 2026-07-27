@@ -35,11 +35,28 @@
 </header>
 
 <section class="hero">
-  <h1>Cherche. Trouve. <b>Recommence.</b></h1>
-  <p>Des grilles de mots mêlés sur tous les thèmes. Joue en ligne ou imprime ta grille. Aucun compte nécessaire pour commencer.</p>
-  <div class="hero-actions">
-    <a href="parcours.html" class="btn btn-v">Commencer le parcours</a>
-    <a href="#themes" class="btn btn-g">Voir les thèmes</a>
+  <div class="hero-grid">
+    <div class="hero-texte">
+      <span class="hero-eyebrow">Mots mêlés en ligne · gratuit</span>
+      <h1>Cherche. Trouve. <b>Recommence.</b></h1>
+      <p>Des grilles sur tous les thèmes, à ton rythme. Joue en ligne ou imprime ta grille. Aucun compte nécessaire pour commencer.</p>
+      <div class="hero-actions">
+        <a href="parcours.html" class="btn btn-v">Commencer le parcours</a>
+        <a href="#themes" class="btn btn-g">Voir les thèmes</a>
+      </div>
+      <p class="hero-stats" id="heroStats" style="display:none"></p>
+    </div>
+    <div class="hero-visuel" aria-hidden="true">
+      <div class="mg-grille">
+        <span class="mg-c mg-w1">B</span><span class="mg-c mg-w1">I</span><span class="mg-c mg-w1">Z</span><span class="mg-c mg-w1">O</span><span class="mg-c mg-w1">U</span><span class="mg-c mg-w1">K</span><span class="mg-c">R</span>
+        <span class="mg-c">A</span><span class="mg-c mg-w2">J</span><span class="mg-c">M</span><span class="mg-c">E</span><span class="mg-c">S</span><span class="mg-c">T</span><span class="mg-c">L</span>
+        <span class="mg-c">N</span><span class="mg-c mg-w2">O</span><span class="mg-c">R</span><span class="mg-c">A</span><span class="mg-c">U</span><span class="mg-c">D</span><span class="mg-c">X</span>
+        <span class="mg-c">C</span><span class="mg-c mg-w2">U</span><span class="mg-c">V</span><span class="mg-c">I</span><span class="mg-c">N</span><span class="mg-c">Q</span><span class="mg-c">P</span>
+        <span class="mg-c">T</span><span class="mg-c mg-w2">E</span><span class="mg-c">S</span><span class="mg-c">N</span><span class="mg-c">O</span><span class="mg-c">I</span><span class="mg-c">R</span>
+        <span class="mg-c mg-w3">M</span><span class="mg-c mg-w3">O</span><span class="mg-c mg-w3">T</span><span class="mg-c mg-w3">S</span><span class="mg-c">A</span><span class="mg-c">B</span><span class="mg-c">I</span>
+      </div>
+      <p class="hero-visuel-legende">Un mot t'attend.</p>
+    </div>
   </div>
 </section>
 
@@ -63,8 +80,9 @@
 </section>
 
 <section class="niveaux" id="themes">
+  <span class="niveaux-eyebrow">Un thème pour chaque envie</span>
   <h2 class="niveaux-titre">Choisis ton thème</h2>
-  <p class="niveaux-sous">Chaque thème contient des chapitres. Un chapitre, c'est deux niveaux et une bombe.</p>
+  <p class="niveaux-sous">Chaque thème contient des chapitres. Un chapitre, c'est trois niveaux et une bombe.</p>
   <div class="niv-grille" id="themesGrille">
     <p style="grid-column:1/-1;text-align:center;color:var(--texte-faible);padding:30px;font-style:italic">
       Chargement des thèmes…
