@@ -1,0 +1,18 @@
+{
+  "name": "BiZouk — Mots mêlés",
+  "short_name": "BiZouk",
+  "description": "Cherche, trouve, recommence. Mots mêlés en ligne, tous les jours.",
+  "start_url": "/index.html",
+  "id": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#1c1b21",
+  "theme_color": "#1c1b21",
+  "orientation": "portrait-primary",
+  "lang": "fr",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
