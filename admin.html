@@ -89,8 +89,42 @@
     </div>
 
     <div id="tab-creer" style="display:none">
+      <div class="form-carte" style="border-color:var(--violet);margin-bottom:20px">
+        <h2 style="font-family:var(--serif);font-size:1.2rem;color:var(--blanc);margin-bottom:10px">
+          Coller un thème complet (plusieurs chapitres d'un coup)</h2>
+        <p class="aide" style="margin-bottom:14px">
+          Colle le thème et ses chapitres, chacun avec son titre. Format à respecter :
+        </p>
+        <pre style="background:var(--gris);border-radius:8px;padding:12px;font-size:.78rem;
+          color:var(--texte-doux);overflow:auto;margin-bottom:14px;white-space:pre-wrap;line-height:1.6">Thème: Histoire d'Haïti
+
+Chapitre 1: Les débuts
+mot1, mot2, mot3 (jusqu'à 35 mots, virgules ou retours à la ligne)
+
+Chapitre 2: L'indépendance
+mot1, mot2, mot3...
+
+(autant de chapitres que tu veux)</pre>
+        <div class="hint" style="margin-bottom:14px">
+          Choisis un thème existant plus bas dans le champ "Thème" pour y <b>ajouter</b> des chapitres,
+          ou laisse-le vide et la ligne "Thème:" créera un <b>nouveau</b> thème.</div>
+
+        <div class="field">
+          <label>Thème + chapitres à coller</label>
+          <textarea id="tcTexte" style="min-height:260px"
+            placeholder="Thème: Histoire d'Haïti&#10;&#10;Chapitre 1: Les débuts&#10;mot, mot, mot...&#10;&#10;Chapitre 2: L'indépendance&#10;mot, mot, mot..."></textarea>
+        </div>
+
+        <div id="tcApercu" style="margin-bottom:14px"></div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button type="button" class="btn btn-g btn-sm" id="btnTcAnalyser">Analyser</button>
+          <button type="button" class="btn btn-v btn-sm" id="btnTcCreer" style="display:none">Créer le thème et tous les chapitres</button>
+        </div>
+      </div>
+
       <div class="form-carte">
-        <h2 style="font-family:var(--serif);font-size:1.3rem;color:var(--blanc);margin-bottom:16px" id="formTitre">Nouveau chapitre</h2>
+        <h2 style="font-family:var(--serif);font-size:1.3rem;color:var(--blanc);margin-bottom:16px" id="formTitre">Ou un chapitre à la fois</h2>
 
         <div class="aide">
           Un <b>thème</b> (ex. Histoire d'Haïti) contient plusieurs <b>chapitres</b>.

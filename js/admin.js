@@ -312,6 +312,102 @@
     };
   }
 
+  /* Analyse un texte structuré "Thème: ... / Chapitre X: titre / mots..." */
+  function parserThemeComplet(texte) {
+    const lignes = (texte || "").split(/\r?\n/);
+    let themeNom = "";
+    const chapitres = [];
+    let courant = null;
+
+    lignes.forEach(ligneBrute => {
+      const ligne = ligneBrute.trim();
+      if (!ligne) return;
+
+      const mTheme = ligne.match(/^th[eè]me\s*[:\-]\s*(.+)$/i);
+      if (mTheme) { themeNom = mTheme[1].trim(); return; }
+
+      const mChap = ligne.match(/^chapitre\s*\d*\s*[:\-]\s*(.+)$/i);
+      if (mChap) { courant = { nom: mChap[1].trim(), mots: [] }; chapitres.push(courant); return; }
+
+      if (!courant) return; // lignes avant le premier titre de chapitre : ignorées
+      ligne.split(/[,;]+/).forEach(m => { const mot = m.trim(); if (mot) courant.mots.push(mot); });
+    });
+
+    return { themeNom, chapitres };
+  }
+
+  if ($("btnTcAnalyser")) {
+    $("btnTcAnalyser").onclick = () => {
+      const { themeNom, chapitres } = parserThemeComplet($("tcTexte").value);
+      const zone = $("tcApercu");
+      const themeChoisi = $("chTheme") ? $("chTheme").value : "";
+
+      if (!chapitres.length) {
+        zone.innerHTML = '<p style="color:#fca5a5;font-size:.85rem">'
+          + 'Aucun chapitre reconnu. Vérifie que chaque chapitre commence bien par "Chapitre : titre".</p>';
+        $("btnTcCreer").style.display = "none";
+        return;
+      }
+      if (!themeChoisi && themeNom.length < 2) {
+        zone.innerHTML = '<p style="color:#fca5a5;font-size:.85rem">'
+          + 'Ajoute une ligne "Thème: ..." en haut du texte, ou choisis un thème existant plus bas.</p>';
+        $("btnTcCreer").style.display = "none";
+        return;
+      }
+
+      zone.innerHTML = '<div style="background:var(--gris);border-radius:8px;padding:12px;font-size:.85rem">'
+        + '<p style="margin-bottom:8px"><b>Thème :</b> ' + (themeChoisi ? "(thème existant choisi plus bas)" : esc(themeNom)) + '</p>'
+        + chapitres.map(c => {
+            const n = c.mots.length;
+            const couleur = n < 20 ? "#fca5a5" : (n > 35 ? "var(--or)" : "var(--vert)");
+            return '<div style="margin-bottom:4px">• <b>' + esc(c.nom) + '</b> — '
+              + '<span style="color:' + couleur + '">' + n + ' mot' + (n>1?'s':'') + '</span>'
+              + (n < 20 ? ' (moins de 20, à éviter)' : (n > 35 ? ' (plus de 35, sera quand même créé)' : ''))
+              + '</div>';
+          }).join("")
+        + '</div>';
+      $("btnTcCreer").style.display = "inline-flex";
+    };
+  }
+
+  if ($("btnTcCreer")) {
+    $("btnTcCreer").onclick = async () => {
+      const { themeNom, chapitres } = parserThemeComplet($("tcTexte").value);
+      const valides = chapitres.filter(c => c.mots.length > 0);
+      if (!valides.length) return;
+
+      status("Création en cours…", "");
+      const base = await db();
+      const ent = await entrepriseId();
+      if (!base || !ent) { status("Connexion impossible.", "err"); return; }
+
+      let idTheme = $("chTheme") ? $("chTheme").value : "";
+      if (!idTheme) {
+        const { data, error } = await base.from("themes")
+          .insert({ entreprise_id: ent, nom: themeNom, mots: [], publie: true })
+          .select("id").single();
+        if (error) { status("Erreur thème : " + error.message, "err"); return; }
+        idTheme = data.id;
+      }
+
+      const { data: existants } = await base.from("chapitres")
+        .select("ordre").eq("theme_id", idTheme).order("ordre", { ascending: false }).limit(1);
+      const ordreDepart = (existants && existants[0] ? existants[0].ordre : 0) + 1;
+
+      const lignes = valides.map((c, i) => ({
+        entreprise_id: ent, theme_id: idTheme,
+        nom: c.nom, ordre: ordreDepart + i, mots: c.mots, publie: true
+      }));
+
+      const { error } = await base.from("chapitres").insert(lignes);
+      if (error) { status("Erreur chapitres : " + error.message, "err"); return; }
+
+      status(valides.length + " chapitre(s) créé(s).", "ok");
+      $("tcTexte").value = ""; $("tcApercu").innerHTML = ""; $("btnTcCreer").style.display = "none";
+      remplirSelectThemes();
+    };
+  }
+
   async function lancerAvecDB(zoneId, fn) {
     const box = $(zoneId);
     if (box) box.innerHTML = "<p class='empty'>Chargement…</p>";
