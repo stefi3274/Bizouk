@@ -72,6 +72,7 @@
 
       return {
         jour: jour(),
+        chapitreId: chap.id,
         chapitre: chap.nom,
         theme: (th && th.nom) || "",
         mots: mots

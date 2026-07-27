@@ -182,6 +182,12 @@
           + '<span class="gb-txt" style="text-align:center">6 pierres gagnées<br>'
           + '<b style="color:var(--violet-c)">chapitre terminé</b></span></div>'
         : '')
+      + (serieB && !serieB.deja && serieB.bonus
+          ? '<div class="gain-bizouk" style="margin-top:8px">'
+            + '<span class="pierre-gain">' + (window.BiZoukPierre ? window.BiZoukPierre.pierre("rose", 36) : "") + '</span>'
+            + '<span class="gb-nb" style="color:var(--rose)">+' + serieB.bonus + '</span>'
+            + '<span class="gb-txt">bonus série<br><b style="color:var(--rose)">' + serieB.palier + ' jours</b></span></div>'
+          : '')
       + '<div class="bf-options" id="bfBoutons">'
       + '<a class="btn btn-v" href="parcours.html" id="btnSuite">Continuer le parcours</a>'
       + '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px">'
@@ -190,6 +196,8 @@
       + '</div>'
       + '</div>'
       + '<div class="partage-liens" id="partageLiens"></div>';
+
+    if (serieB && serieB.bonus && window.BiZoukConfetti) window.BiZoukConfetti.lancer();
 
     // Proposer directement le chapitre suivant s'il existe
     chapitreSuivant().then(suiv => {
@@ -264,18 +272,21 @@
     if (termine) return;
     termine = true;
     clearInterval(minuteur);
+    const presque = !!(jeu && jeu.enCours && jeu.enCours());
     await window.Progression.bombeRatee();
     majCompteur();
-    afficherBlocage(true);
+    afficherBlocage(true, presque);
   }
 
-  function afficherBlocage(vientDExploser) {
+  function afficherBlocage(vientDExploser, presque) {
     const P = window.Progression;
     $("bfCarte").className = "bf-carte rate";
     $("bfEmoji").textContent = "💥";
     $("bfTitre").innerHTML = vientDExploser ? "La bombe a <b style='color:var(--rouge)'>explosé</b>" : "Bombe explosée";
     $("bfSous").textContent = vientDExploser
-      ? "Tu n'as pas trouvé les 2 mots à temps."
+      ? (presque
+          ? "Si près du but ! Tu étais en plein tracé quand le temps s'est écoulé. Retente, tu vas l'avoir."
+          : "Tu n'as pas trouvé le mot à temps.")
       : "Tu dois attendre, ou dépenser des pierres pour continuer.";
 
     function rendre() {

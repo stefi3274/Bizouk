@@ -707,6 +707,7 @@ input[name="niv"]:checked + .niv-radio{background:var(--violet);border-color:var
   font-weight:700;font-size:.88rem;color:var(--or);text-decoration:none;transition:border-color .2s}
 .serie-badge:hover{border-color:var(--or)}
 .serie-badge.eteinte{color:var(--texte-faible)}
+.serie-badge.danger{border-color:var(--rouge);animation:flammeVibre 1.2s ease-in-out infinite}
 .serie-badge .sbf{font-size:1rem}
 
 /* Carte de série sur le compte */

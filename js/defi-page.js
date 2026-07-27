@@ -144,23 +144,32 @@
     clearInterval(minuteur);
     const t = Math.floor((Date.now() - debut)/1000);
 
-    await window.BiZoukDefi.enregistrer(t, totalMots, 0);
+    const enr = await window.BiZoukDefi.enregistrer(t, totalMots, 0);
 
     // La série compte aussi
+    let serieD = null;
     if (window.Progression) {
       await window.Progression.init();
-      await window.Progression.marquerJour();
+      serieD = await window.Progression.marquerJour();
     }
 
     $("resTemps").textContent = fmt(t);
     $("resSous").textContent = totalMots + " mots trouvés";
 
     const place = await window.BiZoukDefi.maPlace();
-    $("resInvite").innerHTML = place
+    let blocSerie = "";
+    if (serieD && !serieD.deja && serieD.bonus) {
+      blocSerie = '<div class="gain-bizouk" style="margin-bottom:8px">'
+        + '<span class="pierre-gain">' + (window.BiZoukPierre ? window.BiZoukPierre.pierre("rose", 36) : "") + '</span>'
+        + '<span class="gb-nb" style="color:var(--rose)">+' + serieD.bonus + '</span>'
+        + '<span class="gb-txt">bonus série<br><b style="color:var(--rose)">' + serieD.palier + ' jours</b></span></div>';
+      if (window.BiZoukConfetti) window.BiZoukConfetti.lancer();
+    }
+    $("resInvite").innerHTML = blocSerie + (place
       ? 'Tu es <b style="color:var(--violet-c)">' + place.place + 'e</b> sur '
         + place.total + ' joueur' + (place.total > 1 ? 's' : '') + ' aujourd\'hui.'
       : 'Tu joues sans compte : ton temps n\'apparaît pas au classement.<br>'
-        + '<a href="inscription.html" style="color:var(--violet-c);font-weight:600">Créer un compte →</a>';
+        + '<a href="inscription.html" style="color:var(--violet-c);font-weight:600">Créer un compte →</a>');
 
     // Partage
     const bp = $("btnPartagerDefi");
@@ -189,7 +198,61 @@
       setTimeout(() => { bp.textContent = avant; bp.disabled = false; }, 2200);
     };
 
+    // Défier un ami sur ce même défi du jour
+    const bd = $("btnDefierDefi");
+    if (bd) bd.onclick = () => lancerDuelDefi(t, enr && enr.joueur);
+
     $("resultat").classList.add("on");
+  }
+
+  async function lancerDuelDefi(temps, nomJoueur) {
+    const zone = $("defiLiens");
+    if (zone) zone.innerHTML = '<p style="color:var(--texte-doux);font-size:.88rem;margin-top:14px">Création du duel…</p>';
+
+    const duel = await window.BiZoukDuel.creer({
+      chapitreId: defi.chapitreId || null,
+      chapitreNom: "Défi du jour · " + defi.chapitre,
+      niveau: 3,
+      mots: defi.mots,
+      joueur: nomJoueur || "Un joueur",
+      temps: temps
+    });
+
+    if (!duel) {
+      if (zone) zone.innerHTML = '<p style="color:#fca5a5;font-size:.88rem;margin-top:14px">'
+        + 'Impossible de créer le duel. Vérifie ta connexion.</p>';
+      return;
+    }
+
+    const lien = window.BiZoukDuel.lien(duel.code);
+    const txt = encodeURIComponent("Je te défie sur le défi du jour BiZouk ! J'ai fait "
+      + fmt(temps) + " sur « " + defi.chapitre + " ». À toi de jouer : ");
+    const u = encodeURIComponent(lien);
+
+    if (zone) zone.innerHTML =
+      '<div style="background:var(--gris-3);border-radius:12px;padding:16px;margin-top:16px">'
+      + '<div style="font-size:.78rem;color:var(--texte-faible);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Ton code de duel</div>'
+      + '<div style="font-family:var(--serif);font-size:1.9rem;font-weight:700;color:var(--violet-c);letter-spacing:.14em;margin-bottom:12px">'
+      + duel.code + '</div>'
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">'
+      + '<a class="share-btn share-wa" href="https://wa.me/?text=' + txt + '%20' + u + '" target="_blank" rel="noopener">WhatsApp</a>'
+      + '<a class="share-btn share-tg" href="https://t.me/share/url?url=' + u + '&text=' + txt + '" target="_blank" rel="noopener">Telegram</a>'
+      + '<button class="share-btn" id="copierDuelDefi" style="background:var(--violet)">Copier le lien</button>'
+      + '</div>'
+      + '<p style="font-size:.8rem;color:var(--texte-faible);margin-top:10px">'
+      + 'Ton ami jouera exactement la même grille.</p>'
+      + '</div>';
+
+    const cp = $("copierDuelDefi");
+    if (cp) cp.onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(lien);
+        cp.textContent = "Copié ✓";
+        setTimeout(() => { cp.textContent = "Copier le lien"; }, 2000);
+      } catch {
+        cp.textContent = "Copie impossible";
+      }
+    };
   }
 
   init();

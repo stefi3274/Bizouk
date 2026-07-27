@@ -240,7 +240,8 @@
       const svg = window.BiZoukPierre ? window.BiZoukPierre.pierre(gain.couleur, 42) : "";
       bloc = '<div class="gain-bizouk"><span class="pierre-gain">' + svg + '</span>'
         + '<span class="gb-nb" style="color:' + cl + '">+' + gain.gain + '</span>'
-        + '<span class="gb-txt">pierres BiZouk<br><b style="color:' + cl + '">' + gain.couleur + '</b></span></div>';
+        + '<span class="gb-txt">pierres BiZouk<br><b style="color:' + cl + '">' + gain.couleur + '</b></span></div>'
+        + (gain.surprise ? '<p style="color:var(--or);font-size:.82rem;font-weight:600;margin-top:4px">🎁 Bonus surprise +' + gain.surprise + ' !</p>' : '');
     } else if (gain && !gain.nouveau) {
       bloc = '<p style="font-size:.85rem;color:var(--texte-faible);margin:10px 0">'
         + 'Niveau déjà réussi · pas de nouvelles pierres</p>';
@@ -260,6 +261,7 @@
           + '<span class="pierre-gain">' + (window.BiZoukPierre ? window.BiZoukPierre.pierre("rose", 36) : "") + '</span>'
           + '<span class="gb-nb" style="color:var(--rose)">+' + serie.bonus + '</span>'
           + '<span class="gb-txt">bonus série<br><b style="color:var(--rose)">' + serie.palier + ' jours</b></span></div>';
+        if (window.BiZoukConfetti) window.BiZoukConfetti.lancer();
       }
     }
 

@@ -91,6 +91,31 @@
     }
   }
 
+  async function majSerie() {
+    if (!window.Progression) return;
+    await window.Progression.init();
+    const P = window.Progression;
+    const b = $("serieBadge"), n = $("serieNb");
+    if (!b || !n) return;
+    const s = P.serie();
+    if (s > 0) {
+      b.style.display = "inline-flex";
+      n.textContent = s;
+      const dejaJoue = P.aJoueAujourdhui();
+      const danger = !dejaJoue && P.serieEnDanger && P.serieEnDanger();
+      b.classList.toggle("eteinte", !dejaJoue);
+      b.classList.toggle("danger", !!danger);
+      b.title = dejaJoue
+        ? s + " jours de suite · déjà joué aujourd'hui"
+        : (danger
+            ? "Ta série de " + s + " jours est en danger ! Joue aujourd'hui pour la sauver."
+            : s + " jours de suite · joue aujourd'hui pour continuer !");
+    } else {
+      b.style.display = "none";
+    }
+  }
+
   chargerThemes();
   majAuth();
+  majSerie();
 })();

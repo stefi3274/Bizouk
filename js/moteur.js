@@ -286,6 +286,8 @@
     window.addEventListener("resize", () => { if (puzzle) dessiner(); });
 
     return {
+      /* Vrai si le joueur a le doigt/la souris posé en train de tracer un mot */
+      enCours() { return glisse; },
       charger(mots, tailleMin, motsClbles) {
         puzzle = generer(mots, tailleMin);
         trouves = [];

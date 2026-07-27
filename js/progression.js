@@ -154,14 +154,20 @@
     async gagnerNiveau(chapId, niveau) {
       const cle = chapId + "-" + niveau;
       const nouveau = !etat.niveaux_reussis.includes(cle);
-      const gain = GAINS[niveau] || 3;
+      let gain = GAINS[niveau] || 3;
+      let surprise = 0;
       if (nouveau) {
+        // Bonus surprise aléatoire (environ 1 réussite sur 5) pour varier la récompense
+        if (Math.random() < 0.2) {
+          surprise = 1 + Math.floor(Math.random() * 2); // +1 ou +2
+          gain += surprise;
+        }
         etat.niveaux_reussis.push(cle);
         const coul = COULEURS[niveau] || "vert";
         etat["bizouk_" + coul] += gain;
         await sauver();
       }
-      return { nouveau, gain: nouveau ? gain : 0, couleur: COULEURS[niveau] || "vert" };
+      return { nouveau, gain: nouveau ? gain : 0, couleur: COULEURS[niveau] || "vert", surprise: nouveau ? surprise : 0 };
     },
 
     /* Nombre total de niveaux réussis (sert à la difficulté de la Bombe) */
