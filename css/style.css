@@ -144,6 +144,28 @@ header{position:sticky;top:0;z-index:100;background:rgba(28,27,33,.88);
 .install-bandeau:hover{background:var(--violet-glow)}
 .install-fleche{display:inline-block;animation:flecheRebond 1.3s ease-in-out infinite}
 @keyframes flecheRebond{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+
+/* Bouton Infos + fenêtre, uniquement quand BiZouk tourne en mode application installée */
+.info-app-btn{position:fixed;right:16px;bottom:16px;z-index:500;
+  background:var(--violet);color:#fff;border:none;border-radius:999px;
+  padding:10px 16px;font-family:var(--sans);font-weight:600;font-size:.85rem;
+  box-shadow:0 6px 20px rgba(0,0,0,.35);cursor:pointer}
+.info-app-btn:hover{background:var(--violet-d)}
+.info-app-fenetre{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:600;
+  display:none;align-items:flex-end;justify-content:center}
+.info-app-fenetre.on{display:flex}
+.info-app-carte{background:var(--gris-2);border:1px solid var(--gris-line);
+  border-radius:20px 20px 0 0;padding:26px 22px 34px;width:100%;max-width:480px;
+  position:relative;animation:infoMonte .2s ease}
+@keyframes infoMonte{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.info-app-carte h3{font-family:var(--serif);font-size:1.2rem;color:var(--blanc);margin-bottom:14px}
+.info-app-carte a{display:block;padding:12px 4px;color:var(--texte);text-decoration:none;
+  border-bottom:1px solid var(--gris-3);font-size:.95rem}
+.info-app-carte a:last-of-type{border-bottom:none}
+.info-app-signature{margin-top:14px;font-size:.8rem;color:var(--texte-faible)}
+.info-app-signature a{display:inline;padding:0;border:none;color:var(--violet-c)}
+.info-app-fermer{position:absolute;top:14px;right:16px;background:none;border:none;
+  color:var(--texte-doux);font-size:1.1rem;cursor:pointer;line-height:1}
 .niveaux-sous{text-align:center;color:var(--texte-doux);font-size:.95rem;margin-bottom:26px}
 .niv-grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
 .niv-carte{background:var(--gris-2);border:1px solid var(--gris-line);border-radius:var(--r-lg);
