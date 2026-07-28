@@ -423,6 +423,12 @@ footer{border-top:1px solid var(--gris-line);background:var(--gris-2);margin-top
 .chemin-etiquette{position:absolute;font-size:.72rem;font-weight:700;color:var(--texte-doux);
   max-width:130px;z-index:2;text-transform:uppercase;letter-spacing:.02em}
 
+.combo-toast{position:fixed;top:14px;left:50%;transform:translate(-50%,-20px);
+  background:var(--or);color:#1c1b21;font-weight:800;font-size:.9rem;padding:10px 18px;
+  border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:800;opacity:0;
+  transition:opacity .2s,transform .2s;pointer-events:none;white-space:nowrap}
+.combo-toast.on{opacity:1;transform:translate(-50%,0)}
+
 /* Bombe entre les parties */
 .bombe-sep{display:flex;align-items:center;gap:14px;margin:28px 0;padding:18px 20px;
   background:linear-gradient(135deg,rgba(239,68,68,.14),var(--gris-2));

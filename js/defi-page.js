@@ -125,7 +125,7 @@
       surVictoire: () => terminer()
     });
 
-    const pz = jeu.charger(defi.mots, 11);
+    const pz = jeu.charger(defi.mots, 11, null, 12);
     totalMots = pz ? pz.placements.length : defi.mots.length;
     $("statRestants").textContent = totalMots;
 
@@ -144,32 +144,11 @@
     clearInterval(minuteur);
     const t = Math.floor((Date.now() - debut)/1000);
 
-    const enr = await window.BiZoukDefi.enregistrer(t, totalMots, 0);
-
-    // La série compte aussi
-    let serieD = null;
-    if (window.Progression) {
-      await window.Progression.init();
-      serieD = await window.Progression.marquerJour();
-    }
-
     $("resTemps").textContent = fmt(t);
     $("resSous").textContent = totalMots + " mots trouvés";
+    $("resInvite").innerHTML = '<p style="font-size:.85rem;color:var(--texte-faible)">Calcul du classement…</p>';
 
-    const place = await window.BiZoukDefi.maPlace();
-    let blocSerie = "";
-    if (serieD && !serieD.deja && serieD.bonus) {
-      blocSerie = '<div class="gain-bizouk" style="margin-bottom:8px">'
-        + '<span class="pierre-gain">' + (window.BiZoukPierre ? window.BiZoukPierre.pierre("rose", 36) : "") + '</span>'
-        + '<span class="gb-nb" style="color:var(--rose)">+' + serieD.bonus + '</span>'
-        + '<span class="gb-txt">bonus série<br><b style="color:var(--rose)">' + serieD.palier + ' jours</b></span></div>';
-      if (window.BiZoukConfetti) window.BiZoukConfetti.lancer();
-    }
-    $("resInvite").innerHTML = blocSerie + (place
-      ? 'Tu es <b style="color:var(--violet-c)">' + place.place + 'e</b> sur '
-        + place.total + ' joueur' + (place.total > 1 ? 's' : '') + ' aujourd\'hui.'
-      : 'Tu joues sans compte : ton temps n\'apparaît pas au classement.<br>'
-        + '<a href="inscription.html" style="color:var(--violet-c);font-weight:600">Créer un compte →</a>');
+    let enr = null, place = null; // remplis plus bas, capturés par les boutons ci-dessous
 
     // Partage
     const bp = $("btnPartagerDefi");
@@ -202,7 +181,34 @@
     const bd = $("btnDefierDefi");
     if (bd) bd.onclick = () => lancerDuelDefi(t, enr && enr.joueur);
 
+    // Le résultat apparaît ici, immédiatement — digne d'une victoire, sans latence.
     $("resultat").classList.add("on");
+    if (window.BiZoukSon) window.BiZoukSon.jouer("victoire");
+    if (window.BiZoukConfetti) window.BiZoukConfetti.lancer(1300, 0.45);
+
+    // ---------- À partir d'ici : le travail réseau, en arrière-plan ----------
+    enr = await window.BiZoukDefi.enregistrer(t, totalMots, 0);
+
+    let serieD = null;
+    if (window.Progression) {
+      await window.Progression.init();
+      serieD = await window.Progression.marquerJour();
+    }
+
+    place = await window.BiZoukDefi.maPlace();
+    let blocSerie = "";
+    if (serieD && !serieD.deja && serieD.bonus) {
+      blocSerie = '<div class="gain-bizouk" style="margin-bottom:8px">'
+        + '<span class="pierre-gain">' + (window.BiZoukPierre ? window.BiZoukPierre.pierre("rose", 36) : "") + '</span>'
+        + '<span class="gb-nb" style="color:var(--rose)">+' + serieD.bonus + '</span>'
+        + '<span class="gb-txt">bonus série<br><b style="color:var(--rose)">' + serieD.palier + ' jours</b></span></div>';
+      if (window.BiZoukConfetti) window.BiZoukConfetti.lancer();
+    }
+    $("resInvite").innerHTML = blocSerie + (place
+      ? 'Tu es <b style="color:var(--violet-c)">' + place.place + 'e</b> sur '
+        + place.total + ' joueur' + (place.total > 1 ? 's' : '') + ' aujourd\'hui.'
+      : 'Tu joues sans compte : ton temps n\'apparaît pas au classement.<br>'
+        + '<a href="inscription.html" style="color:var(--violet-c);font-weight:600">Créer un compte →</a>');
   }
 
   async function lancerDuelDefi(temps, nomJoueur) {

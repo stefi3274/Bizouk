@@ -1,8 +1,9 @@
 /* BiZouk — petite pluie de confettis (canvas vanilla, sans librairie)
    Utilisé pour célébrer un palier de série (3, 7, 14, 30, 60, 100 jours). */
 (function () {
-  function lancer(duree) {
+  function lancer(duree, intensite) {
     const dureeMs = duree || 2200;
+    const mult = intensite || 1;
     const canvas = document.createElement("canvas");
     canvas.style.cssText = "position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9999";
     document.body.appendChild(canvas);
@@ -13,7 +14,7 @@
     window.addEventListener("resize", redim);
 
     const couleurs = ["#7c5cff", "#34d399", "#f0b429", "#fb7185", "#60a5fa", "#fb923c"];
-    const N = window.innerWidth < 500 ? 90 : 150;
+    const N = Math.max(20, Math.round((window.innerWidth < 500 ? 90 : 150) * mult));
     const particules = Array.from({ length: N }, () => ({
       x: Math.random() * canvas.width,
       y: -20 - Math.random() * canvas.height * 0.6,

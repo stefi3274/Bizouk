@@ -128,7 +128,7 @@
       surVictoire: () => terminer()
     });
 
-    const pz = jeu.charger(duel.mots, TAILLES[duel.niveau] || 9);
+    const pz = jeu.charger(duel.mots, TAILLES[duel.niveau] || 9, null, duel.niveau === 3 ? 12 : null);
     totalMots = pz ? pz.placements.length : duel.mots.length;
     majCourse();
 

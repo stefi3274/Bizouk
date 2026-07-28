@@ -12,7 +12,7 @@
   const NIVEAUX = {
     1: { nom: "Découverte", tailleMin: 9,  mots: 10, tri: "courts" },
     2: { nom: "Confirmé",   tailleMin: 10, mots: 10, tri: "moyens" },
-    3: { nom: "Expert",     tailleMin: 11, mots: 15, tri: "longs"  }
+    3: { nom: "Expert",     tailleMin: 11, tailleMax: 12, mots: 15, tri: "longs"  }
   };
   const conf = NIVEAUX[niveau] || NIVEAUX[1];
 
@@ -169,7 +169,7 @@
     forcerNouvelle = false;
 
     if (!restauree) {
-      const puzzle = jeu.charger(res.mots, conf.tailleMin);
+      const puzzle = jeu.charger(res.mots, conf.tailleMin, null, conf.tailleMax);
       if (puzzle) {
         majStats(0, puzzle.placements.length);
         if (puzzle.nonPlaces && puzzle.nonPlaces.length) {
@@ -201,74 +201,12 @@
       ? "Ton temps est prêt à être défié !"
       : et.total + " mots trouvés · niveau " + conf.nom;
 
-    // Attribuer les pierres BiZouk si c'est un niveau du parcours
-    let gain = null, serie = null;
-    if (window.Progression) {
-      await window.Progression.init();
-      if (chapitreId) {
-        gain = await window.Progression.gagnerNiveau(chapitreId, niveau);
-        await window.Progression.memoriserPosition(chapitreId, niveau);
-      }
-      serie = await window.Progression.marquerJour();
-    }
+    // On affiche la victoire TOUT DE SUITE avec ce qu'on sait déjà (temps, mots).
+    // Les récompenses (pierres, série) arrivent juste après, sans faire attendre le joueur.
+    $("vicInvite").innerHTML = '<p class="vic-invite-attente" style="font-size:.85rem;color:var(--texte-faible)">'
+      + 'Calcul des récompenses…</p>';
 
-    // Enregistrer si connecté
-    const base = await db();
-    let connecte = false;
-    if (base) {
-      const { data } = await base.auth.getSession();
-      connecte = !!data.session;
-      if (connecte) {
-        const u = data.session.user;
-        const nom = (u.user_metadata && u.user_metadata.nom) ? u.user_metadata.nom : (u.email||"").split("@")[0];
-        nomCourant = nom;
-        const ent = await entrepriseId();
-        await base.from("parties").insert({
-          entreprise_id: ent, user_id: u.id, joueur: nom,
-          theme_id: themeCourant ? themeCourant.id : null,
-          theme_nom: themeCourant ? themeCourant.nom : null,
-          niveau: niveau, temps_sec: t, mots_total: et.total,
-          chapitre_id: chapitreCourant ? chapitreCourant.id : null,
-          chapitre_nom: chapitreCourant ? chapitreCourant.nom : null
-        });
-      }
-    }
-
-    let bloc = "";
-    if (gain && gain.nouveau) {
-      const cl = { vert:"var(--vert)", jaune:"var(--or)", rose:"var(--rose)" }[gain.couleur] || "var(--violet-c)";
-      const svg = window.BiZoukPierre ? window.BiZoukPierre.pierre(gain.couleur, 42) : "";
-      bloc = '<div class="gain-bizouk"><span class="pierre-gain">' + svg + '</span>'
-        + '<span class="gb-nb" style="color:' + cl + '">+' + gain.gain + '</span>'
-        + '<span class="gb-txt">pierres BiZouk<br><b style="color:' + cl + '">' + gain.couleur + '</b></span></div>'
-        + (gain.surprise ? '<p style="color:var(--or);font-size:.82rem;font-weight:600;margin-top:4px">🎁 Bonus surprise +' + gain.surprise + ' !</p>' : '');
-    } else if (gain && !gain.nouveau) {
-      bloc = '<p style="font-size:.85rem;color:var(--texte-faible);margin:10px 0">'
-        + 'Niveau déjà réussi · pas de nouvelles pierres</p>';
-    }
-
-    // Bandeau de série
-    let blocSerie = "";
-    if (serie && !serie.deja) {
-      const flamme = serie.serie >= 7 ? "🔥" : "✨";
-      blocSerie = '<div class="serie-bandeau">'
-        + '<span class="sb-flamme">' + flamme + '</span>'
-        + '<span class="sb-txt"><b>' + serie.serie + (serie.serie > 1 ? ' jours' : ' jour') + ' de suite</b>'
-        + (serie.nouveauRecord && serie.serie > 2 ? '<br><span style="color:var(--or)">Nouveau record !</span>' : '')
-        + '</span></div>';
-      if (serie.bonus) {
-        blocSerie += '<div class="gain-bizouk" style="margin-top:8px">'
-          + '<span class="pierre-gain">' + (window.BiZoukPierre ? window.BiZoukPierre.pierre("rose", 36) : "") + '</span>'
-          + '<span class="gb-nb" style="color:var(--rose)">+' + serie.bonus + '</span>'
-          + '<span class="gb-txt">bonus série<br><b style="color:var(--rose)">' + serie.palier + ' jours</b></span></div>';
-        if (window.BiZoukConfetti) window.BiZoukConfetti.lancer();
-      }
-    }
-
-    $("vicInvite").innerHTML = blocSerie + bloc + (connecte
-      ? '<a href="classement.html" style="color:var(--violet-c);font-weight:600;font-size:.88rem">Voir le classement →</a>'
-      : '<span style="font-size:.86rem">Sans compte, ta progression reste sur cet appareil. '
-        + '<a href="inscription.html" style="color:var(--violet-c);font-weight:600">Créer un compte →</a></span>');
+    let gain = null, serie = null; // remplis plus bas, capturés par les boutons ci-dessous
 
     // ---------- Boutons de l'écran de victoire ----------
     const act = document.querySelector(".vic-actions");
@@ -342,12 +280,86 @@
       zoneL.id = "vicLiens"; zoneL.className = "partage-liens";
       document.querySelector(".vic-carte").appendChild(zoneL);
     }
+
+    // Le popup apparaît ici, immédiatement — digne d'une victoire, sans latence.
     $("victoire").classList.add("on");
+    if (window.BiZoukSon) window.BiZoukSon.jouer("victoire");
+    if (window.BiZoukConfetti) window.BiZoukConfetti.lancer(1300, 0.45);
 
     // En mode duel, on crée le défi tout de suite
     if (modeDuel && chapitreCourant) {
       setTimeout(() => lancerDuel(t, et.total), 400);
     }
+
+    // ---------- À partir d'ici : tout le travail réseau, en arrière-plan ----------
+
+    // Attribuer les pierres BiZouk si c'est un niveau du parcours
+    if (window.Progression) {
+      await window.Progression.init();
+      if (chapitreId) {
+        gain = await window.Progression.gagnerNiveau(chapitreId, niveau);
+        await window.Progression.memoriserPosition(chapitreId, niveau);
+      }
+      serie = await window.Progression.marquerJour();
+    }
+
+    // Enregistrer si connecté
+    const base = await db();
+    let connecte = false;
+    if (base) {
+      const { data } = await base.auth.getSession();
+      connecte = !!data.session;
+      if (connecte) {
+        const u = data.session.user;
+        const nom = (u.user_metadata && u.user_metadata.nom) ? u.user_metadata.nom : (u.email||"").split("@")[0];
+        nomCourant = nom;
+        const ent = await entrepriseId();
+        await base.from("parties").insert({
+          entreprise_id: ent, user_id: u.id, joueur: nom,
+          theme_id: themeCourant ? themeCourant.id : null,
+          theme_nom: themeCourant ? themeCourant.nom : null,
+          niveau: niveau, temps_sec: t, mots_total: et.total,
+          chapitre_id: chapitreCourant ? chapitreCourant.id : null,
+          chapitre_nom: chapitreCourant ? chapitreCourant.nom : null
+        });
+      }
+    }
+
+    let bloc = "";
+    if (gain && gain.nouveau) {
+      const cl = { vert:"var(--vert)", jaune:"var(--or)", rose:"var(--rose)" }[gain.couleur] || "var(--violet-c)";
+      const svg = window.BiZoukPierre ? window.BiZoukPierre.pierre(gain.couleur, 42) : "";
+      bloc = '<div class="gain-bizouk"><span class="pierre-gain">' + svg + '</span>'
+        + '<span class="gb-nb" style="color:' + cl + '">+' + gain.gain + '</span>'
+        + '<span class="gb-txt">pierres BiZouk<br><b style="color:' + cl + '">' + gain.couleur + '</b></span></div>'
+        + (gain.surprise ? '<p style="color:var(--or);font-size:.82rem;font-weight:600;margin-top:4px">🎁 Bonus surprise +' + gain.surprise + ' !</p>' : '');
+    } else if (gain && !gain.nouveau) {
+      bloc = '<p style="font-size:.85rem;color:var(--texte-faible);margin:10px 0">'
+        + 'Niveau déjà réussi · pas de nouvelles pierres</p>';
+    }
+
+    // Bandeau de série
+    let blocSerie = "";
+    if (serie && !serie.deja) {
+      const flamme = serie.serie >= 7 ? "🔥" : "✨";
+      blocSerie = '<div class="serie-bandeau">'
+        + '<span class="sb-flamme">' + flamme + '</span>'
+        + '<span class="sb-txt"><b>' + serie.serie + (serie.serie > 1 ? ' jours' : ' jour') + ' de suite</b>'
+        + (serie.nouveauRecord && serie.serie > 2 ? '<br><span style="color:var(--or)">Nouveau record !</span>' : '')
+        + '</span></div>';
+      if (serie.bonus) {
+        blocSerie += '<div class="gain-bizouk" style="margin-top:8px">'
+          + '<span class="pierre-gain">' + (window.BiZoukPierre ? window.BiZoukPierre.pierre("rose", 36) : "") + '</span>'
+          + '<span class="gb-nb" style="color:var(--rose)">+' + serie.bonus + '</span>'
+          + '<span class="gb-txt">bonus série<br><b style="color:var(--rose)">' + serie.palier + ' jours</b></span></div>';
+        if (window.BiZoukConfetti) window.BiZoukConfetti.lancer();
+      }
+    }
+
+    $("vicInvite").innerHTML = blocSerie + bloc + (connecte
+      ? '<a href="classement.html" style="color:var(--violet-c);font-weight:600;font-size:.88rem">Voir le classement →</a>'
+      : '<span style="font-size:.86rem">Sans compte, ta progression reste sur cet appareil. '
+        + '<a href="inscription.html" style="color:var(--violet-c);font-weight:600">Créer un compte →</a></span>');
   }
 
   function afficherLiensPartage(info) {

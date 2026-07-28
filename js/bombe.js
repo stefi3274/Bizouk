@@ -138,7 +138,7 @@
     }
 
     // Générer la grille, puis choisir LE mot cible selon la difficulté du joueur
-    const puzzle = jeu.charger(res.mots, 9);
+    const puzzle = jeu.charger(res.mots, 9, null, 10);
     const places = puzzle.placements.map(p => p.mot);
     cibles = [choisirCible(places)];
     jeu.definirCibles(cibles);
@@ -157,19 +157,29 @@
     if (termine) return;
     termine = true;
     clearInterval(minuteur);
+
+    const resteAffiche = fmt(Math.max(0, reste));
+    $("bfCarte").className = "bf-carte reussi";
+    $("bfEmoji").textContent = "🎉";
+    $("bfTitre").innerHTML = "Bombe <b style='color:var(--vert)'>neutralisée</b>";
+    $("bfSous").textContent = "Tu assures ! Il te restait " + resteAffiche + ".";
+    $("bfContenu").innerHTML = '<p style="font-size:.85rem;color:var(--texte-faible)">Calcul des récompenses…</p>';
+
+    // Le panneau apparaît ici, immédiatement — pas d'attente réseau avant la célébration.
+    $("bombeFin").classList.add("on");
+    if (window.BiZoukSon) window.BiZoukSon.jouer("victoire");
+    if (window.BiZoukConfetti) window.BiZoukConfetti.lancer(1300, 0.45);
+
+    // ---------- À partir d'ici : le travail réseau, en arrière-plan ----------
     const rb = await window.Progression.bombeReussie(chapitreId);
     const serieB = await window.Progression.marquerJour();
     majCompteur();
 
-    const et = window.Progression.etat();
     const nom = window.Progression.connecte() ? await nomJoueur() : null;
+    if (nom) {
+      $("bfSous").innerHTML = "Bravo <b>" + esc(nom) + "</b>, tu assures ! Il te restait " + resteAffiche + ".";
+    }
 
-    $("bfCarte").className = "bf-carte reussi";
-    $("bfEmoji").textContent = "🎉";
-    $("bfTitre").innerHTML = "Bombe <b style='color:var(--vert)'>neutralisée</b>";
-    $("bfSous").innerHTML = nom
-      ? "Bravo <b>" + esc(nom) + "</b>, tu assures ! Il te restait " + fmt(Math.max(0,reste)) + "."
-      : "Tu assures ! Il te restait " + fmt(Math.max(0,reste)) + ".";
     $("bfContenu").innerHTML =
       (rb && rb.gain
         ? '<div class="gain-bizouk" style="flex-direction:column;gap:8px">'
@@ -225,7 +235,6 @@
       if (r === "telecharge") afficherLiensPartage(info);
       setTimeout(() => { bp.textContent = avant; bp.disabled = false; }, 2200);
     };
-    $("bombeFin").classList.add("on");
   }
 
   function afficherLiensPartage(info) {

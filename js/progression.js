@@ -165,7 +165,7 @@
         etat.niveaux_reussis.push(cle);
         const coul = COULEURS[niveau] || "vert";
         etat["bizouk_" + coul] += gain;
-        await sauver();
+        sauver().catch(() => {});   // sauvegarde en arrière-plan : ne fait pas attendre la récompense
       }
       return { nouveau, gain: nouveau ? gain : 0, couleur: COULEURS[niveau] || "vert", surprise: nouveau ? surprise : 0 };
     },
@@ -192,13 +192,13 @@
         gain = 6;
         detail = { vert: 2, jaune: 2, rose: 2 };
       }
-      await sauver();
+      sauver().catch(() => {});
       return { gain, detail };
     },
     async bombeRatee() {
       etat.bombes_ratees++;
       etat.bloque_jusqua = new Date(Date.now() + BLOCAGE_MS).toISOString();
-      await sauver();
+      sauver().catch(() => {});
     },
     peutPayer() { return this.total() >= PRIX_DEBLOCAGE; },
     prix() { return PRIX_DEBLOCAGE; },
@@ -278,7 +278,7 @@
         }
       }
 
-      await sauver();
+      sauver().catch(() => {});
       return { deja: false, serie: etat.serie_jours, bonus, palier,
                record: etat.serie_record, nouveauRecord: etat.serie_jours === etat.serie_record && etat.serie_jours > 1 };
     },
@@ -316,7 +316,7 @@
       if (!chapitreId) return;
       etat.dernier_chapitre = chapitreId;
       etat.dernier_niveau = niveau || null;
-      await sauver();
+      sauver().catch(() => {});
     },
     dernierePosition() {
       if (!etat.dernier_chapitre) return null;

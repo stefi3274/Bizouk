@@ -10,15 +10,16 @@
   }
 
   // Génère une grille contenant les mots donnés
-  function generer(motsBruts, tailleMin) {
+  function generer(motsBruts, tailleMin, tailleMax) {
     const liste = [...new Set(motsBruts.map(normaliser).filter(m => m.length >= 2))];
     if (!liste.length) return null;
 
     const plusLong = Math.max(...liste.map(m => m.length));
-    // Taille compacte : on vise ~55% de remplissage (mots serrés mais plaçables)
+    // Taille compacte : on vise ~72% de remplissage (mots serrés, lettres plus grandes)
     const totalLettres = liste.reduce((s,m) => s + m.length, 0);
-    const parVolume = Math.ceil(Math.sqrt(totalLettres / 0.62));
-    const taille = Math.max(tailleMin || 12, plusLong + 1, parVolume);
+    const parVolume = Math.ceil(Math.sqrt(totalLettres / 0.72));
+    let taille = Math.max(tailleMin || 12, plusLong + 1, parVolume);
+    if (tailleMax) taille = Math.min(taille, Math.max(tailleMax, plusLong + 1));
 
     const grille = Array.from({ length: taille }, () => Array(taille).fill(null));
     const placements = [];
@@ -27,7 +28,7 @@
 
     tries.forEach(mot => {
       let place = false;
-      for (let essai = 0; essai < 600 && !place; essai++) {
+      for (let essai = 0; essai < 900 && !place; essai++) {
         const dir = DIRS[Math.floor(Math.random() * DIRS.length)];
         const r0 = Math.floor(Math.random() * taille);
         const c0 = Math.floor(Math.random() * taille);
@@ -75,6 +76,8 @@
     let glisse = false, depart = null, courant = null;
     let tailleCase = 32;
     let bulle = null;
+    let dernierTrouveA = 0, combo = 0;
+    let toastCombo = null;
 
     function assurerBulle() {
       if (!bulle) {
@@ -201,6 +204,20 @@
       });
     }
 
+    function afficherToastCombo(n) {
+      if (!toastCombo) {
+        toastCombo = document.createElement("div");
+        toastCombo.className = "combo-toast";
+        document.body.appendChild(toastCombo);
+      }
+      toastCombo.textContent = "🔥 " + n + " mots coup sur coup !";
+      toastCombo.classList.remove("on");
+      void toastCombo.offsetWidth; // relance l'animation
+      toastCombo.classList.add("on");
+      clearTimeout(toastCombo._t);
+      toastCombo._t = setTimeout(() => toastCombo.classList.remove("on"), 1600);
+    }
+
     function valider() {
       const chemin = cheminTemp();
       if (chemin.length >= 2 && puzzle) {
@@ -215,12 +232,21 @@
           trouves.push(match);
           appliquerTrouves();
           majListe();
+
+          // Combo : mots trouvés coup sur coup (moins de 4s d'écart)
+          const maintenant = Date.now();
+          combo = (maintenant - dernierTrouveA < 4000) ? combo + 1 : 1;
+          dernierTrouveA = maintenant;
+          if (window.BiZoukSon) window.BiZoukSon.jouer(combo >= 3 ? "combo" : "trouve");
+          if (navigator.vibrate) navigator.vibrate(combo >= 3 ? [15,30,15] : 12);
+          if (combo >= 3) afficherToastCombo(combo);
+
           if (cibles) {
             const utiles = trouves.filter(f => cibles.includes(f.mot)).length;
-            surTrouve(match, utiles, cibles.length);
+            surTrouve(match, utiles, cibles.length, combo);
             if (utiles === cibles.length) surVictoire();
           } else {
-            surTrouve(match, trouves.length, puzzle.placements.length);
+            surTrouve(match, trouves.length, puzzle.placements.length, combo);
             if (trouves.length === puzzle.placements.length) surVictoire();
           }
         }
@@ -288,8 +314,8 @@
     return {
       /* Vrai si le joueur a le doigt/la souris posé en train de tracer un mot */
       enCours() { return glisse; },
-      charger(mots, tailleMin, motsClbles) {
-        puzzle = generer(mots, tailleMin);
+      charger(mots, tailleMin, motsClbles, tailleMax) {
+        puzzle = generer(mots, tailleMin, tailleMax);
         trouves = [];
         cibles = motsClbles || null;
         dessiner();
