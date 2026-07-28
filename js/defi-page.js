@@ -185,6 +185,7 @@
     $("resultat").classList.add("on");
     if (window.BiZoukSon) window.BiZoukSon.jouer("victoire");
     if (window.BiZoukConfetti) window.BiZoukConfetti.lancer(1300, 0.45);
+    if (window.BiZoukAnalytics) window.BiZoukAnalytics.evenement("partie_terminee", { mode: "defi" });
 
     // ---------- À partir d'ici : le travail réseau, en arrière-plan ----------
     enr = await window.BiZoukDefi.enregistrer(t, totalMots, 0);

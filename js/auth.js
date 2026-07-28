@@ -133,6 +133,7 @@
       return;
     }
     msg("Compte créé ! Redirection…", "ok");
+    if (window.BiZoukAnalytics) window.BiZoukAnalytics.evenement("inscription");
     setTimeout(() => location.href = retour, 900);
   });
 })();

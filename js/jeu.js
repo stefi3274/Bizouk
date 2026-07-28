@@ -285,6 +285,7 @@
     $("victoire").classList.add("on");
     if (window.BiZoukSon) window.BiZoukSon.jouer("victoire");
     if (window.BiZoukConfetti) window.BiZoukConfetti.lancer(1300, 0.45);
+    if (window.BiZoukAnalytics) window.BiZoukAnalytics.evenement("partie_terminee", { mode: "jeu", niveau: conf.nom });
 
     // En mode duel, on crée le défi tout de suite
     if (modeDuel && chapitreCourant) {

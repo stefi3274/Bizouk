@@ -57,26 +57,29 @@
       const ent = await entrepriseId();
       if (!ent) { box.innerHTML = "<p class='empty'>Entreprise introuvable.</p>"; return; }
 
-      const [rTh, rCh, rPa, rPr, rDu, rDf, rCo] = await Promise.all([
+      const il7 = new Date(); il7.setDate(il7.getDate() - 7);
+
+      const [rTh, rCh, rPa, rPr, rDu, rDf, rCo, rEv] = await Promise.all([
         base.from("themes").select("id, nom").eq("entreprise_id", ent),
         base.from("chapitres").select("id, theme_id, nom, mots").eq("entreprise_id", ent),
         base.from("parties").select("chapitre_nom, theme_nom, niveau, temps_sec, joueur, created_at").eq("entreprise_id", ent),
         base.from("progression").select("joueur, serie_jours, serie_record, niveaux_reussis, bombes_reussies_ids").eq("entreprise_id", ent),
         base.from("duels").select("statut, created_at").eq("entreprise_id", ent),
         base.from("defis_jour").select("jour, joueur, temps_sec").eq("entreprise_id", ent),
-        base.from("bizouk_contributions").select("statut").eq("entreprise_id", ent)
+        base.from("bizouk_contributions").select("statut").eq("entreprise_id", ent),
+        base.from("evenements").select("type, session_id, created_at").eq("entreprise_id", ent).gte("created_at", il7.toISOString())
       ]);
 
       const themes = rTh.data || [], chaps = rCh.data || [], parties = rPa.data || [];
       const joueurs = rPr.data || [], duels = rDu.data || [], defis = rDf.data || [];
       const contribs = rCo.data || [];
+      const evenements = rEv.data || [];
 
       const totalMots = chaps.reduce((s,c) => s + (Array.isArray(c.mots) ? c.mots.length : 0), 0);
       const duelsFinis = duels.filter(d => d.statut === "termine").length;
       const contribsAttente = contribs.filter(c => c.statut === "a_verifier").length;
 
       // Parties des 7 derniers jours
-      const il7 = new Date(); il7.setDate(il7.getDate() - 7);
       const recentes = parties.filter(p => new Date(p.created_at) >= il7).length;
 
       // Chapitres les plus joués
@@ -99,8 +102,29 @@
       // Défi du jour
       const defiAuj = defis.filter(d => d.jour === new Date().toISOString().slice(0,10)).length;
 
+      // Fréquentation (table evenements, 7 derniers jours)
+      const debutJour = new Date(); debutJour.setHours(0,0,0,0);
+      const visiteursAuj = new Set(evenements.filter(e => new Date(e.created_at) >= debutJour).map(e => e.session_id)).size;
+      const visiteurs7j = new Set(evenements.map(e => e.session_id)).size;
+      const inscriptions7j = evenements.filter(e => e.type === "inscription").length;
+      const partiesToutesModes7j = evenements.filter(e => e.type === "partie_terminee").length;
+
       box.innerHTML =
-        '<div class="bord-grille">'
+        '<div class="bord-section" style="border-color:var(--violet)">'
+        + '<h3>Fréquentation (7 derniers jours)</h3>'
+        + '<div class="bord-grille">'
+        + '<div class="bord-c vert"><b>' + visiteursAuj + '</b><span>visiteurs aujourd\'hui</span></div>'
+        + '<div class="bord-c"><b>' + visiteurs7j + '</b><span>visiteurs (7j)</span></div>'
+        + '<div class="bord-c or"><b>' + inscriptions7j + '</b><span>inscriptions (7j)</span></div>'
+        + '<div class="bord-c"><b>' + partiesToutesModes7j + '</b><span>parties toutes catégories (7j)</span></div>'
+        + '</div>'
+        + (evenements.length === 0
+            ? '<p style="font-size:.8rem;color:var(--texte-faible);margin-top:8px">'
+              + 'Aucune donnée pour l\'instant. Vérifie que le fichier bizouk-analytics.sql a bien été exécuté.</p>'
+            : '')
+        + '</div>'
+
+        + '<div class="bord-grille">'
         + '<div class="bord-c"><b>' + joueurs.length + '</b><span>joueurs inscrits</span></div>'
         + '<div class="bord-c or"><b>' + parties.length + '</b><span>parties jouées</span></div>'
         + '<div class="bord-c vert"><b>' + recentes + '</b><span>ces 7 jours</span></div>'

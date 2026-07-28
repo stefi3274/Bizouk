@@ -169,6 +169,7 @@
     $("bombeFin").classList.add("on");
     if (window.BiZoukSon) window.BiZoukSon.jouer("victoire");
     if (window.BiZoukConfetti) window.BiZoukConfetti.lancer(1300, 0.45);
+    if (window.BiZoukAnalytics) window.BiZoukAnalytics.evenement("partie_terminee", { mode: "bombe" });
 
     // ---------- À partir d'ici : le travail réseau, en arrière-plan ----------
     const rb = await window.Progression.bombeReussie(chapitreId);
