@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Match · Championnat · BiZouk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1c1b21">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16">
+
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="index.html" class="logo"><img src="icons/icon-192.png" alt="BiZouk" class="logo-mark"><span class="logo-txt">Bi<b>Zouk</b></span></a>
+    <nav class="nav-liens">
+      <a href="index.html">Jouer</a>
+      <a href="championnats.html">Championnats</a>
+      <a href="classement.html">Classement</a>
+    </nav>
+    <a href="connexion.html" class="btn-connexion" id="navAuth">Se connecter</a>
+  </div>
+</header>
+
+<main class="duel-arene" id="ecranInfo">
+  <div style="text-align:center;margin-bottom:6px">
+    <p class="page-kicker" style="text-align:center">🏆 Match de championnat</p>
+    <h1 style="font-family:var(--serif);font-size:clamp(1.7rem,5vw,2.2rem);color:var(--blanc);line-height:1.15" id="matchTitre">
+      Chargement…</h1>
+    <p style="color:var(--texte-doux);margin-top:8px" id="matchSous"></p>
+  </div>
+  <div id="matchZone" style="max-width:480px;margin:0 auto;text-align:center"></div>
+</main>
+
+<!-- Le jeu -->
+<main class="jeu" id="ecranJeu" style="display:none">
+  <div class="jeu-head">
+    <div class="jeu-titre"><h1>Ton match</h1></div>
+    <div class="jeu-stats no-print">
+      <div class="stat chrono"><b id="chrono">0:00</b><span>Temps</span></div>
+      <div class="stat"><b id="statTrouves">0</b><span>Trouvés</span></div>
+      <div class="stat"><b id="statRestants">0</b><span>Restants</span></div>
+    </div>
+  </div>
+  <div class="jeu-corps">
+    <div class="grille-box"><div class="grille" id="grille"></div></div>
+    <div class="mots-box">
+      <h3>Mots à trouver</h3>
+      <div class="mots-progres" id="motsProgres">—</div>
+      <div class="mots-liste" id="motsListe"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Résultat -->
+<div class="victoire" id="resultat">
+  <div class="vic-carte" style="max-width:460px">
+    <div class="vic-emoji" id="resEmoji">🏆</div>
+    <h2 id="resTitre">Match terminé</h2>
+    <div id="resContenu"></div>
+    <div class="vic-actions" style="margin-top:20px">
+      <a class="btn btn-v btn-sm" href="championnats.html">Retour aux championnats</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-inner">
+    <div class="foot-bas" style="border:0;padding-top:0">
+      <span>© 2026 BiZouk</span>
+      <span>Conçu par <a href="https://stefi-services.vercel.app/" target="_blank" rel="noopener">SteFi Services</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/son.js"></script>
+<script src="js/moteur.js"></script>
+<script src="js/confetti.js"></script>
+<script src="js/tournoi-match.js"></script>
+<script src="js/retour.js"></script>
+<script src="js/pwa.js"></script>
+<script src="js/analytics.js"></script>
+</body>
+</html>

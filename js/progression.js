@@ -25,7 +25,8 @@
       bloque_jusqua: null,
       serie_jours: 0, serie_record: 0, dernier_jour: null,
       paliers_recus: [],
-      dernier_chapitre: null, dernier_niveau: null
+      dernier_chapitre: null, dernier_niveau: null,
+      badges: []
     };
   }
 
@@ -67,7 +68,8 @@
         bloque_jusqua: local.bloque_jusqua || null,
         serie_jours: local.serie_jours||0, serie_record: local.serie_record||0,
         dernier_jour: local.dernier_jour || null, paliers_recus: local.paliers_recus||[],
-        dernier_chapitre: local.dernier_chapitre || null, dernier_niveau: local.dernier_niveau || null
+        dernier_chapitre: local.dernier_chapitre || null, dernier_niveau: local.dernier_niveau || null,
+        badges: local.badges || []
       };
       await base.from("progression").insert(nouveau);
       return nouveau;
@@ -96,7 +98,11 @@
           : (distant.dernier_jour || local.dernier_jour || null),
         paliers_recus: [...new Set([...(distant.paliers_recus||[]), ...(local.paliers_recus||[])])],
         dernier_chapitre: distant.dernier_chapitre || local.dernier_chapitre || null,
-        dernier_niveau: distant.dernier_niveau || local.dernier_niveau || null
+        dernier_niveau: distant.dernier_niveau || local.dernier_niveau || null,
+        badges: (() => {
+          const vus = new Set(); const tous = [...(distant.badges||[]), ...(local.badges||[])];
+          return tous.filter(b => { const c = b.nom + b.date; if (vus.has(c)) return false; vus.add(c); return true; });
+        })()
       };
       ecrireLocal(etat);
       await sauver();
@@ -121,6 +127,7 @@
       serie_jours: etat.serie_jours, serie_record: etat.serie_record,
       dernier_jour: etat.dernier_jour, paliers_recus: etat.paliers_recus,
       dernier_chapitre: etat.dernier_chapitre, dernier_niveau: etat.dernier_niveau,
+      badges: etat.badges || [],
       maj: new Date().toISOString()
     }).eq("user_id", utilisateur.id);
   }
@@ -340,7 +347,14 @@
       return true;
     },
 
-    async reinitialiser() { etat = vide(); await sauver(); }
+    async reinitialiser() { etat = vide(); await sauver(); },
+
+    async ajouterBadge(nomBadge, pierres) {
+      if (!Array.isArray(etat.badges)) etat.badges = [];
+      etat.badges.push({ nom: nomBadge, date: new Date().toISOString().slice(0,10) });
+      etat.bizouk_vert += (pierres || 0);
+      await sauver();
+    }
   };
 
   window.Progression = API;

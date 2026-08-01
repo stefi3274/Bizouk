@@ -126,7 +126,11 @@
     const { error } = await (await db()).auth.signUp({
       email: $("email").value.trim(),
       password: $("pass").value,
-      options: { data: { nom: nom, avatar: window.BiZoukAvatar ? window.BiZoukAvatar.encoder(avConfig) : "0-0" } }
+      options: { data: {
+        nom: nom,
+        avatar: window.BiZoukAvatar ? window.BiZoukAvatar.encoder(avConfig) : "0-0",
+        pays: $("pays") ? $("pays").value : ""
+      } }
     });
     if (error) {
       msg(error.message.includes("already") ? "Cet email a déjà un compte." : "Erreur : " + error.message, "err");

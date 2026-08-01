@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Championnats · BiZouk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1c1b21">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16">
+
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="index.html" class="logo"><img src="icons/icon-192.png" alt="BiZouk" class="logo-mark"><span class="logo-txt">Bi<b>Zouk</b></span></a>
+    <nav class="nav-liens">
+      <a href="index.html">Jouer</a>
+      <a href="parcours.html">Parcours</a>
+      <a href="duels.html">Duels</a>
+      <a href="championnats.html" class="on">Championnats</a>
+      <a href="classement.html">Classement</a>
+    </nav>
+    <a href="connexion.html" class="btn-connexion" id="navAuth">Se connecter</a>
+  </div>
+</header>
+
+<main class="page" style="max-width:640px">
+  <div style="text-align:center;margin-bottom:26px">
+    <p class="page-kicker" style="text-align:center">🏆 Championnats</p>
+    <h1 style="font-family:var(--serif);font-size:clamp(1.8rem,5vw,2.4rem);color:var(--blanc);line-height:1.15">
+      Affronte tout le monde</h1>
+    <p style="color:var(--texte-doux);margin-top:8px;max-width:440px;margin-left:auto;margin-right:auto">
+      Poule contre-la-montre, puis éliminatoires. Le vainqueur repart avec un badge et des pierres BiZouk.
+    </p>
+  </div>
+
+  <div id="champZone">
+    <p style="text-align:center;color:var(--texte-faible);font-style:italic;padding:24px">Chargement…</p>
+  </div>
+</main>
+
+<footer>
+  <div class="foot-inner">
+    <div class="foot-bas" style="border:0;padding-top:0">
+      <span>© 2026 BiZouk</span>
+      <span>Conçu par <a href="https://stefi-services.vercel.app/" target="_blank" rel="noopener">SteFi Services</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/avatar.js"></script>
+<script src="js/progression.js"></script>
+<script src="js/championnats.js"></script>
+<script src="js/retour.js"></script>
+<script src="js/pwa.js"></script>
+<script src="js/analytics.js"></script>
+</body>
+</html>

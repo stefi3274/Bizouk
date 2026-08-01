@@ -97,11 +97,23 @@
     };
   }
 
+  function afficherBadges(badges) {
+    const zone = $("carteBadges");
+    if (!zone || !badges.length) return;
+    zone.innerHTML = '<div class="serie-carte" style="margin-top:14px">'
+      + '<div class="sc-lab" style="margin-bottom:10px">🏅 Badges de championnat</div>'
+      + '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">'
+      + badges.map(b => '<span style="background:var(--gris-3);border:1px solid var(--or);border-radius:999px;'
+          + 'padding:6px 14px;font-size:.82rem;font-weight:600;color:var(--or)">🏆 ' + esc(b.nom||"Champion") + '</span>').join("")
+      + '</div></div>';
+  }
+
   async function chargerProgression() {
     await window.Progression.init();
     const P = window.Progression;
     const etat = P.etat();
     afficherSerie();
+    afficherBadges(etat.badges || []);
 
     // Trésor
     const d = P.detail();

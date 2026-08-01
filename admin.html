@@ -76,6 +76,7 @@
         <button class="adm-tab" data-tab="themes">Thèmes et chapitres</button>
         <button class="adm-tab" data-tab="contrib">Contributions</button>
         <button class="adm-tab" data-tab="parties">Parties jouées</button>
+        <button class="adm-tab" data-tab="champ">Championnats</button>
       </div>
       <button class="btn btn-g btn-sm" id="logoutBtn">Déconnexion</button>
     </div>
@@ -238,6 +239,47 @@ mot1, mot2, mot3...
     <!-- Parties jouées -->
     <div id="tab-parties" style="display:none">
       <div id="partiesList"><p class="empty">Chargement…</p></div>
+    </div>
+
+    <!-- Championnats -->
+    <div id="tab-champ" style="display:none">
+      <div class="form-carte" style="margin-bottom:20px">
+        <h2 style="font-family:var(--serif);font-size:1.2rem;color:var(--blanc);margin-bottom:14px">
+          Nouveau championnat</h2>
+
+        <div class="field"><label>Nom du championnat</label>
+          <input type="text" id="tnNom" placeholder="Ex. Championnat de Juillet"></div>
+
+        <div class="field"><label>Chapitre utilisé pour les grilles</label>
+          <select id="tnChapitre"><option value="">— Choisir —</option></select>
+        </div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div class="field" style="flex:1 1 140px"><label>Joueurs par poule</label>
+            <input type="number" id="tnTaillePoule" value="4" min="3" max="8"></div>
+          <div class="field" style="flex:1 1 140px"><label>Qualifiés par poule</label>
+            <input type="number" id="tnQualifies" value="2" min="1" max="4"></div>
+          <div class="field" style="flex:1 1 140px"><label>Pierres au vainqueur</label>
+            <input type="number" id="tnPierres" value="20" min="0"></div>
+        </div>
+
+        <div class="field"><label>Nom du badge</label>
+          <input type="text" id="tnBadge" value="Champion" placeholder="Ex. Champion BiZouk"></div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div class="field" style="flex:1 1 200px"><label>Lancer les poules automatiquement quand... (optionnel)</label>
+            <input type="datetime-local" id="tnDateLimite"></div>
+          <div class="field" style="flex:1 1 160px"><label>...ou dès ce nombre d'inscrits</label>
+            <input type="number" id="tnMaxJoueurs" min="3" placeholder="Ex. 16"></div>
+        </div>
+        <p class="hint" style="margin-top:-8px;margin-bottom:14px">
+          Si tu laisses les deux vides, tu devras lancer les poules toi-même (bouton "Lancer les poules").
+          Le reste (éliminatoires, tours suivants) s'enchaîne toujours tout seul.</p>
+
+        <button type="button" class="btn btn-v" id="btnCreerTournoi">Créer le championnat</button>
+      </div>
+
+      <div id="champList"><p class="empty">Chargement…</p></div>
     </div>
   </div>
 

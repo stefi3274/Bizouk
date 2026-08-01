@@ -22,7 +22,7 @@
     tab.addEventListener("click", () => {
       const t = tab.getAttribute("data-tab");
       document.querySelectorAll(".adm-tab").forEach(x => x.classList.toggle("on", x === tab));
-      ["bord","creer","themes","contrib","parties"].forEach(k => {
+      ["bord","creer","themes","contrib","parties","champ"].forEach(k => {
         const el = $("tab-" + k); if (el) el.style.display = (t === k) ? "block" : "none";
       });
       if (t === "bord") lancerAvecDB("bordContenu", chargerBord);
@@ -30,6 +30,7 @@
       if (t === "contrib") lancerAvecDB("contribList", chargerContributions);
       if (t === "parties") lancerAvecDB("partiesList", chargerParties);
       if (t === "creer") remplirSelectThemes();
+      if (t === "champ") { remplirSelectChapitresTournoi(); lancerAvecDB("champList", chargerChampionnats); verifierAvancementAuto(); }
     });
   });
 
@@ -787,6 +788,364 @@
     status("Tous les scores effacés.", "ok");
     chargerParties();
   }
+
+  // ============================================================
+  // Championnats
+  // ============================================================
+
+  async function remplirSelectChapitresTournoi() {
+    const sel = $("tnChapitre");
+    if (!sel || sel.dataset.rempli) return;
+    const base = await db();
+    const ent = await entrepriseId();
+    if (!base || !ent) return;
+    const { data } = await base.from("chapitres").select("id, nom, mots, theme_id")
+      .eq("entreprise_id", ent).eq("publie", true).order("nom");
+    (data || []).filter(c => Array.isArray(c.mots) && c.mots.length >= 15).forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c.id; opt.textContent = c.nom + " (" + c.mots.length + " mots)";
+      sel.appendChild(opt);
+    });
+    sel.dataset.rempli = "1";
+  }
+
+  function melanger(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function nomRonde(nbJoueurs) {
+    if (nbJoueurs <= 2) return "finale";
+    if (nbJoueurs === 4) return "demi-finale";
+    if (nbJoueurs === 8) return "quart de finale";
+    return (nbJoueurs / 2) + "e de finale";
+  }
+
+  if ($("btnCreerTournoi")) {
+    $("btnCreerTournoi").onclick = async () => {
+      const nom = ($("tnNom").value || "").trim();
+      const chapId = $("tnChapitre").value;
+      if (nom.length < 2) { status("Donne un nom au championnat.", "err"); return; }
+      if (!chapId) { status("Choisis un chapitre.", "err"); return; }
+
+      const base = await db();
+      const ent = await entrepriseId();
+      const { data: chap } = await base.from("chapitres").select("mots").eq("id", chapId).single();
+      if (!chap) { status("Chapitre introuvable.", "err"); return; }
+
+      const motsPoule = melanger(chap.mots).slice(0, 15);
+
+      const { error } = await base.from("tournois").insert({
+        entreprise_id: ent, nom, chapitre_id: chapId, mots_poule: motsPoule,
+        taille_poule: parseInt($("tnTaillePoule").value, 10) || 4,
+        qualifies_poule: parseInt($("tnQualifies").value, 10) || 2,
+        recompense_pierres: parseInt($("tnPierres").value, 10) || 20,
+        badge_nom: ($("tnBadge").value || "Champion").trim() || "Champion",
+        date_limite_inscriptions: $("tnDateLimite").value ? new Date($("tnDateLimite").value).toISOString() : null,
+        nb_max_joueurs: $("tnMaxJoueurs").value ? parseInt($("tnMaxJoueurs").value, 10) : null,
+        statut: "inscriptions"
+      });
+      if (error) { status("Erreur : " + error.message, "err"); return; }
+
+      status("Championnat créé. Les joueurs peuvent s'inscrire depuis la page Championnats.", "ok");
+      $("tnNom").value = ""; $("tnDateLimite").value = ""; $("tnMaxJoueurs").value = "";
+      chargerChampionnats();
+    };
+  }
+
+  async function chargerChampionnats() {
+    const box = $("champList");
+    try {
+      const base = await db();
+      const ent = await entrepriseId();
+      if (!ent) { box.innerHTML = "<p class='empty'>Entreprise introuvable.</p>"; return; }
+
+      const { data: tournois } = await base.from("tournois").select("*").eq("entreprise_id", ent).order("created_at", { ascending: false });
+      if (!tournois || !tournois.length) { box.innerHTML = "<p class='empty'>Aucun championnat pour l'instant.</p>"; return; }
+
+      let html = "";
+      for (const t of tournois) {
+        html += await rendreCarteTournoi(t);
+      }
+      box.innerHTML = html;
+
+      box.querySelectorAll("[data-lancer-poules]").forEach(b =>
+        b.onclick = () => lancerPoules(b.getAttribute("data-lancer-poules")));
+      box.querySelectorAll("[data-lancer-elim]").forEach(b =>
+        b.onclick = () => lancerEliminatoires(b.getAttribute("data-lancer-elim")));
+      box.querySelectorAll("[data-tour-suivant]").forEach(b =>
+        b.onclick = () => genererTourSuivant(b.getAttribute("data-tour-suivant")));
+      box.querySelectorAll("[data-suppr-tournoi]").forEach(b =>
+        b.onclick = () => supprimerTournoi(b.getAttribute("data-suppr-tournoi")));
+
+    } catch (e) {
+      box.innerHTML = "<p class='empty' style='color:#fca5a5'>Erreur : " + esc(String(e && e.message || e)) + "</p>";
+    }
+  }
+
+  async function rendreCarteTournoi(t) {
+    const base = await db();
+    const badgeStatut = { inscriptions: "var(--violet-c)", poules: "var(--or)", eliminatoires: "var(--rose)", termine: "var(--vert)" }[t.statut] || "var(--texte-doux)";
+    const nomStatut = { inscriptions: "Inscriptions ouvertes", poules: "Phase de poules", eliminatoires: "Éliminatoires", termine: "Terminé" }[t.statut] || t.statut;
+
+    let corps = "";
+
+    if (t.statut === "inscriptions") {
+      const { data: joueurs } = await base.from("tournoi_joueurs").select("joueur").eq("tournoi_id", t.id);
+      const n = (joueurs || []).length;
+      const conditions = [];
+      if (t.date_limite_inscriptions) conditions.push("le " + new Date(t.date_limite_inscriptions).toLocaleString("fr-FR", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" }));
+      if (t.nb_max_joueurs) conditions.push("dès " + t.nb_max_joueurs + " inscrits");
+      corps = '<p style="font-size:.88rem;color:var(--texte-doux);margin-bottom:10px">'
+        + '<b>' + n + '</b> inscrit' + (n>1?'s':'') + ' · poules de ' + t.taille_poule + '</p>'
+        + (conditions.length
+            ? '<p class="hint" style="margin-bottom:10px">⚡ Lancement automatique : ' + conditions.join(" ou ") + '</p>'
+            : '')
+        + (n >= t.taille_poule
+            ? '<button class="btn btn-v btn-sm" data-lancer-poules="' + t.id + '">Lancer les poules maintenant</button>'
+            : '<p class="hint">Il faut au moins ' + t.taille_poule + ' inscrits pour lancer les poules.</p>');
+    }
+
+    if (t.statut === "poules") {
+      const { data: joueurs } = await base.from("tournoi_joueurs").select("joueur, poule, temps_poule_sec").eq("tournoi_id", t.id).order("poule");
+      const parPoule = {};
+      (joueurs || []).forEach(j => { (parPoule[j.poule] = parPoule[j.poule] || []).push(j); });
+      const tousJoue = (joueurs || []).every(j => j.temps_poule_sec != null);
+
+      corps = Object.keys(parPoule).sort((a,b)=>a-b).map(p => {
+        const liste = parPoule[p].slice().sort((a,b) => (a.temps_poule_sec ?? 9999) - (b.temps_poule_sec ?? 9999));
+        return '<div style="margin-bottom:10px"><b style="font-size:.85rem">Poule ' + p + '</b>'
+          + liste.map((j,i) => '<div class="bord-ligne" style="border:0;padding:4px 0">'
+            + '<span class="bord-nom">' + (i < t.qualifies_poule ? '🟢 ' : '') + esc(j.joueur) + '</span>'
+            + '<span class="bord-val">' + (j.temps_poule_sec != null ? fmtSec(j.temps_poule_sec) : '—') + '</span></div>').join("")
+          + '</div>';
+      }).join("")
+      + (tousJoue
+          ? '<button class="btn btn-v btn-sm" data-lancer-elim="' + t.id + '">Lancer les éliminatoires maintenant</button>'
+          : '<p class="hint">⚡ Passera automatiquement aux éliminatoires dès que tout le monde a joué sa poule.</p>'
+            + '<button class="btn btn-g btn-sm" data-lancer-elim="' + t.id + '">Lancer quand même</button>');
+    }
+
+    if (t.statut === "eliminatoires") {
+      const { data: matchs } = await base.from("tournoi_matchs").select("*").eq("tournoi_id", t.id).order("created_at");
+      const parRonde = {};
+      (matchs || []).forEach(m => { (parRonde[m.ronde] = parRonde[m.ronde] || []).push(m); });
+      const derniereRonde = (matchs || [])[matchs.length - 1];
+      const rondeActuelle = derniereRonde ? matchs.filter(m => m.ronde === derniereRonde.ronde) : [];
+      const tousTermines = rondeActuelle.length > 0 && rondeActuelle.every(m => m.statut === "termine");
+
+      corps = Object.keys(parRonde).map(r =>
+        '<div style="margin-bottom:10px"><b style="font-size:.85rem;text-transform:capitalize">' + esc(r) + '</b>'
+        + parRonde[r].map(m => '<div class="bord-ligne" style="border:0;padding:4px 0">'
+          + '<span class="bord-nom">' + esc(m.joueur1_nom||'?') + ' vs ' + esc(m.joueur2_nom||'(bye)') + '</span>'
+          + '<span class="bord-val">' + (m.statut === "termine" ? "🏆 " + esc(m.gagnant_id === m.joueur1_id ? m.joueur1_nom : m.joueur2_nom) : "en cours") + '</span></div>').join("")
+        + '</div>').join("")
+      + (tousTermines
+          ? (rondeActuelle.length === 1
+              ? '<p class="hint">⚡ Le champion sera déterminé automatiquement.</p>'
+              : '<p class="hint" style="margin-bottom:6px">⚡ Le tour suivant se génère automatiquement.</p>'
+                + '<button class="btn btn-g btn-sm" data-tour-suivant="' + t.id + '">Générer maintenant</button>')
+          : '<p class="hint">En attente que le tour en cours se termine.</p>');
+    }
+
+    if (t.statut === "termine") {
+      corps = '<p style="font-size:.92rem">🏆 <b style="color:var(--or)">' + esc(t.gagnant_nom || "—") + '</b> '
+        + 'remporte le badge « ' + esc(t.badge_nom) + ' » et ' + t.recompense_pierres + ' pierres.</p>'
+        + '<p class="hint">' + (t.recompense_reclamee ? "Récompense réclamée." : "En attente que le joueur la réclame sur sa page Championnats.") + '</p>';
+    }
+
+    return '<div class="bord-section">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+      + '<h3 style="margin:0">' + esc(t.nom) + '</h3>'
+      + '<span style="font-size:.76rem;font-weight:700;color:' + badgeStatut + '">' + nomStatut + '</span>'
+      + '</div>' + corps
+      + '<div style="margin-top:10px"><button class="btn btn-g btn-sm" data-suppr-tournoi="' + t.id + '">Supprimer</button></div>'
+      + '</div>';
+  }
+
+  function fmtSec(s) { return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0"); }
+
+  async function lancerPoules(tournoiId, silencieux) {
+    const base = await db();
+    const { data: tournoi } = await base.from("tournois").select("*").eq("id", tournoiId).single();
+    const { data: joueurs } = await base.from("tournoi_joueurs").select("id").eq("tournoi_id", tournoiId);
+    if (!tournoi || !joueurs || !joueurs.length) return;
+
+    const melanges = melanger(joueurs);
+    const maj = melanges.map((j, i) => ({ id: j.id, poule: Math.floor(i / tournoi.taille_poule) + 1 }));
+
+    for (const m of maj) {
+      await base.from("tournoi_joueurs").update({ poule: m.poule }).eq("id", m.id);
+    }
+    await base.from("tournois").update({ statut: "poules" }).eq("id", tournoiId);
+    if (!silencieux) { status("Poules créées.", "ok"); chargerChampionnats(); }
+  }
+
+  function prochainePuissanceDeDeux(n) {
+    let p = 2;
+    while (p < n) p *= 2;
+    return p;
+  }
+
+  async function lancerEliminatoires(tournoiId, silencieux) {
+    const base = await db();
+    const { data: tournoi } = await base.from("tournois").select("*").eq("id", tournoiId).single();
+    const { data: chap } = await base.from("chapitres").select("mots").eq("id", tournoi.chapitre_id).single();
+    const { data: joueurs } = await base.from("tournoi_joueurs")
+      .select("user_id, joueur, poule, temps_poule_sec").eq("tournoi_id", tournoiId).not("temps_poule_sec", "is", null);
+
+    const parPoule = {};
+    (joueurs || []).forEach(j => { (parPoule[j.poule] = parPoule[j.poule] || []).push(j); });
+
+    let qualifies = [];
+    let candidatsTroisiemes = [];
+    Object.values(parPoule).forEach(liste => {
+      const tries = liste.slice().sort((a,b) => a.temps_poule_sec - b.temps_poule_sec);
+      qualifies = qualifies.concat(tries.slice(0, tournoi.qualifies_poule));
+      // Le(s) joueur(s) juste après les qualifiés directs : candidats "meilleurs troisièmes"
+      candidatsTroisiemes = candidatsTroisiemes.concat(tries.slice(tournoi.qualifies_poule, tournoi.qualifies_poule + 1));
+    });
+
+    if (qualifies.length < 2) { if (!silencieux) status("Pas assez de qualifiés pour lancer les éliminatoires.", "err"); return; }
+
+    // Compléter jusqu'à la puissance de 2 la plus proche avec les meilleurs troisièmes
+    const cible = prochainePuissanceDeDeux(qualifies.length);
+    const manquants = cible - qualifies.length;
+    let repechesTxt = "";
+    if (manquants > 0 && candidatsTroisiemes.length) {
+      const repeches = candidatsTroisiemes.slice()
+        .sort((a,b) => a.temps_poule_sec - b.temps_poule_sec)
+        .slice(0, manquants);
+      qualifies = qualifies.concat(repeches);
+      if (repeches.length) repechesTxt = " (+" + repeches.length + " meilleur" + (repeches.length>1?"s":"") + " troisième" + (repeches.length>1?"s":"") + ")";
+    }
+
+    await creerRonde(tournoiId, melanger(qualifies), chap.mots);
+    await base.from("tournois").update({ statut: "eliminatoires" }).eq("id", tournoiId);
+    if (!silencieux) { status("Éliminatoires lancées avec " + qualifies.length + " joueurs" + repechesTxt + ".", "ok"); chargerChampionnats(); }
+  }
+
+  async function creerRonde(tournoiId, joueursMelanges, motsSource) {
+    const base = await db();
+    const ronde = nomRonde(joueursMelanges.length);
+    const lignes = [];
+
+    for (let i = 0; i < joueursMelanges.length; i += 2) {
+      const j1 = joueursMelanges[i], j2 = joueursMelanges[i+1];
+      if (!j2) {
+        // Nombre impair : bye automatique, ce joueur passe directement au tour suivant
+        lignes.push({
+          tournoi_id: tournoiId, ronde, joueur1_id: j1.user_id, joueur1_nom: j1.joueur,
+          joueur2_id: null, joueur2_nom: null, mots: [],
+          gagnant_id: j1.user_id, statut: "termine"
+        });
+        continue;
+      }
+      lignes.push({
+        tournoi_id: tournoiId, ronde,
+        joueur1_id: j1.user_id, joueur1_nom: j1.joueur,
+        joueur2_id: j2.user_id, joueur2_nom: j2.joueur,
+        mots: melanger(motsSource).slice(0, 15),
+        statut: "a_jouer"
+      });
+    }
+    await base.from("tournoi_matchs").insert(lignes);
+  }
+
+  async function genererTourSuivant(tournoiId, silencieux) {
+    const base = await db();
+    const { data: tournoi } = await base.from("tournois").select("*").eq("id", tournoiId).single();
+    const { data: chap } = await base.from("chapitres").select("mots").eq("id", tournoi.chapitre_id).single();
+    const { data: matchs } = await base.from("tournoi_matchs").select("*").eq("tournoi_id", tournoiId).order("created_at");
+    if (!matchs || !matchs.length) return;
+
+    const derniereRonde = matchs[matchs.length - 1].ronde;
+    const rondeActuelle = matchs.filter(m => m.ronde === derniereRonde);
+    if (!rondeActuelle.every(m => m.statut === "termine")) { if (!silencieux) status("Le tour en cours n'est pas fini.", "err"); return; }
+
+    const gagnants = rondeActuelle.map(m => ({
+      user_id: m.gagnant_id,
+      joueur: m.gagnant_id === m.joueur1_id ? m.joueur1_nom : m.joueur2_nom
+    }));
+
+    if (gagnants.length === 1) {
+      await base.from("tournois").update({
+        statut: "termine", gagnant_id: gagnants[0].user_id, gagnant_nom: gagnants[0].joueur
+      }).eq("id", tournoiId);
+      if (!silencieux) status(gagnants[0].joueur + " remporte le championnat 🏆", "ok");
+    } else {
+      await creerRonde(tournoiId, melanger(gagnants), chap.mots);
+      if (!silencieux) status("Tour suivant généré.", "ok");
+    }
+    if (!silencieux) chargerChampionnats();
+  }
+
+  async function supprimerTournoi(id) {
+    if (!confirm("Supprimer ce championnat et toutes ses données ?")) return;
+    const base = await db();
+    await base.from("tournois").delete().eq("id", id);
+    chargerChampionnats();
+  }
+
+  // ---------- Avancement automatique ----------
+  // À chaque ouverture de l'onglet, et toutes les 20 secondes tant qu'il reste ouvert,
+  // on fait avancer tout seul chaque championnat qui remplit ses conditions.
+  let auto_verifEnCours = false;
+  async function verifierAvancementAuto() {
+    if (auto_verifEnCours) return;
+    auto_verifEnCours = true;
+    try {
+      const base = await db();
+      const ent = await entrepriseId();
+      if (!base || !ent) return;
+      const { data: tournois } = await base.from("tournois").select("*").eq("entreprise_id", ent)
+        .in("statut", ["inscriptions", "poules", "eliminatoires"]);
+      if (!tournois || !tournois.length) return;
+
+      let quelqueChoseAChange = false;
+
+      for (const t of tournois) {
+        if (t.statut === "inscriptions") {
+          const { count } = await base.from("tournoi_joueurs").select("id", { count: "exact", head: true }).eq("tournoi_id", t.id);
+          const dateAtteinte = t.date_limite_inscriptions && new Date(t.date_limite_inscriptions) <= new Date();
+          const nbAtteint = t.nb_max_joueurs && (count || 0) >= t.nb_max_joueurs;
+          if ((dateAtteinte || nbAtteint) && (count || 0) >= t.taille_poule) {
+            await lancerPoules(t.id, true);
+            quelqueChoseAChange = true;
+          }
+        }
+
+        if (t.statut === "poules") {
+          const { data: joueurs } = await base.from("tournoi_joueurs").select("temps_poule_sec").eq("tournoi_id", t.id);
+          if (joueurs && joueurs.length && joueurs.every(j => j.temps_poule_sec != null)) {
+            await lancerEliminatoires(t.id, true);
+            quelqueChoseAChange = true;
+          }
+        }
+
+        if (t.statut === "eliminatoires") {
+          const { data: matchs } = await base.from("tournoi_matchs").select("*").eq("tournoi_id", t.id).order("created_at");
+          if (matchs && matchs.length) {
+            const derniereRonde = matchs[matchs.length - 1].ronde;
+            const rondeActuelle = matchs.filter(m => m.ronde === derniereRonde);
+            if (rondeActuelle.every(m => m.statut === "termine")) {
+              await genererTourSuivant(t.id, true);
+              quelqueChoseAChange = true;
+            }
+          }
+        }
+      }
+
+      if (quelqueChoseAChange) chargerChampionnats();
+    } catch (e) { /* silencieux : une vérification ratée n'affiche rien, on retente au prochain passage */ }
+    finally { auto_verifEnCours = false; }
+  }
+
+  setInterval(verifierAvancementAuto, 20000);
 
   refreshAuth();
 })();
