@@ -260,6 +260,9 @@ header{position:sticky;top:0;z-index:100;background:rgba(28,27,33,.88);
 .vic-emoji{font-size:3rem;margin-bottom:10px}
 .vic-carte h2{font-family:var(--serif);font-size:1.9rem;color:var(--blanc);margin-bottom:8px}
 .vic-carte h2 b{color:var(--violet-c)}
+
+.apercu-liste{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:18px 0 6px;max-height:260px;overflow:auto}
+#apercuMots .vic-carte{max-width:520px}
 .vic-temps{font-family:var(--serif);font-size:2.4rem;color:var(--or);margin:14px 0 6px;line-height:1}
 .vic-sous{color:var(--texte-doux);font-size:.92rem;margin-bottom:22px}
 .vic-invite{background:var(--gris-3);border-radius:12px;padding:16px;margin-bottom:20px;

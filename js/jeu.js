@@ -48,6 +48,20 @@
   }
   function tempsEcoule() { return Math.floor((Date.now() - debut) / 1000); }
 
+  function afficherApercu(mots) {
+    const tries = mots.slice().sort((a, b) => a.localeCompare(b, "fr"));
+    $("apercuSous").textContent = tries.length + " mot" + (tries.length > 1 ? "s" : "") + " à repérer dans la grille";
+    $("apercuListe").innerHTML = tries.map(m => '<span class="mot">' + m + '</span>').join("");
+    $("apercuMots").classList.add("on");
+
+    const bc = $("btnCommencer");
+    bc.onclick = () => {
+      $("apercuMots").classList.remove("on");
+      demarrerChrono();
+      sauverPartie();
+    };
+  }
+
   function majStats(tr, total) {
     $("statTrouves").textContent = tr;
     $("statRestants").textContent = total - tr;
@@ -175,9 +189,11 @@
         if (puzzle.nonPlaces && puzzle.nonPlaces.length) {
           $("jeuMeta").textContent = conf.nom + " · " + puzzle.placements.length + " mots à trouver";
         }
+        afficherApercu(puzzle.placements.map(p => p.mot));
+      } else {
+        demarrerChrono();
+        sauverPartie();
       }
-      demarrerChrono();
-      sauverPartie();
     }
 
     // Sauvegarde régulière (chrono qui avance) et à la fermeture
