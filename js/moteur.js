@@ -36,12 +36,12 @@
         // cadre), donc les coins récupèrent surtout des lettres de remplissage.
         // On force donc une majorité des tentatives à viser les coins/bords.
         const zone = Math.random();
-        if (zone < 0.35) {
-          const k = Math.max(3, Math.floor(taille * 0.3));
+        if (zone < 0.75) {
+          const k = Math.max(3, Math.floor(taille * 0.32));
           r0 = Math.random() < 0.5 ? Math.floor(Math.random() * k) : taille - 1 - Math.floor(Math.random() * k);
           c0 = Math.random() < 0.5 ? Math.floor(Math.random() * k) : taille - 1 - Math.floor(Math.random() * k);
-        } else if (zone < 0.75) {
-          const bande = Math.max(2, Math.floor(taille * 0.25));
+        } else if (zone < 0.95) {
+          const bande = Math.max(2, Math.floor(taille * 0.22));
           if (Math.random() < 0.5) {
             r0 = Math.random() < 0.5 ? Math.floor(Math.random() * bande) : taille - 1 - Math.floor(Math.random() * bande);
             c0 = Math.floor(Math.random() * taille);
