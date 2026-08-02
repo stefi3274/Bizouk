@@ -184,6 +184,18 @@ header{position:sticky;top:0;z-index:100;background:rgba(28,27,33,.88);
   color:var(--texte-doux);font-size:1.1rem;cursor:pointer;display:flex;
   align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.3)}
 .contraste-btn.actif{background:var(--violet);border-color:var(--violet);color:#fff}
+
+.onb-carte{background:var(--gris-2);border:1px solid var(--gris-line);border-radius:20px;
+  padding:32px 26px 26px;width:100%;max-width:380px;position:relative;text-align:center;
+  animation:infoMonte .2s ease}
+.onb-passer{position:absolute;top:16px;right:18px;background:none;border:none;
+  color:var(--texte-faible);font-size:.78rem;font-weight:600;cursor:pointer}
+.onb-icone{font-size:2.6rem;margin-bottom:14px}
+.onb-titre{font-family:var(--serif);font-size:1.25rem;color:var(--blanc);margin-bottom:10px}
+.onb-texte{color:var(--texte-doux);font-size:.9rem;line-height:1.55;margin-bottom:22px;min-height:66px}
+.onb-points{display:flex;gap:6px;justify-content:center;margin-bottom:20px}
+.onb-point{width:7px;height:7px;border-radius:50%;background:var(--gris-3);transition:background .2s,transform .2s}
+.onb-point.on{background:var(--violet-c);transform:scale(1.3)}
 .niveaux-sous{text-align:center;color:var(--texte-doux);font-size:.95rem;margin-bottom:26px}
 .niv-grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
 .niv-carte{background:var(--gris-2);border:1px solid var(--gris-line);border-radius:var(--r-lg);

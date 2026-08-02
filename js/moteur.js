@@ -30,8 +30,29 @@
       let place = false;
       for (let essai = 0; essai < 900 && !place; essai++) {
         const dir = DIRS[Math.floor(Math.random() * DIRS.length)];
-        const r0 = Math.floor(Math.random() * taille);
-        const c0 = Math.floor(Math.random() * taille);
+        let r0, c0;
+        // Sans ça, l'algorithme remplit surtout le centre : les points de départ
+        // proches des bords/coins sont plus souvent rejetés (le mot sortirait du
+        // cadre), donc les coins récupèrent surtout des lettres de remplissage.
+        // On force donc une majorité des tentatives à viser les coins/bords.
+        const zone = Math.random();
+        if (zone < 0.35) {
+          const k = Math.max(3, Math.floor(taille * 0.3));
+          r0 = Math.random() < 0.5 ? Math.floor(Math.random() * k) : taille - 1 - Math.floor(Math.random() * k);
+          c0 = Math.random() < 0.5 ? Math.floor(Math.random() * k) : taille - 1 - Math.floor(Math.random() * k);
+        } else if (zone < 0.75) {
+          const bande = Math.max(2, Math.floor(taille * 0.25));
+          if (Math.random() < 0.5) {
+            r0 = Math.random() < 0.5 ? Math.floor(Math.random() * bande) : taille - 1 - Math.floor(Math.random() * bande);
+            c0 = Math.floor(Math.random() * taille);
+          } else {
+            c0 = Math.random() < 0.5 ? Math.floor(Math.random() * bande) : taille - 1 - Math.floor(Math.random() * bande);
+            r0 = Math.floor(Math.random() * taille);
+          }
+        } else {
+          r0 = Math.floor(Math.random() * taille);
+          c0 = Math.floor(Math.random() * taille);
+        }
         const rF = r0 + dir[0] * (mot.length - 1);
         const cF = c0 + dir[1] * (mot.length - 1);
         if (rF < 0 || rF >= taille || cF < 0 || cF >= taille) continue;

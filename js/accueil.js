@@ -130,34 +130,47 @@
       if (localStorage.getItem("bizouk_onboarding_vu") === "1") return;
     } catch (e) { return; }
 
+    const etapes = [
+      { icone: "👆", titre: "Trace un mot", texte: "Fais glisser ton doigt sur les lettres, dans n'importe quelle direction, pour tracer un mot caché dans la grille." },
+      { icone: "💎", titre: "Gagne des pierres", texte: "Chaque niveau réussi te rapporte des pierres BiZouk, à dépenser pour débloquer des indices." },
+      { icone: "🔥", titre: "Reviens chaque jour", texte: "Le défi du jour et ta série de jours consécutifs t'attendent — un peu chaque jour suffit." }
+    ];
+    let i = 0;
+
     const fenetre = document.createElement("div");
     fenetre.className = "info-app-fenetre on";
-    fenetre.innerHTML =
-      '<div class="info-app-carte" style="text-align:center;max-width:420px">'
-      + '<div style="font-size:2.4rem;margin-bottom:6px">👋</div>'
-      + '<h3 style="text-align:center;margin-bottom:16px">Bienvenue sur BiZouk</h3>'
-      + '<div style="text-align:left;display:flex;flex-direction:column;gap:14px;margin-bottom:22px">'
-      + '<div style="display:flex;gap:12px;align-items:flex-start">'
-      + '<span style="font-size:1.3rem">👆</span><span style="color:var(--texte-doux);font-size:.92rem">'
-      + 'Fais glisser ton doigt (ou clique-glisse) sur les lettres pour tracer un mot, dans '
-      + 'n\'importe quelle direction.</span></div>'
-      + '<div style="display:flex;gap:12px;align-items:flex-start">'
-      + '<span style="font-size:1.3rem">💎</span><span style="color:var(--texte-doux);font-size:.92rem">'
-      + 'Gagne des pierres BiZouk à chaque niveau réussi, pour débloquer des indices.</span></div>'
-      + '<div style="display:flex;gap:12px;align-items:flex-start">'
-      + '<span style="font-size:1.3rem">🔥</span><span style="color:var(--texte-doux);font-size:.92rem">'
-      + 'Joue chaque jour pour construire ta série et relever le défi du jour.</span></div>'
-      + '</div>'
-      + '<button type="button" class="btn btn-v" id="btnOnboardingOk" style="width:100%">C\'est parti !</button>'
-      + '</div>';
     document.body.appendChild(fenetre);
+
+    function rendre() {
+      const e = etapes[i];
+      const dernier = i === etapes.length - 1;
+      fenetre.innerHTML =
+        '<div class="onb-carte">'
+        + '<button type="button" class="onb-passer" id="onbPasser">Passer</button>'
+        + '<div class="onb-icone">' + e.icone + '</div>'
+        + '<h3 class="onb-titre">' + e.titre + '</h3>'
+        + '<p class="onb-texte">' + e.texte + '</p>'
+        + '<div class="onb-points">'
+        + etapes.map((_, k) => '<span class="onb-point' + (k === i ? ' on' : '') + '"></span>').join("")
+        + '</div>'
+        + '<button type="button" class="btn btn-v" id="onbSuivant" style="width:100%">'
+        + (dernier ? "Commencer !" : "Suivant") + '</button>'
+        + '</div>';
+
+      document.getElementById("onbPasser").onclick = fermer;
+      document.getElementById("onbSuivant").onclick = () => {
+        if (dernier) { fermer(); return; }
+        i++; rendre();
+      };
+    }
 
     const fermer = () => {
       try { localStorage.setItem("bizouk_onboarding_vu", "1"); } catch (e) {}
       fenetre.remove();
     };
-    document.getElementById("btnOnboardingOk").onclick = fermer;
     fenetre.addEventListener("click", (e) => { if (e.target === fenetre) fermer(); });
+
+    rendre();
   }
 
   chargerThemes();
