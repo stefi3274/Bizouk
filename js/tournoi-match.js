@@ -67,6 +67,22 @@
     totalMots = pz ? pz.placements.length : mots.length;
     majStats(0, totalMots);
 
+    afficherApercu(pz ? pz.placements.map(p => p.mot) : mots);
+  }
+
+  function afficherApercu(mots) {
+    const tries = mots.slice().sort((a, b) => a.localeCompare(b, "fr"));
+    $("apercuSous").textContent = tries.length + " mot" + (tries.length > 1 ? "s" : "") + " à repérer dans la grille";
+    $("apercuListe").innerHTML = tries.map(m => '<span class="mot">' + m + '</span>').join("");
+    $("apercuMots").classList.add("on");
+
+    $("btnCommencer").onclick = () => {
+      $("apercuMots").classList.remove("on");
+      demarrerChrono();
+    };
+  }
+
+  function demarrerChrono() {
     debut = Date.now(); fini = false;
     minuteur = setInterval(() => {
       if (fini) return;
@@ -134,6 +150,23 @@
 
     if (window.BiZoukConfetti && jeGagne) window.BiZoukConfetti.lancer(1300, 0.5);
     $("resultat").classList.add("on");
+
+    const infoPartage = {
+      chapitre: (match.joueur1_nom||"") + " vs " + (match.joueur2_nom||""),
+      joueur: monCote === "joueur1" ? match.joueur1_nom : match.joueur2_nom,
+      temps: fmt(monCote === "joueur1" ? match.temps1_sec : match.temps2_sec),
+      duel: {
+        gagne: jeGagne,
+        adversaire: monCote === "joueur1" ? match.joueur2_nom : match.joueur1_nom,
+        sonTemps: fmt(monCote === "joueur1" ? match.temps2_sec : match.temps1_sec)
+      }
+    };
+    const zoneActions = document.createElement("div");
+    zoneActions.style.marginTop = "16px";
+    zoneActions.innerHTML = '<button type="button" class="btn btn-g btn-sm" id="btnPartagerMatch">Partager</button>';
+    $("resContenu").appendChild(zoneActions);
+    const bp = document.getElementById("btnPartagerMatch");
+    if (bp && window.BiZoukPartage) bp.onclick = () => window.BiZoukPartage.partagerDuel(infoPartage);
   }
 
   init();

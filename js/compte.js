@@ -224,4 +224,23 @@
   });
 
   init();
+
+  const btnRappels = $("btnRappels");
+  if (btnRappels) {
+    if ("Notification" in window && localStorage.getItem("bizouk_rappels") === "1" && Notification.permission === "granted") {
+      btnRappels.textContent = "✓ Rappels activés";
+      btnRappels.disabled = true;
+    }
+    btnRappels.onclick = async () => {
+      if (!("Notification" in window)) { alert("Ton navigateur ne supporte pas les notifications."); return; }
+      const perm = await Notification.requestPermission();
+      if (perm === "granted") {
+        localStorage.setItem("bizouk_rappels", "1");
+        btnRappels.textContent = "✓ Rappels activés";
+        btnRappels.disabled = true;
+      } else {
+        alert("Autorisation refusée. Tu peux la changer dans les réglages de ton navigateur.");
+      }
+    };
+  }
 })();

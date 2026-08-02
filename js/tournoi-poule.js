@@ -55,6 +55,22 @@
     const pz = jeu.charger(mots, 11, null, 12);
     majStats(0, pz ? pz.placements.length : mots.length);
 
+    afficherApercu(pz ? pz.placements.map(p => p.mot) : mots);
+  }
+
+  function afficherApercu(mots) {
+    const tries = mots.slice().sort((a, b) => a.localeCompare(b, "fr"));
+    $("apercuSous").textContent = tries.length + " mot" + (tries.length > 1 ? "s" : "") + " à repérer dans la grille";
+    $("apercuListe").innerHTML = tries.map(m => '<span class="mot">' + m + '</span>').join("");
+    $("apercuMots").classList.add("on");
+
+    $("btnCommencer").onclick = () => {
+      $("apercuMots").classList.remove("on");
+      demarrerChrono();
+    };
+  }
+
+  function demarrerChrono() {
     debut = Date.now(); fini = false;
     minuteur = setInterval(() => {
       if (fini) return;
@@ -78,6 +94,16 @@
     if (window.BiZoukSon) window.BiZoukSon.jouer("victoire");
     if (window.BiZoukConfetti) window.BiZoukConfetti.lancer(1300, 0.5);
     if (window.BiZoukAnalytics) window.BiZoukAnalytics.evenement("partie_terminee", { mode: "tournoi_poule", tournoi: tournoiId });
+
+    if (window.BiZoukPartage) {
+      const zone = document.createElement("div");
+      zone.style.marginTop = "12px";
+      zone.innerHTML = '<button type="button" class="btn btn-g btn-sm" id="btnPartagerPoule">Partager</button>';
+      $("vicSous").insertAdjacentElement("afterend", zone);
+      document.getElementById("btnPartagerPoule").onclick = () => window.BiZoukPartage.partagerNiveau({
+        chapitre: tournoi.nom, niveau: "Poule", temps: fmt(t), mots: 15
+      });
+    }
 
     const base = await db();
     await base.from("tournoi_joueurs").update({ temps_poule_sec: t }).eq("tournoi_id", tournoiId).eq("user_id", monId);

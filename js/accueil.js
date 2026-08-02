@@ -125,7 +125,43 @@
     }
   }
 
+  function afficherOnboarding() {
+    try {
+      if (localStorage.getItem("bizouk_onboarding_vu") === "1") return;
+    } catch (e) { return; }
+
+    const fenetre = document.createElement("div");
+    fenetre.className = "info-app-fenetre on";
+    fenetre.innerHTML =
+      '<div class="info-app-carte" style="text-align:center;max-width:420px">'
+      + '<div style="font-size:2.4rem;margin-bottom:6px">👋</div>'
+      + '<h3 style="text-align:center;margin-bottom:16px">Bienvenue sur BiZouk</h3>'
+      + '<div style="text-align:left;display:flex;flex-direction:column;gap:14px;margin-bottom:22px">'
+      + '<div style="display:flex;gap:12px;align-items:flex-start">'
+      + '<span style="font-size:1.3rem">👆</span><span style="color:var(--texte-doux);font-size:.92rem">'
+      + 'Fais glisser ton doigt (ou clique-glisse) sur les lettres pour tracer un mot, dans '
+      + 'n\'importe quelle direction.</span></div>'
+      + '<div style="display:flex;gap:12px;align-items:flex-start">'
+      + '<span style="font-size:1.3rem">💎</span><span style="color:var(--texte-doux);font-size:.92rem">'
+      + 'Gagne des pierres BiZouk à chaque niveau réussi, pour débloquer des indices.</span></div>'
+      + '<div style="display:flex;gap:12px;align-items:flex-start">'
+      + '<span style="font-size:1.3rem">🔥</span><span style="color:var(--texte-doux);font-size:.92rem">'
+      + 'Joue chaque jour pour construire ta série et relever le défi du jour.</span></div>'
+      + '</div>'
+      + '<button type="button" class="btn btn-v" id="btnOnboardingOk" style="width:100%">C\'est parti !</button>'
+      + '</div>';
+    document.body.appendChild(fenetre);
+
+    const fermer = () => {
+      try { localStorage.setItem("bizouk_onboarding_vu", "1"); } catch (e) {}
+      fenetre.remove();
+    };
+    document.getElementById("btnOnboardingOk").onclick = fermer;
+    fenetre.addEventListener("click", (e) => { if (e.target === fenetre) fermer(); });
+  }
+
   chargerThemes();
   majAuth();
   majSerie();
+  afficherOnboarding();
 })();

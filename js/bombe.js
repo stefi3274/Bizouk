@@ -149,7 +149,17 @@
       + " · " + paliersDifficulte() + " · 1 mot à trouver";
     majCibles();
     termine = false;
-    demarrer();
+    afficherApercuBombe(cibles[0]);
+  }
+
+  function afficherApercuBombe(mot) {
+    $("apercuSous").textContent = "Le mot à trouver avant l'explosion :";
+    $("apercuListe").innerHTML = '<span class="mot" style="font-size:1.1rem;padding:10px 18px">' + mot + '</span>';
+    $("apercuMots").classList.add("on");
+    $("btnCommencer").onclick = () => {
+      $("apercuMots").classList.remove("on");
+      demarrer();
+    };
   }
 
   // ---------- Fin ----------

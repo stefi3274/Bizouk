@@ -107,11 +107,11 @@
   // ---------- Jouer ----------
   $("btnJouer").addEventListener("click", () => {
     $("ecranAccueil").style.display = "none";
-    rebours(() => lancer());
+    $("ecranJeu").style.display = "block";
+    construireGrille();
   });
 
-  function lancer() {
-    $("ecranJeu").style.display = "block";
+  function construireGrille() {
     $("jeuTitre").textContent = defi.chapitre;
     $("jeuMeta").textContent = "Défi du " + dateLisible(defi.jour);
 
@@ -129,6 +129,22 @@
     totalMots = pz ? pz.placements.length : defi.mots.length;
     $("statRestants").textContent = totalMots;
 
+    afficherApercu(pz ? pz.placements.map(p => p.mot) : defi.mots);
+  }
+
+  function afficherApercu(mots) {
+    const tries = mots.slice().sort((a, b) => a.localeCompare(b, "fr"));
+    $("apercuSous").textContent = tries.length + " mot" + (tries.length > 1 ? "s" : "") + " à repérer dans la grille";
+    $("apercuListe").innerHTML = tries.map(m => '<span class="mot">' + m + '</span>').join("");
+    $("apercuMots").classList.add("on");
+
+    $("btnCommencer").onclick = () => {
+      $("apercuMots").classList.remove("on");
+      rebours(() => lancer());
+    };
+  }
+
+  function lancer() {
     debut = Date.now(); fini = false;
     clearInterval(minuteur);
     minuteur = setInterval(() => {

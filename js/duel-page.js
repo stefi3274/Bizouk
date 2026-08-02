@@ -112,11 +112,11 @@
     if (nom.length < 2) { alert("Indique ton nom pour relever le défi."); return; }
     monNom = nom;
     $("ecranDefi").style.display = "none";
-    rebours(() => lancerPartie());
+    $("ecranJeu").style.display = "block";
+    construireGrille();
   });
 
-  function lancerPartie() {
-    $("ecranJeu").style.display = "block";
+  function construireGrille() {
     $("chronoCible").textContent = "à battre : " + fmt(duel.lanceur_temps);
     $("legMoi").textContent = monNom;
     $("legLui").textContent = duel.lanceur_nom;
@@ -132,6 +132,22 @@
     totalMots = pz ? pz.placements.length : duel.mots.length;
     majCourse();
 
+    afficherApercu(pz ? pz.placements.map(p => p.mot) : duel.mots);
+  }
+
+  function afficherApercu(mots) {
+    const tries = mots.slice().sort((a, b) => a.localeCompare(b, "fr"));
+    $("apercuSous").textContent = tries.length + " mot" + (tries.length > 1 ? "s" : "") + " à repérer dans la grille";
+    $("apercuListe").innerHTML = tries.map(m => '<span class="mot">' + m + '</span>').join("");
+    $("apercuMots").classList.add("on");
+
+    $("btnCommencer").onclick = () => {
+      $("apercuMots").classList.remove("on");
+      rebours(() => lancerPartie());
+    };
+  }
+
+  function lancerPartie() {
     debut = Date.now(); fini = false;
     clearInterval(minuteur);
     minuteur = setInterval(() => {

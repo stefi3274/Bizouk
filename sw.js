@@ -27,6 +27,27 @@ self.addEventListener("activate", (evt) => {
   );
 });
 
+/* Prêt à recevoir de vraies notifications push, une fois qu'un envoi côté serveur
+   (Edge Function + tâche planifiée) sera mis en place. */
+self.addEventListener("push", (evt) => {
+  let donnees = {};
+  try { donnees = evt.data ? evt.data.json() : {}; } catch (e) {}
+  const titre = donnees.titre || "BiZouk";
+  const options = {
+    body: donnees.corps || "Un nouveau défi t'attend !",
+    icon: "icons/icon-192.png",
+    badge: "icons/icon-192.png",
+    data: { url: donnees.url || "/index.html" }
+  };
+  evt.waitUntil(self.registration.showNotification(titre, options));
+});
+
+self.addEventListener("notificationclick", (evt) => {
+  evt.notification.close();
+  const url = (evt.notification.data && evt.notification.data.url) || "/index.html";
+  evt.waitUntil(clients.openWindow(url));
+});
+
 self.addEventListener("fetch", (evt) => {
   const req = evt.request;
 

@@ -88,3 +88,57 @@ function initModeApp() {
 }
 
 document.addEventListener("DOMContentLoaded", initModeApp);
+
+/* Rappel de série : si activé et que la série est en danger aujourd'hui,
+   une notification locale s'affiche à l'ouverture du site (une fois par jour). */
+async function verifierRappelSerie() {
+  try {
+    if (localStorage.getItem("bizouk_rappels") !== "1") return;
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+    const auj = new Date().toISOString().slice(0, 10);
+    if (localStorage.getItem("bizouk_rappel_fait") === auj) return;
+    if (!window.Progression) return;
+
+    await window.Progression.init();
+    const P = window.Progression;
+    const serie = P.serie ? P.serie() : 0;
+    if (serie <= 0) return;
+    if (P.aJoueAujourdhui && P.aJoueAujourdhui()) return;
+    if (!(P.serieEnDanger && P.serieEnDanger())) return;
+
+    localStorage.setItem("bizouk_rappel_fait", auj);
+    const corps = "Ta série de " + serie + " jours est en danger ! Joue une grille avant minuit.";
+    if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+      const reg = await navigator.serviceWorker.ready;
+      reg.showNotification("BiZouk 🔥", { body: corps, icon: "icons/icon-192.png" });
+    } else {
+      new Notification("BiZouk 🔥", { body: corps, icon: "icons/icon-192.png" });
+    }
+  } catch (e) { /* silencieux */ }
+}
+document.addEventListener("DOMContentLoaded", verifierRappelSerie);
+
+/* Mode contraste élevé / daltonien — disponible partout, mémorisé sur l'appareil */
+(function () {
+  const CLE = "bizouk_contraste";
+  function appliquer(actif) { document.documentElement.classList.toggle("mode-contraste", actif); }
+  appliquer(localStorage.getItem(CLE) === "1");
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const b = document.createElement("button");
+    b.className = "contraste-btn";
+    b.type = "button";
+    b.setAttribute("aria-label", "Contraste élevé / daltonien");
+    b.title = "Contraste élevé / daltonien";
+    b.textContent = "◐";
+    document.body.appendChild(b);
+    b.classList.toggle("actif", localStorage.getItem(CLE) === "1");
+
+    b.onclick = () => {
+      const nouveau = localStorage.getItem(CLE) !== "1";
+      localStorage.setItem(CLE, nouveau ? "1" : "0");
+      appliquer(nouveau);
+      b.classList.toggle("actif", nouveau);
+    };
+  });
+})();

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mes statistiques · BiZouk</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1c1b21">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16">
+
+<style>
+  .stats-grille2{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px}
+  .stat-c{background:var(--gris-2);border:1px solid var(--gris-line);border-radius:14px;
+    padding:18px;text-align:center}
+  .stat-c b{display:block;font-family:var(--serif);font-size:1.8rem;font-weight:700;
+    color:var(--violet-c);line-height:1.1}
+  .stat-c span{font-size:.78rem;color:var(--texte-faible);text-transform:uppercase;letter-spacing:.05em}
+  .bloc{background:var(--gris-2);border:1px solid var(--gris-line);border-radius:var(--r-lg);
+    padding:22px;margin-bottom:20px}
+  .bloc h2{font-family:var(--serif);font-size:1.2rem;color:var(--blanc);margin-bottom:14px}
+  .theme-ligne{display:flex;justify-content:space-between;align-items:center;gap:10px;
+    padding:10px 0;border-bottom:1px solid var(--gris-3);font-size:.9rem}
+  .theme-ligne:last-child{border-bottom:none}
+  .theme-nom{color:var(--texte);font-weight:600}
+  .theme-detail{color:var(--texte-faible);font-size:.78rem}
+  .theme-temps{color:var(--vert);font-family:var(--serif);font-weight:700;white-space:nowrap}
+  .barres{display:flex;align-items:flex-end;gap:5px;height:110px;margin-top:6px}
+  .barre-c{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+  .barre{width:100%;background:var(--violet-c);border-radius:5px 5px 0 0;min-height:4px}
+  .barre-lab{font-size:.62rem;color:var(--texte-faible);margin-top:4px;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="index.html" class="logo"><img src="icons/icon-192.png" alt="BiZouk" class="logo-mark"><span class="logo-txt">Bi<b>Zouk</b></span></a>
+    <nav class="nav-liens">
+      <a href="index.html">Jouer</a>
+      <a href="parcours.html">Parcours</a>
+      <a href="classement.html">Classement</a>
+    </nav>
+    <a href="compte.html" class="btn-connexion">← Mon compte</a>
+  </div>
+</header>
+
+<main class="page" style="max-width:640px">
+  <div style="text-align:center;margin-bottom:22px">
+    <p class="page-kicker" style="text-align:center">📊 Statistiques</p>
+    <h1 style="font-family:var(--serif);font-size:clamp(1.7rem,5vw,2.2rem);color:var(--blanc)">Ta progression</h1>
+  </div>
+
+  <div id="nonConnecte" style="display:none">
+    <div class="cls-vide">
+      <h3>Tu n'es pas connecté</h3>
+      <p>Connecte-toi pour voir tes statistiques.</p>
+      <a href="connexion.html?retour=stats.html" class="btn btn-v btn-sm" style="margin-top:16px">Se connecter</a>
+    </div>
+  </div>
+
+  <div id="connecte" style="display:none">
+    <div class="stats-grille2">
+      <div class="stat-c"><b id="statTotal">0</b><span>parties jouées</span></div>
+      <div class="stat-c"><b id="statMoyen">0:00</b><span>temps moyen</span></div>
+      <div class="stat-c"><b id="statMeilleur">0:00</b><span>meilleur temps</span></div>
+      <div class="stat-c"><b id="statSemaine">0</b><span>cette semaine</span></div>
+    </div>
+
+    <div class="bloc">
+      <h2>Tes 10 dernières parties</h2>
+      <div class="barres" id="barresRecentes"></div>
+    </div>
+
+    <div class="bloc">
+      <h2>Meilleur temps par thème</h2>
+      <div id="parTheme"><p style="color:var(--texte-faible);font-style:italic;text-align:center">Chargement…</p></div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="foot-inner">
+    <div class="foot-bas" style="border:0;padding-top:0">
+      <span>© 2026 BiZouk</span>
+      <span>Conçu par <a href="https://stefi-services.vercel.app/" target="_blank" rel="noopener">SteFi Services</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/stats.js"></script>
+<script src="js/retour.js"></script>
+<script src="js/pwa.js"></script>
+<script src="js/analytics.js"></script>
+</body>
+</html>
