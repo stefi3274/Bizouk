@@ -152,9 +152,7 @@
         conteneur: $("grille"),
         listeMots: $("motsListe"),
         surTrouve: (m, tr, total) => { majStats(tr, total); sauverPartie(); },
-        surVictoire: () => victoire(),
-        surMotsTermines: (mystere) => afficherBanniereMystere(mystere),
-        surLettreMystere: (idx, total) => remplirLettreMystere(idx)
+        surVictoire: () => victoire()
       });
     }
     // Reprendre une partie interrompue ?
@@ -185,10 +183,8 @@
     forcerNouvelle = false;
 
     if (!restauree) {
-      const puzzle = jeu.charger(res.mots, conf.tailleMin, null, conf.tailleMax, niveau === 3);
+      const puzzle = jeu.charger(res.mots, conf.tailleMin, null, conf.tailleMax);
       puzzleCourant = puzzle;
-      mysterePlat = null;
-      if ($("mystereBanniere")) { $("mystereBanniere").style.display = "none"; $("mystereTexte").textContent = ""; }
       if (puzzle) {
         majStats(0, puzzle.placements.length);
         if (puzzle.nonPlaces && puzzle.nonPlaces.length) {
@@ -207,36 +203,6 @@
     window.addEventListener("beforeunload", sauverPartie);
     document.addEventListener("visibilitychange", () => { if (document.hidden) sauverPartie(); });
     if (window.Progression) { window.Progression.init().then(majBoutonIndice); }
-  }
-
-  // ---------- Mot mystère (bannière) ----------
-  let mysterePlat = null;
-
-  function afficherBanniereMystere(mystere) {
-    const banniere = $("mystereBanniere");
-    if (!banniere) return;
-    mysterePlat = [];
-    mystere.mots.forEach((mot, mi) => {
-      mot.split("").forEach((l, li) => {
-        mysterePlat.push({ lettre: l, revele: false, finMot: li === mot.length - 1 && mi < mystere.mots.length - 1 });
-      });
-    });
-    banniere.style.display = "block";
-    redessinerBanniereMystere();
-  }
-
-  function remplirLettreMystere(idx) {
-    if (!mysterePlat || !mysterePlat[idx]) return;
-    mysterePlat[idx].revele = true;
-    redessinerBanniereMystere();
-  }
-
-  function redessinerBanniereMystere() {
-    const texte = $("mystereTexte");
-    if (!texte || !mysterePlat) return;
-    texte.textContent = mysterePlat.map(l =>
-      (l.revele ? l.lettre : "_") + (l.finMot ? "\u00A0\u00A0" : " ")
-    ).join("");
   }
 
   // ---------- Victoire ----------
@@ -367,6 +333,7 @@
         const ent = await entrepriseId();
         await base.from("parties").insert({
           entreprise_id: ent, user_id: u.id, joueur: nom,
+          pays: (u.user_metadata && u.user_metadata.pays) || null,
           theme_id: themeCourant ? themeCourant.id : null,
           theme_nom: themeCourant ? themeCourant.nom : null,
           niveau: niveau, temps_sec: t, mots_total: et.total,

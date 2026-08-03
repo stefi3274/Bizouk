@@ -941,7 +941,8 @@
       corps = Object.keys(parRonde).map(r =>
         '<div style="margin-bottom:10px"><b style="font-size:.85rem;text-transform:capitalize">' + esc(r) + '</b>'
         + parRonde[r].map(m => '<div class="bord-ligne" style="border:0;padding:4px 0">'
-          + '<span class="bord-nom">' + esc(m.joueur1_nom||'?') + ' vs ' + esc(m.joueur2_nom||'(bye)') + '</span>'
+          + '<span class="bord-nom">' + esc(m.joueur1_nom||'?') + (window.BiZoukDrapeau && m.joueur1_pays ? ' ' + window.BiZoukDrapeau.drapeau(m.joueur1_pays) : '')
+            + ' vs ' + esc(m.joueur2_nom||'(bye)') + (window.BiZoukDrapeau && m.joueur2_pays ? ' ' + window.BiZoukDrapeau.drapeau(m.joueur2_pays) : '') + '</span>'
           + '<span class="bord-val">' + (m.statut === "termine" ? "🏆 " + esc(m.gagnant_id === m.joueur1_id ? m.joueur1_nom : m.joueur2_nom) : "en cours") + '</span></div>').join("")
         + '</div>').join("")
       + (tousTermines
@@ -996,7 +997,7 @@
     const { data: tournoi } = await base.from("tournois").select("*").eq("id", tournoiId).single();
     const { data: chap } = await base.from("chapitres").select("mots").eq("id", tournoi.chapitre_id).single();
     const { data: joueurs } = await base.from("tournoi_joueurs")
-      .select("user_id, joueur, poule, temps_poule_sec").eq("tournoi_id", tournoiId).not("temps_poule_sec", "is", null);
+      .select("user_id, joueur, pays, poule, temps_poule_sec").eq("tournoi_id", tournoiId).not("temps_poule_sec", "is", null);
 
     const parPoule = {};
     (joueurs || []).forEach(j => { (parPoule[j.poule] = parPoule[j.poule] || []).push(j); });
@@ -1039,7 +1040,7 @@
       if (!j2) {
         // Nombre impair : bye automatique, ce joueur passe directement au tour suivant
         lignes.push({
-          tournoi_id: tournoiId, ronde, joueur1_id: j1.user_id, joueur1_nom: j1.joueur,
+          tournoi_id: tournoiId, ronde, joueur1_id: j1.user_id, joueur1_nom: j1.joueur, joueur1_pays: j1.pays || null,
           joueur2_id: null, joueur2_nom: null, mots: [],
           gagnant_id: j1.user_id, statut: "termine"
         });
@@ -1047,8 +1048,8 @@
       }
       lignes.push({
         tournoi_id: tournoiId, ronde,
-        joueur1_id: j1.user_id, joueur1_nom: j1.joueur,
-        joueur2_id: j2.user_id, joueur2_nom: j2.joueur,
+        joueur1_id: j1.user_id, joueur1_nom: j1.joueur, joueur1_pays: j1.pays || null,
+        joueur2_id: j2.user_id, joueur2_nom: j2.joueur, joueur2_pays: j2.pays || null,
         mots: melanger(motsSource).slice(0, 15),
         statut: "a_jouer"
       });
@@ -1069,7 +1070,8 @@
 
     const gagnants = rondeActuelle.map(m => ({
       user_id: m.gagnant_id,
-      joueur: m.gagnant_id === m.joueur1_id ? m.joueur1_nom : m.joueur2_nom
+      joueur: m.gagnant_id === m.joueur1_id ? m.joueur1_nom : m.joueur2_nom,
+      pays: m.gagnant_id === m.joueur1_id ? m.joueur1_pays : m.joueur2_pays
     }));
 
     if (gagnants.length === 1) {

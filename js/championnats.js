@@ -6,7 +6,7 @@
     { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   const fmtSec = s => Math.floor(s/60) + ":" + String(s%60).padStart(2,"0");
 
-  let monId = null, monNom = "";
+  let monId = null, monNom = "", monPays = "";
 
   async function moi() {
     const base = await db();
@@ -15,6 +15,7 @@
     if (data.session) {
       monId = data.session.user.id;
       monNom = (data.session.user.user_metadata && data.session.user.user_metadata.nom) || "";
+      monPays = (data.session.user.user_metadata && data.session.user.user_metadata.pays) || "";
       const nav = $("navAuth");
       if (nav) { nav.textContent = "Mon compte"; nav.href = "compte.html"; }
     }
@@ -63,13 +64,14 @@
     }
 
     if (t.statut === "poules" && moiInscrit) {
-      const { data: poule } = await base.from("tournoi_joueurs").select("joueur, temps_poule_sec")
+      const { data: poule } = await base.from("tournoi_joueurs").select("joueur, temps_poule_sec, pays")
         .eq("tournoi_id", t.id).eq("poule", moiInscrit.poule).order("temps_poule_sec", { ascending: true, nullsFirst: false });
       corps = '<p style="font-size:.85rem;color:var(--texte-doux);margin-bottom:8px">Ta poule : <b>Poule ' + moiInscrit.poule + '</b></p>'
         + (moiInscrit.temps_poule_sec == null
             ? '<button class="btn btn-v btn-sm" data-jouer-poule="' + t.id + '">Jouer ta grille de poule</button>'
             : (poule || []).map((j,i) => '<div class="bord-ligne" style="border:0;padding:4px 0">'
-                + '<span class="bord-nom">' + (i < t.qualifies_poule ? '🟢 ' : '') + esc(j.joueur) + '</span>'
+                + '<span class="bord-nom">' + (i < t.qualifies_poule ? '🟢 ' : '') + esc(j.joueur)
+                  + (window.BiZoukDrapeau && j.pays ? ' ' + window.BiZoukDrapeau.drapeau(j.pays) : '') + '</span>'
                 + '<span class="bord-val">' + (j.temps_poule_sec != null ? fmtSec(j.temps_poule_sec) : '—') + '</span></div>').join(""));
     } else if (t.statut === "poules" && !moiInscrit) {
       corps = '<p class="hint">Tu n\'étais pas inscrit avant le lancement des poules.</p>';
@@ -152,9 +154,13 @@
           const j2Gagne = m.statut === "termine" && m.gagnant_id === m.joueur2_id;
           return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;'
             + 'background:var(--gris-2);border:1px solid var(--gris-line);border-radius:10px;padding:9px 12px;margin-bottom:6px;font-size:.86rem">'
-            + '<span style="' + (j1Gagne ? 'color:var(--vert);font-weight:700' : '') + '">' + esc(m.joueur1_nom || "?") + (j1Gagne ? ' 🏆' : '') + '</span>'
+            + '<span style="' + (j1Gagne ? 'color:var(--vert);font-weight:700' : '') + '">' + esc(m.joueur1_nom || "?")
+              + (window.BiZoukDrapeau && m.joueur1_pays ? ' ' + window.BiZoukDrapeau.drapeau(m.joueur1_pays) : '')
+              + (j1Gagne ? ' 🏆' : '') + '</span>'
             + '<span style="color:var(--texte-faible);font-size:.76rem">vs</span>'
-            + '<span style="' + (j2Gagne ? 'color:var(--vert);font-weight:700' : '') + '">' + esc(m.joueur2_nom || "(bye)") + (j2Gagne ? ' 🏆' : '') + '</span>'
+            + '<span style="' + (j2Gagne ? 'color:var(--vert);font-weight:700' : '') + '">' + esc(m.joueur2_nom || "(bye)")
+              + (window.BiZoukDrapeau && m.joueur2_pays ? ' ' + window.BiZoukDrapeau.drapeau(m.joueur2_pays) : '')
+              + (j2Gagne ? ' 🏆' : '') + '</span>'
             + '</div>';
         }).join("")
       + '</div>'
@@ -165,7 +171,7 @@
     if (!monId) { location.href = "connexion.html?retour=championnats.html"; return; }
     const base = await db();
     const nom = monNom || "Joueur";
-    const { error } = await base.from("tournoi_joueurs").insert({ tournoi_id: tournoiId, user_id: monId, joueur: nom });
+    const { error } = await base.from("tournoi_joueurs").insert({ tournoi_id: tournoiId, user_id: monId, joueur: nom, pays: monPays || null });
     if (error) { alert("Inscription impossible : " + error.message); return; }
     charger();
   }

@@ -56,6 +56,7 @@
             + (window.BiZoukAvatar ? '<span class="av-inline">' + window.BiZoukAvatar.avatar(
                 Object.assign(window.BiZoukAvatar.configDepuisNom(p.joueur), {initiales: window.BiZoukAvatar.initialesDe(p.joueur)}), 26) + '</span>' : '')
             + esc(p.joueur)
+            + (window.BiZoukDrapeau && p.pays ? ' ' + window.BiZoukDrapeau.drapeau(p.pays) : '')
             + '<span class="cls-theme">' + esc(p.theme_nom || "—") + ' · '
               + (NOMS_NIV[p.niveau] || ("Niveau " + p.niveau))
               + (p.mots_total ? " (" + p.mots_total + " mots)" : "") + '</span></span>'

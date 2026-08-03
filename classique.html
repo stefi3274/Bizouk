@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Match · Championnat · BiZouk</title>
+<title>Mode classique · BiZouk</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -22,34 +22,41 @@
     <a href="index.html" class="logo"><img src="icons/icon-192.png" alt="BiZouk" class="logo-mark"><span class="logo-txt">Bi<b>Zouk</b></span></a>
     <nav class="nav-liens">
       <a href="index.html">Jouer</a>
-      <a href="championnats.html">Championnats</a>
-      <a href="classique.html">Mode classique</a>
+      <a href="parcours.html">Parcours</a>
+      <a href="classique.html" class="on">Mode classique</a>
       <a href="classement.html">Classement</a>
     </nav>
     <a href="connexion.html" class="btn-connexion" id="navAuth">Se connecter</a>
   </div>
 </header>
 
-<main class="duel-arene" id="ecranInfo">
-  <div style="text-align:center;margin-bottom:6px">
-    <p class="page-kicker" style="text-align:center">🏆 Match de championnat</p>
-    <h1 style="font-family:var(--serif);font-size:clamp(1.7rem,5vw,2.2rem);color:var(--blanc);line-height:1.15" id="matchTitre">
-      Chargement…</h1>
-    <p style="color:var(--texte-doux);margin-top:8px" id="matchSous"></p>
+<!-- Sélection du chapitre -->
+<main class="page" id="ecranChoix" style="max-width:640px">
+  <div style="text-align:center;margin-bottom:24px">
+    <p class="page-kicker" style="text-align:center">🕵️ Mode classique</p>
+    <h1 style="font-family:var(--serif);font-size:clamp(1.8rem,5vw,2.4rem);color:var(--blanc);line-height:1.15">
+      Le message caché</h1>
+    <p style="color:var(--texte-doux);margin-top:8px;max-width:460px;margin-left:auto;margin-right:auto">
+      Comme les mots mêlés d'autrefois : aucune lettre au hasard. Trouve tous les mots,
+      puis touche les cases restantes pour révéler le message mystère.
+    </p>
   </div>
-  <div id="matchZone" style="max-width:480px;margin:0 auto;text-align:center"></div>
+  <div id="listeChapitres"><p style="text-align:center;color:var(--texte-faible);font-style:italic;padding:24px">Chargement…</p></div>
 </main>
 
 <!-- Le jeu -->
 <main class="jeu" id="ecranJeu" style="display:none">
   <div class="jeu-head">
-    <div class="jeu-titre"><h1>Ton match</h1></div>
-    <div class="jeu-stats no-print">
-      <div class="stat chrono"><b id="chrono">0:00</b><span>Temps</span></div>
-      <div class="stat"><b id="statTrouves">0</b><span>Trouvés</span></div>
-      <div class="stat"><b id="statRestants">0</b><span>Restants</span></div>
+    <div class="jeu-titre">
+      <h1 id="jeuTitre">Chargement…</h1>
+      <div class="jeu-meta" id="jeuMeta"></div>
     </div>
   </div>
+
+  <div class="mystere-banniere" id="mystereBanniere" style="display:none">
+    🔎 Message mystère : <span id="mystereTexte"></span>
+  </div>
+
   <div class="jeu-corps">
     <div class="grille-box"><div class="grille" id="grille"></div></div>
     <div class="mots-box">
@@ -60,38 +67,26 @@
   </div>
 </main>
 
-<div class="victoire" id="apercuMots">
+<!-- Victoire -->
+<div class="victoire" id="victoire">
   <div class="vic-carte">
-    <div class="vic-emoji">🔎</div>
-    <h2>Les mots à <b>trouver</b></h2>
-    <p class="vic-sous" id="apercuSous">—</p>
-    <div class="apercu-liste" id="apercuListe"></div>
+    <div class="vic-emoji">🎉</div>
+    <h2>Message <b>révélé</b></h2>
+    <p class="vic-sous" id="vicSous">Bravo !</p>
     <div class="vic-actions">
-      <button class="btn btn-v" id="btnCommencer">Commencer !</button>
+      <button class="btn btn-v btn-sm" id="vicRejouer">Autre chapitre</button>
+      <a class="btn btn-g btn-sm" href="index.html">Retour</a>
     </div>
   </div>
 </div>
-
-<!-- Résultat -->
-<div class="victoire" id="resultat">
-  <div class="vic-carte" style="max-width:460px">
-    <div class="vic-emoji" id="resEmoji">🏆</div>
-    <h2 id="resTitre">Match terminé</h2>
-    <div id="resContenu"></div>
-    <div class="vic-actions" style="margin-top:20px">
-      <a class="btn btn-v btn-sm" href="championnats.html">Retour aux championnats</a>
-    </div>
-  </div>
-</div>
-
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-config.js"></script>
 <script src="js/son.js"></script>
+<script src="js/mots-mystere.js"></script>
 <script src="js/moteur.js"></script>
 <script src="js/confetti.js"></script>
-<script src="js/partage.js"></script>
-<script src="js/tournoi-match.js"></script>
+<script src="js/classique.js"></script>
 <script src="js/retour.js"></script>
 <script src="js/pwa.js"></script>
 <script src="js/analytics.js"></script>

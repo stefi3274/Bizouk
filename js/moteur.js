@@ -315,24 +315,8 @@
       }
     }
 
-    // Révélation du mot mystère : un tap sur une case vide révèle sa lettre
-    conteneur.addEventListener("click", e => {
-      if (!mystereActif) return;
-      const el = e.target.closest(".case-mystere");
-      if (!el || el.classList.contains("mystere-lettre")) return;
-      const r = Number(el.dataset.r), c = Number(el.dataset.c);
-      const idx = puzzle.mystere.cases.findIndex(p => p.r === r && p.c === c);
-      if (idx === -1) return;
-      el.textContent = puzzle.grille[r][c];
-      el.classList.add("mystere-lettre");
-      mystereRevele++;
-      if (window.BiZoukSon) window.BiZoukSon.jouer("trouve");
-      surLettreMystere(idx, puzzle.mystere.cases.length);
-      if (mystereRevele >= puzzle.mystere.cases.length) {
-        conteneur.classList.remove("mystere-actif");
-        surVictoire();
-      }
-    });
+    // Révélation du mot mystère : gérée directement dans mousedown/touchstart ci-dessus
+    // (un tap y est traité avant que le blocage du défilement n'empêche l'événement "click").
 
     function caseDepuisPoint(x, y) {
       if (!puzzle) return null;
@@ -351,9 +335,27 @@
     }
 
     // Souris
+    function essayerRevelerMystere(el) {
+      if (!mystereActif || !el.classList.contains("case-mystere") || el.classList.contains("mystere-lettre")) return false;
+      const r = Number(el.dataset.r), c = Number(el.dataset.c);
+      const idx = puzzle.mystere.cases.findIndex(p => p.r === r && p.c === c);
+      if (idx === -1) return false;
+      el.textContent = puzzle.grille[r][c];
+      el.classList.add("mystere-lettre");
+      mystereRevele++;
+      if (window.BiZoukSon) window.BiZoukSon.jouer("trouve");
+      surLettreMystere(idx, puzzle.mystere.cases.length);
+      if (mystereRevele >= puzzle.mystere.cases.length) {
+        conteneur.classList.remove("mystere-actif");
+        surVictoire();
+      }
+      return true;
+    }
+
     conteneur.addEventListener("mousedown", e => {
       const el = e.target.closest(".case"); if (!el) return;
       e.preventDefault();
+      if (essayerRevelerMystere(el)) return;
       glisse = true;
       depart = { r: Number(el.dataset.r), c: Number(el.dataset.c) };
       courant = { ...depart };
@@ -373,6 +375,7 @@
     conteneur.addEventListener("touchstart", e => {
       const el = e.target.closest(".case"); if (!el) return;
       e.preventDefault();
+      if (essayerRevelerMystere(el)) return;
       glisse = true;
       depart = { r: Number(el.dataset.r), c: Number(el.dataset.c) };
       courant = { ...depart };
