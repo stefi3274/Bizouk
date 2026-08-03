@@ -10,7 +10,7 @@
   }
 
   // Génère une grille contenant les mots donnés
-  function generer(motsBruts, tailleMin, tailleMax) {
+  function generer(motsBruts, tailleMin, tailleMax, avecMystere) {
     const liste = [...new Set(motsBruts.map(normaliser).filter(m => m.length >= 2))];
     if (!liste.length) return null;
 
@@ -76,12 +76,32 @@
       if (!place) nonPlaces.push(mot);
     });
 
-    // Remplir les cases vides
+    // Cases restantes : mot mystère garanti si demandé, sinon lettres aléatoires
+    let mystere = null;
+    if (avecMystere && window.BiZoukMystere) {
+      const vides = [];
+      for (let r = 0; r < taille; r++)
+        for (let c = 0; c < taille; c++)
+          if (!grille[r][c]) vides.push({ r, c });
+
+      const phrase = vides.length ? window.BiZoukMystere.construirePhrase(vides.length) : null;
+      if (phrase) {
+        const lettres = phrase.join("");
+        const cases = [];
+        vides.forEach((pos, i) => {
+          grille[pos.r][pos.c] = lettres[i];
+          cases.push(pos);
+        });
+        mystere = { mots: phrase, cases };
+      }
+    }
+
+    // Remplir les cases encore vides (aléatoire, cas normal ou secours du mystère)
     for (let r = 0; r < taille; r++)
       for (let c = 0; c < taille; c++)
         if (!grille[r][c]) grille[r][c] = LETTRES[Math.floor(Math.random() * LETTRES.length)];
 
-    return { grille, taille, placements, nonPlaces };
+    return { grille, taille, placements, nonPlaces, mystere };
   }
 
   // ---------- Interaction ----------
@@ -90,6 +110,8 @@
     const listeBox = options.listeMots;
     const surTrouve = options.surTrouve || function(){};
     const surVictoire = options.surVictoire || function(){};
+    const surMotsTermines = options.surMotsTermines || function(){};
+    const surLettreMystere = options.surLettreMystere || function(){};
 
     let puzzle = null;
     let trouves = [];
@@ -99,6 +121,7 @@
     let bulle = null;
     let dernierTrouveA = 0, combo = 0;
     let toastCombo = null;
+    let mystereActif = false, mystereRevele = 0;
 
     function assurerBulle() {
       if (!bulle) {
@@ -156,9 +179,12 @@
       boite.classList.toggle("defile", largeurTotale > dispo + 4);
 
       let html = "";
+      const casesMystere = new Set((puzzle.mystere ? puzzle.mystere.cases : []).map(p => p.r + "_" + p.c));
       for (let r = 0; r < t; r++) {
         for (let c = 0; c < t; c++) {
-          html += '<div class="case" data-r="' + r + '" data-c="' + c + '">' + puzzle.grille[r][c] + '</div>';
+          const estMystere = casesMystere.has(r + "_" + c);
+          html += '<div class="case' + (estMystere ? ' case-mystere' : '') + '" data-r="' + r + '" data-c="' + c + '">'
+            + (estMystere ? '' : puzzle.grille[r][c]) + '</div>';
         }
       }
       conteneur.innerHTML = html;
@@ -265,16 +291,48 @@
           if (cibles) {
             const utiles = trouves.filter(f => cibles.includes(f.mot)).length;
             surTrouve(match, utiles, cibles.length, combo);
-            if (utiles === cibles.length) surVictoire();
+            if (utiles === cibles.length) declencherFin();
           } else {
             surTrouve(match, trouves.length, puzzle.placements.length, combo);
-            if (trouves.length === puzzle.placements.length) surVictoire();
+            if (trouves.length === puzzle.placements.length) declencherFin();
           }
         }
       }
       glisse = false; depart = null; courant = null;
       conteneur.querySelectorAll(".case.select").forEach(e => e.classList.remove("select"));
     }
+
+    /* Tous les mots réels sont trouvés : soit victoire immédiate (pas de mot
+       mystère sur cette grille), soit on active la révélation par tap. */
+    function declencherFin() {
+      if (puzzle.mystere && puzzle.mystere.cases.length) {
+        mystereActif = true;
+        mystereRevele = 0;
+        conteneur.classList.add("mystere-actif");
+        surMotsTermines(puzzle.mystere);
+      } else {
+        surVictoire();
+      }
+    }
+
+    // Révélation du mot mystère : un tap sur une case vide révèle sa lettre
+    conteneur.addEventListener("click", e => {
+      if (!mystereActif) return;
+      const el = e.target.closest(".case-mystere");
+      if (!el || el.classList.contains("mystere-lettre")) return;
+      const r = Number(el.dataset.r), c = Number(el.dataset.c);
+      const idx = puzzle.mystere.cases.findIndex(p => p.r === r && p.c === c);
+      if (idx === -1) return;
+      el.textContent = puzzle.grille[r][c];
+      el.classList.add("mystere-lettre");
+      mystereRevele++;
+      if (window.BiZoukSon) window.BiZoukSon.jouer("trouve");
+      surLettreMystere(idx, puzzle.mystere.cases.length);
+      if (mystereRevele >= puzzle.mystere.cases.length) {
+        conteneur.classList.remove("mystere-actif");
+        surVictoire();
+      }
+    });
 
     function caseDepuisPoint(x, y) {
       if (!puzzle) return null;
@@ -335,8 +393,8 @@
     return {
       /* Vrai si le joueur a le doigt/la souris posé en train de tracer un mot */
       enCours() { return glisse; },
-      charger(mots, tailleMin, motsClbles, tailleMax) {
-        puzzle = generer(mots, tailleMin, tailleMax);
+      charger(mots, tailleMin, motsClbles, tailleMax, avecMystere) {
+        puzzle = generer(mots, tailleMin, tailleMax, avecMystere);
         trouves = [];
         cibles = motsClbles || null;
         dessiner();

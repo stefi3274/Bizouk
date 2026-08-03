@@ -1,4 +1,4 @@
-/* BiZouk — La Bombe : 10 mots cachés, 1 à trouver, 1 minute */
+/* BiZouk — La Bombe : 12 mots cachés, 1 à trouver, 1 minute */
 (function () {
   const $ = id => document.getElementById(id);
   async function db() { return window.DB || (window.attendreDB ? await window.attendreDB(6000) : null); }
@@ -6,7 +6,7 @@
     { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 
   const DUREE = 60;           // 1 minute
-  const NB_MOTS_GRILLE = 10;  // mots cachés (rebrassage des mots du chapitre)
+  const NB_MOTS_GRILLE = 12;  // mots cachés (rebrassage des mots du chapitre)
   const NB_CIBLES = 1;        // un seul mot à trouver
 
   const params = new URLSearchParams(location.search);

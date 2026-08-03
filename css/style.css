@@ -255,6 +255,22 @@ header{position:sticky;top:0;z-index:100;background:rgba(28,27,33,.88);
 .case:hover{background:var(--gris-line)}
 .case.select{background:var(--violet);color:#fff}
 
+.case.mystere-lettre{background:var(--or)!important;color:#241a02!important;
+  box-shadow:0 0 0 3px rgba(240,180,41,.4);animation:mysterePop .35s ease}
+@keyframes mysterePop{0%{transform:scale(1)}50%{transform:scale(1.25)}100%{transform:scale(1)}}
+
+.case-mystere{position:relative}
+.mystere-actif .case-mystere{cursor:pointer;box-shadow:0 0 0 2px rgba(240,180,41,.3) inset;
+  animation:mystereAttente 1.5s ease-in-out infinite}
+@keyframes mystereAttente{0%,100%{box-shadow:0 0 0 2px rgba(240,180,41,.15) inset}
+  50%{box-shadow:0 0 0 2px rgba(240,180,41,.55) inset}}
+
+.mystere-banniere{max-width:var(--wrap);margin:0 auto 14px;padding:12px 18px;
+  background:linear-gradient(135deg,rgba(240,180,41,.18),rgba(240,180,41,.06));
+  border:1.5px solid var(--or);border-radius:12px;text-align:center;
+  font-weight:700;color:var(--or);font-size:.95rem;letter-spacing:.03em}
+.mystere-banniere span{color:var(--blanc)}
+
 .lettre-bulle{position:fixed;display:flex;align-items:center;justify-content:center;
   transform:translate(-50%,-50%) scale(.7);background:var(--violet);color:#fff;
   border-radius:20%;font-weight:800;opacity:0;pointer-events:none;z-index:999;

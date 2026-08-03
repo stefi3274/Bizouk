@@ -46,7 +46,7 @@
     let libelle, lien;
     if (!P.reussi(chap.id, 1)) { libelle = "Découverte · 10 mots"; lien = "jeu.html?chapitre=" + chap.id + "&niveau=1"; }
     else if (!P.reussi(chap.id, 2)) { libelle = "Confirmé · 10 mots"; lien = "jeu.html?chapitre=" + chap.id + "&niveau=2"; }
-    else if (!P.reussi(chap.id, 3)) { libelle = "Expert · 15 mots"; lien = "jeu.html?chapitre=" + chap.id + "&niveau=3"; }
+    else if (!P.reussi(chap.id, 3)) { libelle = "Expert · 17 mots"; lien = "jeu.html?chapitre=" + chap.id + "&niveau=3"; }
     else if (!P.bombeFaite(chap.id)) { libelle = "La Bombe 💣"; lien = "bombe.html?chapitre=" + chap.id; }
     else {
       // Chapitre fini : proposer le suivant

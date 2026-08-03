@@ -12,12 +12,12 @@
   const NIVEAUX = {
     1: { nom: "Découverte", tailleMin: 9,  mots: 10, tri: "courts" },
     2: { nom: "Confirmé",   tailleMin: 10, mots: 10, tri: "moyens" },
-    3: { nom: "Expert",     tailleMin: 11, tailleMax: 12, mots: 15, tri: "longs"  }
+    3: { nom: "Expert",     tailleMin: 11, tailleMax: 12, mots: 17, tri: "longs"  }
   };
   const conf = NIVEAUX[niveau] || NIVEAUX[1];
 
   let forcerNouvelle = false;
-  let jeu = null, debut = null, minuteur = null, themeCourant = null, chapitreCourant = null, fini = false;
+  let jeu = null, debut = null, minuteur = null, themeCourant = null, chapitreCourant = null, fini = false, puzzleCourant = null;
   let nomCourant = null;
   let sauvMinuteur = null;
 
@@ -152,7 +152,9 @@
         conteneur: $("grille"),
         listeMots: $("motsListe"),
         surTrouve: (m, tr, total) => { majStats(tr, total); sauverPartie(); },
-        surVictoire: () => victoire()
+        surVictoire: () => victoire(),
+        surMotsTermines: (mystere) => afficherBanniereMystere(mystere),
+        surLettreMystere: (idx, total) => remplirLettreMystere(idx)
       });
     }
     // Reprendre une partie interrompue ?
@@ -183,7 +185,10 @@
     forcerNouvelle = false;
 
     if (!restauree) {
-      const puzzle = jeu.charger(res.mots, conf.tailleMin, null, conf.tailleMax);
+      const puzzle = jeu.charger(res.mots, conf.tailleMin, null, conf.tailleMax, niveau === 3);
+      puzzleCourant = puzzle;
+      mysterePlat = null;
+      if ($("mystereBanniere")) { $("mystereBanniere").style.display = "none"; $("mystereTexte").textContent = ""; }
       if (puzzle) {
         majStats(0, puzzle.placements.length);
         if (puzzle.nonPlaces && puzzle.nonPlaces.length) {
@@ -204,9 +209,38 @@
     if (window.Progression) { window.Progression.init().then(majBoutonIndice); }
   }
 
+  // ---------- Mot mystère (bannière) ----------
+  let mysterePlat = null;
+
+  function afficherBanniereMystere(mystere) {
+    const banniere = $("mystereBanniere");
+    if (!banniere) return;
+    mysterePlat = [];
+    mystere.mots.forEach((mot, mi) => {
+      mot.split("").forEach((l, li) => {
+        mysterePlat.push({ lettre: l, revele: false, finMot: li === mot.length - 1 && mi < mystere.mots.length - 1 });
+      });
+    });
+    banniere.style.display = "block";
+    redessinerBanniereMystere();
+  }
+
+  function remplirLettreMystere(idx) {
+    if (!mysterePlat || !mysterePlat[idx]) return;
+    mysterePlat[idx].revele = true;
+    redessinerBanniereMystere();
+  }
+
+  function redessinerBanniereMystere() {
+    const texte = $("mystereTexte");
+    if (!texte || !mysterePlat) return;
+    texte.textContent = mysterePlat.map(l =>
+      (l.revele ? l.lettre : "_") + (l.finMot ? "\u00A0\u00A0" : " ")
+    ).join("");
+  }
+
   // ---------- Victoire ----------
   async function victoire() {
-    fini = true;
     clearInterval(minuteur);
     clearInterval(sauvMinuteur);
     if (window.BiZoukSauvegarde) window.BiZoukSauvegarde.effacer(contexteSauv());

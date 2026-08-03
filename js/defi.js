@@ -2,7 +2,7 @@
 (function () {
   async function db() { return window.DB || (window.attendreDB ? await window.attendreDB(8000) : null); }
 
-  const NB_MOTS = 15;   // taille du défi quotidien (maximum d'une grille)
+  const NB_MOTS = 17;   // taille du défi quotidien (aligné sur le niveau Expert)
 
   /* Date du jour au format AAAA-MM-JJ */
   function jour() {
@@ -56,7 +56,7 @@
       if (!chapsTous || !chapsTous.length) return null;
 
       // Seuls les chapitres ayant au moins NB_MOTS mots peuvent alimenter le défi du jour,
-      // pour garantir une grille toujours complète (15 mots)
+      // pour garantir une grille toujours complète (17 mots)
       const chaps = chapsTous.filter(c => Array.isArray(c.mots) && c.mots.length >= NB_MOTS);
       if (!chaps.length) return null;
 

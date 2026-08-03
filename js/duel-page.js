@@ -39,7 +39,9 @@
     poserAvatar($("avLui"), duel.lanceur_nom, 68);
     $("tempsLui").textContent = fmt(duel.lanceur_temps);
     $("infoGrille").textContent = duel.chapitre_nom || "Grille";
-    $("infoNiveau").textContent = ({1:"Découverte",2:"Confirmé",3:"Expert"}[duel.niveau] || "Découverte") + " · 15 mots";
+    const MOTS_NIV = {1:10, 2:10, 3:17};
+    $("infoNiveau").textContent = ({1:"Découverte",2:"Confirmé",3:"Expert"}[duel.niveau] || "Découverte")
+      + " · " + (MOTS_NIV[duel.niveau] || duel.mots.length) + " mots";
     $("infoTemps").textContent = fmt(duel.lanceur_temps);
     $("duelCarte").style.display = "block";
 
