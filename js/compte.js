@@ -115,15 +115,12 @@
     afficherSerie();
     afficherBadges(etat.badges || []);
 
-    // Trésor
-    const d = P.detail();
-    const noms = { vert: "Découverte", jaune: "Confirmé", rose: "Bombes" };
-    $("tresor").innerHTML = ["vert","jaune","rose"].map(c =>
+    // Trésor (une seule couleur maintenant ; le total inclut les anciennes pierres jaune/rose déjà gagnées)
+    $("tresor").innerHTML =
       '<div class="tresor-c">'
-      + (window.BiZoukPierre ? window.BiZoukPierre.pierre(c, 40) : "")
-      + '<div class="tc-nb" style="color:var(--' + (c === "jaune" ? "or" : c) + ')">' + d[c] + '</div>'
-      + '<div class="tc-lab">' + noms[c] + '</div></div>'
-    ).join("");
+      + (window.BiZoukPierre ? window.BiZoukPierre.pierre("vert", 48) : "")
+      + '<div class="tc-nb" style="color:var(--vert)">' + P.total() + '</div>'
+      + '<div class="tc-lab">Pierres BiZouk</div></div>';
     $("tresorTotal").textContent = P.total();
 
     // Statistiques
@@ -196,7 +193,7 @@
       '<div class="prog-ligne">'
       + '<span class="prog-nom">' + esc(p.chapitre_nom || p.theme_nom || "Grille")
       + '<span style="font-size:.78rem;color:var(--texte-faible);display:block">'
-      + ({1:"Découverte",2:"Confirmé",3:"Expert"}[p.niveau] || "Découverte") + ' · ' + p.mots_total + ' mots</span></span>'
+      + ({1:"Niveau 1",2:"Niveau 2",3:"Niveau 3",4:"Niveau 4",5:"Niveau 5"}[p.niveau] || "Niveau " + p.niveau) + ' · ' + p.mots_total + ' mots</span></span>'
       + '<span style="font-family:var(--serif);font-weight:700;color:var(--or);font-size:1.05rem">'
       + fmt(p.temps_sec) + '</span></div>'
     ).join("");

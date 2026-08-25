@@ -1,10 +1,10 @@
 /* BiZouk — progression : chapitres, niveaux, pierres BiZouk, bombes
-   Un chapitre = 3 niveaux (10, 10 et 17 mots) + 1 bombe.
+   Un chapitre = 5 niveaux (6, 7, 8, 9 et 10 mots) + 1 bombe.
    Fonctionne sans compte (navigateur) et avec compte (synchronisé). */
 (function () {
   const CLE = "bizouk_progression";
-  const COULEURS = { 1: "vert", 2: "jaune", 3: "rose" };
-  const GAINS = { 1: 3, 2: 3, 3: 5 };
+  const COULEURS = { 1: "vert", 2: "vert", 3: "vert", 4: "vert", 5: "vert" };
+  const GAINS = { 1: 2, 2: 2, 3: 2, 4: 2, 5: 2 };
   const PRIX_DEBLOCAGE = 5;
   const PRIX_INDICE = 1;
   const PRIX_SAUVETAGE = 1;                  // pierres pour sauver une série
@@ -150,18 +150,17 @@
       return this.reussi(chapId, niveau - 1);
     },
     bombeOuverte(chapId, chapitreOuvert) {
-      return !!chapitreOuvert && this.reussi(chapId, 1) && this.reussi(chapId, 2) && this.reussi(chapId, 3);
+      return !!chapitreOuvert && [1,2,3,4,5].every(n => this.reussi(chapId, n));
     },
-    // Un chapitre est terminé quand ses 3 niveaux ET sa bombe sont passés
+    // Un chapitre est terminé quand ses 5 niveaux ET sa bombe sont passés
     chapitreFini(chapId) {
-      return this.reussi(chapId, 1) && this.reussi(chapId, 2)
-        && this.reussi(chapId, 3) && this.bombeFaite(chapId);
+      return [1,2,3,4,5].every(n => this.reussi(chapId, n)) && this.bombeFaite(chapId);
     },
 
     async gagnerNiveau(chapId, niveau) {
       const cle = chapId + "-" + niveau;
       const nouveau = !etat.niveaux_reussis.includes(cle);
-      let gain = GAINS[niveau] || 3;
+      let gain = GAINS[niveau] || 2;
       let surprise = 0;
       if (nouveau) {
         // Bonus surprise aléatoire (environ 1 réussite sur 5) pour varier la récompense
@@ -192,12 +191,9 @@
       let gain = 0, detail = null;
       if (chapId && !etat.bombes_reussies_ids.includes(chapId)) {
         etat.bombes_reussies_ids.push(chapId);
-        // La Bombe récompense avec un mélange des trois couleurs
-        etat.bizouk_vert += 2;
-        etat.bizouk_jaune += 2;
-        etat.bizouk_rose += 2;
+        etat.bizouk_vert += 6;
         gain = 6;
-        detail = { vert: 2, jaune: 2, rose: 2 };
+        detail = { vert: 6 };
       }
       sauver().catch(() => {});
       return { gain, detail };
@@ -224,8 +220,7 @@
     },
     // Récompense de contribution (créditée par l'admin)
     async recompenser(nb, couleur) {
-      const c = couleur || "violet";
-      const cible = (c === "violet") ? "rose" : c;   // pas de pierre violette en stock
+      const cible = couleur || "vert";
       etat["bizouk_" + cible] += (nb || 0);
       await sauver();
       return { gain: nb, couleur: cible };
@@ -280,7 +275,7 @@
           palier = p;
           recus.push(p);
           etat.paliers_recus = recus;
-          etat.bizouk_rose += bonus;
+          etat.bizouk_vert += bonus;
           break;
         }
       }

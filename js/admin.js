@@ -584,7 +584,7 @@
                   return '<div class="theme-item">'
                     + '<div class="ti-nom">' + c.ordre + '. ' + esc(c.nom) + '</div>'
                     + '<div class="ti-meta"><span class="compte-mots">' + nb + ' mots</span> · '
-                    + (ok ? 'Découverte + Confirmé + Bombe' : '<span style="color:#fca5a5">trop peu de mots</span>')
+                    + (ok ? '5 niveaux + Bombe' : '<span style="color:#fca5a5">trop peu de mots</span>')
                     + ' · ' + dateFr(c.created_at) + '</div>'
                     + (apercu ? '<div class="ti-apercu">' + esc(apercu) + (nb > 6 ? ' …' : '') + '</div>' : '')
                     + '<div class="ti-act">'

@@ -18,15 +18,11 @@
   function fmt(s) { return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0"); }
 
   function majCompteur() {
-    const d = window.Progression.detail();
-    ["vert","jaune","rose"].forEach(c => {
-      const badge = $("badge" + c.charAt(0).toUpperCase() + c.slice(1));
-      const nb = $("bz" + c.charAt(0).toUpperCase() + c.slice(1));
-      if (badge && window.BiZoukPierre && !badge.querySelector("svg")) {
-        badge.insertAdjacentHTML("afterbegin", window.BiZoukPierre.pierre(c, 17));
-      }
-      if (nb) nb.textContent = d[c];
-    });
+    const badge = $("badgeVert"), nb = $("bzVert");
+    if (badge && window.BiZoukPierre && !badge.querySelector("svg")) {
+      badge.insertAdjacentHTML("afterbegin", window.BiZoukPierre.pierre("vert", 17));
+    }
+    if (nb && window.Progression) nb.textContent = window.Progression.total();
   }
 
   function majCibles() {
@@ -193,21 +189,16 @@
 
     $("bfContenu").innerHTML =
       (rb && rb.gain
-        ? '<div class="gain-bizouk" style="flex-direction:column;gap:8px">'
-          + '<div style="display:flex;gap:10px;align-items:center;justify-content:center">'
-          + ["vert","jaune","rose"].map(c =>
-              '<span class="pierre-gain" style="display:inline-flex;align-items:center;gap:3px">'
-              + (window.BiZoukPierre ? window.BiZoukPierre.pierre(c, 34) : "")
-              + '<b style="font-family:var(--serif);color:var(--' + (c==="jaune"?"or":c) + ')">+2</b></span>').join("")
-          + '</div>'
-          + '<span class="gb-txt" style="text-align:center">6 pierres gagnées<br>'
-          + '<b style="color:var(--violet-c)">chapitre terminé</b></span></div>'
+        ? '<div class="gain-bizouk">'
+          + '<span class="pierre-gain">' + (window.BiZoukPierre ? window.BiZoukPierre.pierre("vert", 42) : "") + '</span>'
+          + '<span class="gb-nb" style="color:var(--vert)">+' + rb.gain + '</span>'
+          + '<span class="gb-txt">pierres BiZouk<br><b style="color:var(--vert)">chapitre terminé</b></span></div>'
         : '')
       + (serieB && !serieB.deja && serieB.bonus
           ? '<div class="gain-bizouk" style="margin-top:8px">'
-            + '<span class="pierre-gain">' + (window.BiZoukPierre ? window.BiZoukPierre.pierre("rose", 36) : "") + '</span>'
-            + '<span class="gb-nb" style="color:var(--rose)">+' + serieB.bonus + '</span>'
-            + '<span class="gb-txt">bonus série<br><b style="color:var(--rose)">' + serieB.palier + ' jours</b></span></div>'
+            + '<span class="pierre-gain">' + (window.BiZoukPierre ? window.BiZoukPierre.pierre("vert", 36) : "") + '</span>'
+            + '<span class="gb-nb" style="color:var(--vert)">+' + serieB.bonus + '</span>'
+            + '<span class="gb-txt">bonus série<br><b style="color:var(--vert)">' + serieB.palier + ' jours</b></span></div>'
           : '')
       + '<div class="bf-options" id="bfBoutons">'
       + '<a class="btn btn-v" href="parcours.html" id="btnSuite">Continuer le parcours</a>'

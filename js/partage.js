@@ -77,11 +77,7 @@
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 
     // Barre du haut
-    const bg = ctx.createLinearGradient(0, 0, W, 0);
-    bg.addColorStop(0, TEINTES.vert);
-    bg.addColorStop(0.5, TEINTES.jaune);
-    bg.addColorStop(1, TEINTES.rose);
-    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, 12);
+    ctx.fillStyle = TEINTES.vert; ctx.fillRect(0, 0, W, 12);
 
     const marge = 90;
 
@@ -124,12 +120,9 @@
       ctx.fillText(info.theme, W/2, y + 8);
     }
 
-    // Les trois gemmes
+    // La gemme
     const yGem = 700;
-    const espace = 150;
-    ["vert","jaune","rose"].forEach((c, i) => {
-      dessinerGemme(ctx, W/2 + (i-1)*espace, yGem, 92, c);
-    });
+    dessinerGemme(ctx, W/2, yGem, 100, "vert");
 
     // Total de pierres
     ctx.font = "700 52px Georgia, serif";
@@ -159,7 +152,7 @@
     cv.width = W; cv.height = H;
     const ctx = cv.getContext("2d");
 
-    const teinte = info.niveau === "Confirmé" ? TEINTES.jaune : TEINTES.vert;
+    const teinte = TEINTES.vert;
 
     const g = ctx.createLinearGradient(0, 0, W*0.7, H);
     g.addColorStop(0, melangeCouleur(teinte, 0.22));
@@ -212,7 +205,7 @@
 
     // Pierres gagnées
     if (info.pierres) {
-      const coul = info.niveau === "Confirmé" ? "jaune" : "vert";
+      const coul = "vert";
       dessinerGemme(ctx, W/2 - 70, 880, 64, coul);
       ctx.textAlign = "left";
       ctx.font = "700 44px Georgia, serif";

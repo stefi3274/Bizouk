@@ -142,7 +142,7 @@
         + '<span class="di-av">' + avatarDe(adversaire, 40) + '</span>'
         + '<span class="di-info"><span class="di-nom">' + (jeGagne ? '🏆 ' : '') + 'contre ' + esc(adversaire) + '</span>'
         + '<span class="di-detail">' + esc(d.chapitre_nom || "Grille") + ' · '
-        + ({1:"Découverte",2:"Confirmé",3:"Expert"}[d.niveau] || "Découverte") + '</span></span>'
+        + ({1:"Niveau 1",2:"Niveau 2",3:"Niveau 3",4:"Niveau 4",5:"Niveau 5"}[d.niveau] || "Niveau 1") + '</span></span>'
         + '<span class="di-temps ' + (jeGagne ? 'gagne' : 'perdu') + '">'
         + '<b>' + fmt(monTemps) + '</b><span>contre ' + fmt(sonTemps) + '</span></span>'
         + '</div>';

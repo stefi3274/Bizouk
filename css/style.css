@@ -185,6 +185,38 @@ header{position:sticky;top:0;z-index:100;background:rgba(28,27,33,.88);
   align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.3)}
 .contraste-btn.actif{background:var(--violet);border-color:var(--violet);color:#fff}
 
+.clair-btn{position:fixed;left:16px;bottom:66px;z-index:500;width:40px;height:40px;
+  border-radius:50%;background:var(--gris-2);border:1.5px solid var(--gris-3);
+  color:var(--texte-doux);font-size:1.1rem;cursor:pointer;display:flex;
+  align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+.clair-btn.actif{background:linear-gradient(135deg,#f0b429,#fb923c);border-color:#f0b429}
+
+/* Mode "grille claire", façon papier : ne touche que les pages de jeu,
+   activé par le bouton ☀️, jamais le reste du site. */
+html.grille-claire .jeu{
+  background:linear-gradient(160deg,#3b2a52 0%,#8a4a3d 45%,#c98a4b 75%,#e8b25c 100%);
+  border-radius:0;margin:0;max-width:100%;padding:20px 14px 70px}
+html.grille-claire .jeu-head{max-width:var(--wrap);margin:0 auto 14px}
+html.grille-claire .jeu-titre h1,
+html.grille-claire .jeu-titre{color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.35)}
+html.grille-claire .jeu-meta{color:rgba(255,255,255,.85)!important}
+html.grille-claire .jeu-stats .stat{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.25)}
+html.grille-claire .jeu-stats .stat b{color:#fff}
+html.grille-claire .jeu-stats .stat span{color:rgba(255,255,255,.75)}
+
+html.grille-claire .mots-box{background:linear-gradient(135deg,#2dd4bf,#14b8a6);
+  border:none;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+html.grille-claire .mots-box h3,
+html.grille-claire .mots-progres{color:#fff}
+html.grille-claire .mot{background:rgba(255,255,255,.92);color:#0f172a;font-weight:700}
+html.grille-claire .mot.trouve{background:rgba(255,255,255,.35);color:#fff;opacity:1}
+
+html.grille-claire .grille-box{background:#fdfaf3;border:none;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+html.grille-claire .case{background:#fdfaf3;color:#1c1b28;border-radius:0;font-weight:700}
+html.grille-claire .case:hover{background:#f3ecd8}
+html.grille-claire .case.select{background:#f0b429;color:#241a02}
+html.grille-claire .mystere-banniere{background:#fdfaf3;color:#b45309;border-color:#f0b429}
+
 .onb-carte{background:var(--gris-2);border:1px solid var(--gris-line);border-radius:20px;
   padding:32px 26px 26px;width:100%;max-width:380px;position:relative;text-align:center;
   animation:infoMonte .2s ease}

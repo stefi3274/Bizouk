@@ -1,12 +1,11 @@
 /* BiZouk — moteur de mots mêlés (génération + interaction) */
 (function () {
   const DIRS = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
-  const LETTRES = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const LETTRES = "ABCDEFGHIJKLMNOPQRSTUVWXYZÉÈÀÇÊ";
   const NB_COULEURS = 8;
 
   function normaliser(mot) {
-    return (mot || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      .toUpperCase().replace(/[^A-Z]/g, "");
+    return (mot || "").toUpperCase().replace(/[^A-ZÀÂÄÇÉÈÊËÎÏÔÖÙÛÜŸŒÆ]/g, "");
   }
 
   // Génère une grille contenant les mots donnés

@@ -6,7 +6,7 @@
     { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   const fmt = s => Math.floor(s/60) + ":" + String(s%60).padStart(2,"0");
   const MEDAILLES = ["🥇","🥈","🥉"];
-  const NOMS_NIV = { 1: "Découverte", 2: "Confirmé", 3: "Expert" };
+  const NOMS_NIV = { 1: "Niveau 1", 2: "Niveau 2", 3: "Niveau 3", 4: "Niveau 4", 5: "Niveau 5" };
 
   let niveauActif = "tous";
 

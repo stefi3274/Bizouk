@@ -44,17 +44,19 @@
 
     // Déterminer l'étape suivante dans ce chapitre
     let libelle, lien;
-    if (!P.reussi(chap.id, 1)) { libelle = "Découverte · 10 mots"; lien = "jeu.html?chapitre=" + chap.id + "&niveau=1"; }
-    else if (!P.reussi(chap.id, 2)) { libelle = "Confirmé · 10 mots"; lien = "jeu.html?chapitre=" + chap.id + "&niveau=2"; }
-    else if (!P.reussi(chap.id, 3)) { libelle = "Expert · 17 mots"; lien = "jeu.html?chapitre=" + chap.id + "&niveau=3"; }
-    else if (!P.bombeFaite(chap.id)) { libelle = "La Bombe 💣"; lien = "bombe.html?chapitre=" + chap.id; }
+    const MOTS_NIV = { 1: 6, 2: 7, 3: 8, 4: 9, 5: 10 };
+    const prochainNiveau = [1,2,3,4,5].find(n => !P.reussi(chap.id, n));
+    if (prochainNiveau) {
+      libelle = "Niveau " + prochainNiveau + " · " + MOTS_NIV[prochainNiveau] + " mots";
+      lien = "jeu.html?chapitre=" + chap.id + "&niveau=" + prochainNiveau;
+    } else if (!P.bombeFaite(chap.id)) { libelle = "La Bombe 💣"; lien = "bombe.html?chapitre=" + chap.id; }
     else {
       // Chapitre fini : proposer le suivant
       const idx = theme.chapitres.findIndex(x => x.id === chap.id);
       const suiv = theme.chapitres[idx + 1];
       if (!suiv) { zone.innerHTML = ""; return; }
       chap = suiv;
-      libelle = "Découverte · 10 mots";
+      libelle = "Niveau 1 · 6 mots";
       lien = "jeu.html?chapitre=" + suiv.id + "&niveau=1";
     }
 
@@ -67,15 +69,11 @@
   }
 
   function majCompteur() {
-    const d = window.Progression.detail();
-    ["vert","jaune","rose"].forEach(c => {
-      const badge = $("badge" + c.charAt(0).toUpperCase() + c.slice(1));
-      const nb = $("bz" + c.charAt(0).toUpperCase() + c.slice(1));
-      if (badge && window.BiZoukPierre && !badge.querySelector("svg")) {
-        badge.insertAdjacentHTML("afterbegin", window.BiZoukPierre.pierre(c, 17));
-      }
-      if (nb) nb.textContent = d[c];
-    });
+    const badge = $("badgeVert"), nb = $("bzVert");
+    if (badge && window.BiZoukPierre && !badge.querySelector("svg")) {
+      badge.insertAdjacentHTML("afterbegin", window.BiZoukPierre.pierre("vert", 17));
+    }
+    if (nb && window.Progression) nb.textContent = window.Progression.total();
   }
 
   // ---------- Chargement ----------
@@ -162,9 +160,11 @@
     t.chapitres.forEach((chap, ci) => {
       const ouvertChap = (ci === 0) || P.chapitreFini(t.chapitres[ci - 1].id);
       const NIVS = [
-        { n: 1, nom: "Découverte", icone: "1" },
-        { n: 2, nom: "Confirmé",   icone: "2" },
-        { n: 3, nom: "Expert",     icone: "3" }
+        { n: 1, nom: "Niveau 1", icone: "1" },
+        { n: 2, nom: "Niveau 2", icone: "2" },
+        { n: 3, nom: "Niveau 3", icone: "3" },
+        { n: 4, nom: "Niveau 4", icone: "4" },
+        { n: 5, nom: "Niveau 5", icone: "5" }
       ];
       NIVS.forEach(niv => {
         noeuds.push({

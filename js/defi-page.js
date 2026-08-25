@@ -125,7 +125,7 @@
       surVictoire: () => terminer()
     });
 
-    const pz = jeu.charger(defi.mots, 11, null, 12);
+    const pz = jeu.charger(defi.mots, 10, null, 11);
     totalMots = pz ? pz.placements.length : defi.mots.length;
     $("statRestants").textContent = totalMots;
 
@@ -216,9 +216,9 @@
     let blocSerie = "";
     if (serieD && !serieD.deja && serieD.bonus) {
       blocSerie = '<div class="gain-bizouk" style="margin-bottom:8px">'
-        + '<span class="pierre-gain">' + (window.BiZoukPierre ? window.BiZoukPierre.pierre("rose", 36) : "") + '</span>'
-        + '<span class="gb-nb" style="color:var(--rose)">+' + serieD.bonus + '</span>'
-        + '<span class="gb-txt">bonus série<br><b style="color:var(--rose)">' + serieD.palier + ' jours</b></span></div>';
+        + '<span class="pierre-gain">' + (window.BiZoukPierre ? window.BiZoukPierre.pierre("vert", 36) : "") + '</span>'
+        + '<span class="gb-nb" style="color:var(--vert)">+' + serieD.bonus + '</span>'
+        + '<span class="gb-txt">bonus série<br><b style="color:var(--vert)">' + serieD.palier + ' jours</b></span></div>';
       if (window.BiZoukConfetti) window.BiZoukConfetti.lancer();
     }
     $("resInvite").innerHTML = blocSerie + (place
@@ -235,7 +235,7 @@
     const duel = await window.BiZoukDuel.creer({
       chapitreId: defi.chapitreId || null,
       chapitreNom: "Défi du jour · " + defi.chapitre,
-      niveau: 3,
+      niveau: 5,
       mots: defi.mots,
       joueur: nomJoueur || "Un joueur",
       temps: temps

@@ -8,7 +8,7 @@
   const initiale = n => (n || "?").trim().charAt(0).toUpperCase();
 
   const code = (new URLSearchParams(location.search).get("code") || "").toUpperCase().trim();
-  const TAILLES = { 1: 9, 2: 10, 3: 11 };
+  const TAILLES = { 1: 8, 2: 8, 3: 9, 4: 9, 5: 10 };
 
   let duel = null, jeu = null, debut = null, minuteur = null, fini = false;
   let monNom = "", totalMots = 0, trouves = 0;
@@ -39,8 +39,8 @@
     poserAvatar($("avLui"), duel.lanceur_nom, 68);
     $("tempsLui").textContent = fmt(duel.lanceur_temps);
     $("infoGrille").textContent = duel.chapitre_nom || "Grille";
-    const MOTS_NIV = {1:10, 2:10, 3:17};
-    $("infoNiveau").textContent = ({1:"Découverte",2:"Confirmé",3:"Expert"}[duel.niveau] || "Découverte")
+    const MOTS_NIV = {1:6, 2:7, 3:8, 4:9, 5:10};
+    $("infoNiveau").textContent = ({1:"Niveau 1",2:"Niveau 2",3:"Niveau 3",4:"Niveau 4",5:"Niveau 5"}[duel.niveau] || "Niveau 1")
       + " · " + (MOTS_NIV[duel.niveau] || duel.mots.length) + " mots";
     $("infoTemps").textContent = fmt(duel.lanceur_temps);
     $("duelCarte").style.display = "block";
@@ -130,7 +130,7 @@
       surVictoire: () => terminer()
     });
 
-    const pz = jeu.charger(duel.mots, TAILLES[duel.niveau] || 9, null, duel.niveau === 3 ? 12 : null);
+    const pz = jeu.charger(duel.mots, TAILLES[duel.niveau] || 8, null, duel.niveau === 5 ? 11 : null);
     totalMots = pz ? pz.placements.length : duel.mots.length;
     majCourse();
 
@@ -181,6 +181,47 @@
   }
 
   // ---------- Fin ----------
+  async function lancerRevanche(bouton) {
+    bouton.disabled = true;
+    const avant = bouton.textContent;
+    bouton.textContent = "Création…";
+
+    const nouveauDuel = await window.BiZoukDuel.creer({
+      chapitreId: duel.chapitre_id || null,
+      chapitreNom: duel.chapitre_nom || "Revanche",
+      niveau: duel.niveau,
+      mots: duel.mots,
+      joueur: monNom,
+      temps: null
+    });
+
+    bouton.textContent = avant;
+    bouton.disabled = false;
+
+    if (!nouveauDuel) { alert("Impossible de créer la revanche pour le moment."); return; }
+
+    const lien = window.BiZoukDuel.lien(nouveauDuel.code);
+    const txt = encodeURIComponent(esc(duel.lanceur_nom) + ", je prends ma revanche sur BiZouk ! À toi de jouer : ");
+    const u = encodeURIComponent(lien);
+
+    $("revancheLiens").innerHTML =
+      '<div style="background:var(--gris-3);border-radius:12px;padding:16px;margin-top:16px">'
+      + '<div style="font-size:.78rem;color:var(--texte-faible);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Code de la revanche</div>'
+      + '<div style="font-family:var(--serif);font-size:1.9rem;font-weight:700;color:var(--violet-c);letter-spacing:.14em;margin-bottom:12px">'
+      + nouveauDuel.code + '</div>'
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">'
+      + '<a class="share-btn share-wa" href="https://wa.me/?text=' + txt + '%20' + u + '" target="_blank" rel="noopener">WhatsApp</a>'
+      + '<a class="share-btn share-tg" href="https://t.me/share/url?url=' + u + '&text=' + txt + '" target="_blank" rel="noopener">Telegram</a>'
+      + '<button class="share-btn" id="copierRevanche" style="background:var(--violet)">Copier le lien</button>'
+      + '</div></div>';
+
+    const cp = $("copierRevanche");
+    if (cp) cp.onclick = async () => {
+      try { await navigator.clipboard.writeText(lien); cp.textContent = "Copié ✓"; }
+      catch (e) { cp.textContent = "Copie impossible"; }
+    };
+  }
+
   async function terminer() {
     if (fini) return;
     fini = true;
@@ -195,7 +236,7 @@
     $("resEmoji").textContent = jeGagne ? "🏆" : "💪";
     $("resTitre").innerHTML = jeGagne
       ? 'Tu <b style="color:var(--vert)">remportes</b> le duel !'
-      : 'Presque !';
+      : 'Cette fois, c\'est <b style="color:var(--rouge)">' + esc(duel.lanceur_nom) + '</b> qui gagne';
 
     $("resContenu").innerHTML =
       arene(
@@ -206,8 +247,19 @@
       + '<div class="res-ecart">'
       + (jeGagne
           ? 'Plus rapide de <b>' + fmt(ecart) + '</b>. Beau travail.'
-          : 'Il te manquait <b>' + fmt(ecart) + '</b>. Lance ta revanche !')
+          : 'Il te manquait <b>' + fmt(ecart) + '</b>. Prends ta revanche, tu peux faire mieux !')
       + '</div>';
+
+    if (jeGagne) {
+      if (window.BiZoukSon) window.BiZoukSon.jouer("victoire");
+      if (window.BiZoukConfetti) window.BiZoukConfetti.lancer(2000, 1.4);
+    } else {
+      const br = $("btnRevanche");
+      if (br) {
+        br.style.display = "inline-flex";
+        br.onclick = () => lancerRevanche(br);
+      }
+    }
 
     // Bouton de partage du résultat
     const bp = $("btnPartagerRes");
@@ -215,7 +267,7 @@
       const info = {
         chapitre: duel.chapitre_nom || "Duel",
         theme: "",
-        niveau: duel.niveau === 20 ? "Confirmé" : "Découverte",
+        niveau: "Niveau " + duel.niveau,
         temps: fmt(t),
         mots: totalMots,
         pierres: 0,

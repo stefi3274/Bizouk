@@ -142,3 +142,31 @@ document.addEventListener("DOMContentLoaded", verifierRappelSerie);
     };
   });
 })();
+
+/* Mode clair pour la grille (façon papier), uniquement sur les pages de jeu.
+   N'affecte que l'apparence de la grille — le reste du site reste identique. */
+(function () {
+  const CLE = "bizouk_grille_claire";
+  function appliquer(actif) { document.documentElement.classList.toggle("grille-claire", actif); }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    if (!document.querySelector(".grille-box")) return; // seulement sur une page de jeu
+    appliquer(localStorage.getItem(CLE) === "1");
+
+    const b = document.createElement("button");
+    b.className = "clair-btn";
+    b.type = "button";
+    b.setAttribute("aria-label", "Grille claire façon papier");
+    b.title = "Grille claire façon papier";
+    b.textContent = "☀️";
+    document.body.appendChild(b);
+    b.classList.toggle("actif", localStorage.getItem(CLE) === "1");
+
+    b.onclick = () => {
+      const nouveau = localStorage.getItem(CLE) !== "1";
+      localStorage.setItem(CLE, nouveau ? "1" : "0");
+      appliquer(nouveau);
+      b.classList.toggle("actif", nouveau);
+    };
+  });
+})();

@@ -10,9 +10,11 @@
   const themeId = params.get("theme");
 
   const NIVEAUX = {
-    1: { nom: "Découverte", tailleMin: 9,  mots: 10, tri: "courts" },
-    2: { nom: "Confirmé",   tailleMin: 10, mots: 10, tri: "moyens" },
-    3: { nom: "Expert",     tailleMin: 11, tailleMax: 12, mots: 17, tri: "longs"  }
+    1: { nom: "Niveau 1", tailleMin: 8,  tailleMax: 9,  mots: 6,  tri: "courts" },
+    2: { nom: "Niveau 2", tailleMin: 8,  tailleMax: 9,  mots: 7,  tri: "courts" },
+    3: { nom: "Niveau 3", tailleMin: 9,  tailleMax: 10, mots: 8,  tri: "moyens" },
+    4: { nom: "Niveau 4", tailleMin: 9,  tailleMax: 10, mots: 9,  tri: "moyens" },
+    5: { nom: "Niveau 5", tailleMin: 10, tailleMax: 11, mots: 10, tri: "longs"  }
   };
   const conf = NIVEAUX[niveau] || NIVEAUX[1];
 
@@ -69,7 +71,7 @@
 
   // ---------- Chargement des mots ----------
   /* Choisit les mots selon le niveau :
-     Découverte prend les plus courts, Confirmé les moyens, Expert les plus longs. */
+     Les niveaux 1-2 prennent les mots les plus courts, 3-4 les moyens, 5 les plus longs. */
   function choisirMots(tous) {
     const liste = Array.isArray(tous) ? tous.slice() : [];
     if (!liste.length) return [];
@@ -367,9 +369,9 @@
         + '</span></div>';
       if (serie.bonus) {
         blocSerie += '<div class="gain-bizouk" style="margin-top:8px">'
-          + '<span class="pierre-gain">' + (window.BiZoukPierre ? window.BiZoukPierre.pierre("rose", 36) : "") + '</span>'
-          + '<span class="gb-nb" style="color:var(--rose)">+' + serie.bonus + '</span>'
-          + '<span class="gb-txt">bonus série<br><b style="color:var(--rose)">' + serie.palier + ' jours</b></span></div>';
+          + '<span class="pierre-gain">' + (window.BiZoukPierre ? window.BiZoukPierre.pierre("vert", 36) : "") + '</span>'
+          + '<span class="gb-nb" style="color:var(--vert)">+' + serie.bonus + '</span>'
+          + '<span class="gb-txt">bonus série<br><b style="color:var(--vert)">' + serie.palier + ' jours</b></span></div>';
         if (window.BiZoukConfetti) window.BiZoukConfetti.lancer();
       }
     }
@@ -401,9 +403,10 @@
   function prochaineEtape() {
     if (!chapitreId || !window.Progression) return null;
     const P = window.Progression;
-    if (niveau === 1) return { libelle: "Continuer · Confirmé", lien: "jeu.html?chapitre=" + chapitreId + "&niveau=2" };
-    if (niveau === 2) return { libelle: "Continuer · Expert", lien: "jeu.html?chapitre=" + chapitreId + "&niveau=3" };
-    if (niveau === 3) {
+    if (niveau >= 1 && niveau <= 4) {
+      return { libelle: "Continuer · Niveau " + (niveau + 1), lien: "jeu.html?chapitre=" + chapitreId + "&niveau=" + (niveau + 1) };
+    }
+    if (niveau === 5) {
       if (P.bombeFaite && P.bombeFaite(chapitreId)) return null;
       return { libelle: "Continuer · La Bombe 💣", lien: "bombe.html?chapitre=" + chapitreId };
     }
