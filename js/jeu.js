@@ -10,11 +10,11 @@
   const themeId = params.get("theme");
 
   const NIVEAUX = {
-    1: { nom: "Niveau 1", tailleMin: 8,  tailleMax: 9,  mots: 6,  tri: "courts" },
-    2: { nom: "Niveau 2", tailleMin: 8,  tailleMax: 9,  mots: 7,  tri: "courts" },
-    3: { nom: "Niveau 3", tailleMin: 9,  tailleMax: 10, mots: 8,  tri: "moyens" },
+    1: { nom: "Niveau 1", tailleMin: 7,  tailleMax: 7,  mots: 6,  tri: "courts" },
+    2: { nom: "Niveau 2", tailleMin: 7,  tailleMax: 8,  mots: 7,  tri: "courts" },
+    3: { nom: "Niveau 3", tailleMin: 8,  tailleMax: 9,  mots: 8,  tri: "moyens" },
     4: { nom: "Niveau 4", tailleMin: 9,  tailleMax: 10, mots: 9,  tri: "moyens" },
-    5: { nom: "Niveau 5", tailleMin: 10, tailleMax: 11, mots: 10, tri: "longs"  }
+    5: { nom: "Niveau 5", tailleMin: 10, tailleMax: 12, mots: 10, tri: "longs"  }
   };
   const conf = NIVEAUX[niveau] || NIVEAUX[1];
 
