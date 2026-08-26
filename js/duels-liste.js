@@ -114,6 +114,9 @@
     if (nav) { nav.textContent = "Mon compte"; nav.href = "compte.html"; }
 
     const duels = await window.BiZoukDuel.mesDuels();
+    if (window.BiZoukDuelRecompense) {
+      duels.filter(d => d.statut === "termine").forEach(d => window.BiZoukDuelRecompense.verifierEtCrediter(d, uid));
+    }
     if (!duels.length) {
       box.innerHTML = '<p style="text-align:center;color:var(--texte-faible);font-style:italic;padding:24px">'
         + 'Aucun duel pour l\'instant. Lance ton premier défi !</p>';

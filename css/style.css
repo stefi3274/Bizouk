@@ -988,6 +988,10 @@ body.accueil .foot-bas{border-color:rgba(255,255,255,.08)!important}
   text-transform:uppercase;color:var(--violet-c);margin-bottom:6px}
 .duel-accueil-inner h2{font-family:var(--serif);font-size:1.3rem;color:#fff;margin-bottom:4px}
 .duel-accueil-inner p{color:rgba(255,255,255,.55);font-size:.88rem}
-.duel-accueil-btns{display:flex;gap:10px;flex-wrap:wrap}
+.duel-accueil-vignettes{display:flex;gap:8px;flex-wrap:wrap}
+.duel-accueil-vignettes .racc-carte{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;padding:14px 18px;min-width:110px}
+.duel-accueil-vignettes .racc-ic{background:rgba(124,58,237,.25);border:1px solid var(--violet-c)}
+.duel-accueil-vignettes .racc-txt{color:#fff}
 @media (max-width:560px){.duel-accueil-inner{flex-direction:column;align-items:stretch;text-align:center}
-  .duel-accueil-btns{justify-content:center}}
+  .duel-accueil-vignettes{justify-content:center}}

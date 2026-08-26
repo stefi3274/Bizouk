@@ -109,7 +109,6 @@
       destinataireId: cible.userId, destinataireNom: cible.joueur
     });
 
-    if (window.Progression) { await window.Progression.init(); window.Progression.ajouterPierres(3); }
     if (window.BiZoukAnalytics) window.BiZoukAnalytics.evenement("partie_terminee", { mode: "duel_recherche" });
 
     $("resSous").textContent = duel

@@ -11,7 +11,7 @@
   const TAILLES = { 1: 8, 2: 8, 3: 9, 4: 9, 5: 10 };
 
   let duel = null, jeu = null, debut = null, minuteur = null, fini = false;
-  let monNom = "", totalMots = 0, trouves = 0;
+  let monNom = "", totalMots = 0, trouves = 0, monId = null;
 
   function poserAvatar(el, nom, taille) {
     if (!el) return;
@@ -50,6 +50,7 @@
       const { data } = await base.auth.getSession();
       if (data.session) {
         const u = data.session.user;
+        monId = u.id;
         const nom = (u.user_metadata && u.user_metadata.nom) ? u.user_metadata.nom : (u.email||"").split("@")[0];
         $("duelNom").value = nom;
         $("nomMoi").textContent = nom;
@@ -228,8 +229,8 @@
     clearInterval(minuteur);
     const t = Math.floor((Date.now() - debut)/1000);
 
-    await window.BiZoukDuel.repondre(code, monNom, t);
-    if (window.Progression) { await window.Progression.init(); window.Progression.ajouterPierres(3); }
+    const duelMaj = await window.BiZoukDuel.repondre(code, monNom, t);
+    if (duelMaj && window.BiZoukDuelRecompense) window.BiZoukDuelRecompense.verifierEtCrediter(duelMaj, monId);
 
     const jeGagne = t < duel.lanceur_temps;
     const ecart = Math.abs(t - duel.lanceur_temps);

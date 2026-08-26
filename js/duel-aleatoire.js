@@ -105,7 +105,6 @@
       entreprise_id: ent, duel_code: duel.code, user_id: monId, joueur: monNom || "Un joueur", statut: "attente"
     });
 
-    if (window.Progression) { await window.Progression.init(); window.Progression.ajouterPierres(3); }
     if (window.BiZoukAnalytics) window.BiZoukAnalytics.evenement("partie_terminee", { mode: "duel_aleatoire" });
 
     $("ecranAttente").style.display = "block";
@@ -127,6 +126,7 @@
     if (!duel || duel.statut !== "termine") { setTimeout(() => afficherResultatFinal(code), 4000); return; }
 
     $("ecranAttente").style.display = "none";
+    if (window.BiZoukDuelRecompense) window.BiZoukDuelRecompense.verifierEtCrediter(duel, monId);
     const jeGagne = duel.lanceur_temps < duel.adversaire_temps;
     $("resEmoji").textContent = jeGagne ? "🏆" : "💪";
     $("resTitre").textContent = jeGagne ? "Tu as gagné ce duel !" : "Cette fois, ton adversaire gagne";
