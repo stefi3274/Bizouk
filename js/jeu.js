@@ -50,14 +50,28 @@
   }
   function tempsEcoule() { return Math.floor((Date.now() - debut) / 1000); }
 
+  let defierIntention = false;
+
   function afficherApercu(mots) {
     const tries = mots.slice().sort((a, b) => a.localeCompare(b, "fr"));
     $("apercuSous").textContent = tries.length + " mot" + (tries.length > 1 ? "s" : "") + " à repérer dans la grille";
     $("apercuListe").innerHTML = tries.map(m => '<span class="mot">' + m + '</span>').join("");
     $("apercuMots").classList.add("on");
 
+    const bda = $("btnDefierAvant");
+    if (bda) {
+      bda.style.display = chapitreId ? "inline-flex" : "none";
+      bda.onclick = () => {
+        defierIntention = true;
+        $("apercuMots").classList.remove("on");
+        demarrerChrono();
+        sauverPartie();
+      };
+    }
+
     const bc = $("btnCommencer");
     bc.onclick = () => {
+      defierIntention = false;
       $("apercuMots").classList.remove("on");
       demarrerChrono();
       sauverPartie();
@@ -273,6 +287,11 @@
         bd.textContent = "Défier un ami";
         bd.onclick = () => lancerDuel(t, et.total);
         ligne.appendChild(bd);
+
+        if (defierIntention) {
+          defierIntention = false;
+          lancerDuel(t, et.total);
+        }
       }
 
       // Rejouer la même grille

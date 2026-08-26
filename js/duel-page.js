@@ -229,6 +229,7 @@
     const t = Math.floor((Date.now() - debut)/1000);
 
     await window.BiZoukDuel.repondre(code, monNom, t);
+    if (window.Progression) { await window.Progression.init(); window.Progression.ajouterPierres(3); }
 
     const jeGagne = t < duel.lanceur_temps;
     const ecart = Math.abs(t - duel.lanceur_temps);

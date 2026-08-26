@@ -35,6 +35,8 @@
           lanceur_nom: info.joueur || "Un joueur",
           lanceur_id: user ? user.id : null,
           lanceur_temps: info.temps,
+          destinataire_id: info.destinataireId || null,
+          destinataire_nom: info.destinataireNom || null,
           statut: "ouvert"
         }).select("*").single();
         if (!error) cree = data;
@@ -76,7 +78,7 @@
       return location.origin + location.pathname.replace(/[^/]*$/, "") + "duel.html?code=" + code;
     },
 
-    /* Mes duels (si connecté) */
+    /* Mes duels (si connecté), y compris ceux qui me sont adressés directement */
     async mesDuels() {
       const base = await db();
       if (!base) return [];
@@ -84,9 +86,30 @@
       if (!sess.session) return [];
       const uid = sess.session.user.id;
       const { data } = await base.from("duels").select("*")
-        .or("lanceur_id.eq." + uid + ",adversaire_id.eq." + uid)
+        .or("lanceur_id.eq." + uid + ",adversaire_id.eq." + uid + ",destinataire_id.eq." + uid)
         .order("created_at", { ascending: false }).limit(30);
       return data || [];
+    },
+
+    /* Rechercher un joueur par pseudo, parmi ceux qui ont déjà joué au moins une grille */
+    async chercherJoueur(pseudo) {
+      const base = await db();
+      if (!base || !pseudo || pseudo.trim().length < 2) return [];
+      const ent = await entrepriseId();
+      if (!ent) return [];
+      const { data: sess } = await base.auth.getSession();
+      const monId = sess.session ? sess.session.user.id : null;
+
+      const { data } = await base.from("parties").select("user_id, joueur")
+        .eq("entreprise_id", ent).ilike("joueur", "%" + pseudo.trim() + "%").limit(50);
+
+      const vus = new Set(); const resultats = [];
+      (data || []).forEach(p => {
+        if (!p.user_id || vus.has(p.user_id) || p.user_id === monId) return;
+        vus.add(p.user_id);
+        resultats.push({ userId: p.user_id, joueur: p.joueur });
+      });
+      return resultats.slice(0, 10);
     }
   };
 

@@ -920,3 +920,74 @@ input[name="niv"]:checked + .niv-radio{background:var(--violet);border-color:var
   display:flex;align-items:center;justify-content:center;transition:all .2s;padding:0}
 .btn-retour:hover{border-color:var(--violet);color:var(--violet-c);background:var(--gris-3)}
 .btn-retour svg{width:19px;height:19px;display:block}
+
+/* ============================================================
+   Accueil — refonte noir / blanc / violet
+   Ne touche que index.html (body.accueil), le reste du site
+   garde le thème gris habituel.
+   ============================================================ */
+body.accueil{background:#000}
+body.accueil header{background:#000;border-bottom:1px solid rgba(255,255,255,.08)}
+body.accueil .nav-liens a{color:rgba(255,255,255,.55)}
+body.accueil .nav-liens a:hover,
+body.accueil .nav-liens a.on{color:#fff}
+body.accueil .btn-connexion{border-color:rgba(255,255,255,.18);color:#fff}
+
+body.accueil .hero{padding:72px 20px 24px}
+body.accueil .hero-eyebrow{color:var(--violet-c);letter-spacing:.18em}
+body.accueil .hero h1{color:#fff;letter-spacing:-.035em;font-weight:700}
+body.accueil .hero h1 b{color:var(--violet-c);
+  background:linear-gradient(135deg,var(--violet-c),#fff);-webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent}
+body.accueil .hero p{color:rgba(255,255,255,.62)}
+body.accueil .hero-stats{color:rgba(255,255,255,.45)}
+body.accueil .hero-stats b{color:#fff}
+
+body.accueil .btn-v{background:var(--violet);border:1px solid var(--violet);color:#fff;
+  box-shadow:0 8px 24px rgba(124,58,237,.35)}
+body.accueil .btn-v:hover{background:var(--violet-d)}
+body.accueil .btn-g{background:transparent;border:1.5px solid rgba(255,255,255,.25);color:#fff}
+body.accueil .btn-g:hover{border-color:#fff}
+
+body.accueil .mg-grille{background:#0a0a0c;border-color:rgba(255,255,255,.1)}
+body.accueil .mg-c{background:rgba(255,255,255,.06);color:rgba(255,255,255,.4)}
+body.accueil .hero-visuel-legende{color:rgba(255,255,255,.4)}
+
+body.accueil .install-bandeau{background:#0a0a0c;border-color:var(--violet-c);color:#fff}
+
+body.accueil .raccourcis{border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)}
+body.accueil .racc-carte{color:#fff}
+body.accueil .racc-carte:hover{background:rgba(255,255,255,.05)}
+body.accueil .racc-ic{background:#0a0a0c;border-color:rgba(255,255,255,.15)}
+body.accueil .racc-carte:hover .racc-ic{border-color:var(--violet-c);background:rgba(124,58,237,.18)}
+body.accueil .racc-txt{color:rgba(255,255,255,.6)}
+
+body.accueil .niveaux-eyebrow{color:var(--violet-c)}
+body.accueil .niveaux-titre{color:#fff}
+body.accueil .niveaux-sous{color:rgba(255,255,255,.55)}
+body.accueil .niv-carte{background:#0a0a0c;border:1px solid rgba(255,255,255,.1)}
+body.accueil .niv-carte:hover{border-color:var(--nc,var(--violet-c));transform:translateY(-3px)}
+body.accueil .niv-carte h3{color:#fff}
+body.accueil .niv-carte p{color:rgba(255,255,255,.5)}
+body.accueil .niv-taille{color:rgba(255,255,255,.4)}
+
+body.accueil .invite-inner{background:linear-gradient(135deg,rgba(124,58,237,.28),#0a0a0c);border:1px solid rgba(255,255,255,.1)}
+body.accueil .invite-txt h3{color:#fff}
+body.accueil .invite-txt p{color:rgba(255,255,255,.6)}
+
+body.accueil footer{background:#000;border-top:1px solid rgba(255,255,255,.08)}
+body.accueil .foot-inner,
+body.accueil .foot-inner a{color:rgba(255,255,255,.5)}
+body.accueil .foot-bas{border-color:rgba(255,255,255,.08)!important}
+
+.duel-accueil{max-width:var(--wrap);margin:0 auto 8px;padding:0 20px}
+.duel-accueil-inner{background:linear-gradient(135deg,#1a1025,#0a0a0c);border:1px solid rgba(124,58,237,.4);
+  border-radius:var(--r-lg);padding:26px 28px;display:flex;flex-wrap:wrap;gap:18px;
+  align-items:center;justify-content:space-between}
+.duel-accueil-eyebrow{display:block;font-size:.76rem;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--violet-c);margin-bottom:6px}
+.duel-accueil-inner h2{font-family:var(--serif);font-size:1.3rem;color:#fff;margin-bottom:4px}
+.duel-accueil-inner p{color:rgba(255,255,255,.55);font-size:.88rem}
+.duel-accueil-btns{display:flex;gap:10px;flex-wrap:wrap}
+@media (max-width:560px){.duel-accueil-inner{flex-direction:column;align-items:stretch;text-align:center}
+  .duel-accueil-btns{justify-content:center}}

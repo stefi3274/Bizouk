@@ -12,7 +12,7 @@
   const params = new URLSearchParams(location.search);
   const chapitreId = params.get("chapitre");
 
-  let jeu = null, reste = DUREE, minuteur = null, cibles = [], termine = false;
+  let jeu = null, reste = DUREE, minuteur = null, cibles = [], termine = false, defierIntentionBombe = false, motsBombeCourant = [];
   let chapitreCourant = null, themeNomCourant = "";
 
   function fmt(s) { return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0"); }
@@ -136,6 +136,7 @@
     // Générer la grille, puis choisir LE mot cible selon la difficulté du joueur
     const puzzle = jeu.charger(res.mots, 9, null, 10);
     const places = puzzle.placements.map(p => p.mot);
+    motsBombeCourant = places;
     cibles = [choisirCible(places)];
     jeu.definirCibles(cibles);
 
@@ -153,6 +154,13 @@
     $("apercuListe").innerHTML = '<span class="mot" style="font-size:1.1rem;padding:10px 18px">' + mot + '</span>';
     $("apercuMots").classList.add("on");
     $("btnCommencer").onclick = () => {
+      defierIntentionBombe = false;
+      $("apercuMots").classList.remove("on");
+      demarrer();
+    };
+    const bda = $("btnDefierAvant");
+    if (bda) bda.onclick = () => {
+      defierIntentionBombe = true;
       $("apercuMots").classList.remove("on");
       demarrer();
     };
@@ -164,11 +172,11 @@
     termine = true;
     clearInterval(minuteur);
 
-    const resteAffiche = fmt(Math.max(0, reste));
+    const tempsEcoule = fmt(Math.max(0, DUREE - reste));
     $("bfCarte").className = "bf-carte reussi";
     $("bfEmoji").textContent = "🎉";
     $("bfTitre").innerHTML = "Bombe <b style='color:var(--vert)'>neutralisée</b>";
-    $("bfSous").textContent = "Tu assures ! Il te restait " + resteAffiche + ".";
+    $("bfSous").textContent = "Tu assures ! Désamorcée en " + tempsEcoule + ".";
     $("bfContenu").innerHTML = '<p style="font-size:.85rem;color:var(--texte-faible)">Calcul des récompenses…</p>';
 
     // Le panneau apparaît ici, immédiatement — pas d'attente réseau avant la célébration.
@@ -184,7 +192,7 @@
 
     const nom = window.Progression.connecte() ? await nomJoueur() : null;
     if (nom) {
-      $("bfSous").innerHTML = "Bravo <b>" + esc(nom) + "</b>, tu assures ! Il te restait " + resteAffiche + ".";
+      $("bfSous").innerHTML = "Bravo <b>" + esc(nom) + "</b>, tu assures ! Désamorcée en " + tempsEcoule + ".";
     }
 
     $("bfContenu").innerHTML =
@@ -204,10 +212,12 @@
       + '<a class="btn btn-v" href="parcours.html" id="btnSuite">Continuer le parcours</a>'
       + '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px">'
       + '<button class="btn btn-g btn-sm" id="btnPartager">Partager</button>'
+      + '<button class="btn btn-g btn-sm" id="btnDefierApres">🎯 Défier un ami</button>'
       + (nom ? '' : '<a class="btn btn-g btn-sm" href="inscription.html">Créer un compte</a>')
       + '</div>'
       + '</div>'
-      + '<div class="partage-liens" id="partageLiens"></div>';
+      + '<div class="partage-liens" id="partageLiens"></div>'
+      + '<div class="partage-liens" id="defiBombeLiens"></div>';
 
     if (serieB && serieB.bonus && window.BiZoukConfetti) window.BiZoukConfetti.lancer();
 
@@ -236,6 +246,55 @@
       bp.textContent = (r === "telecharge") ? "Image téléchargée" : avant;
       if (r === "telecharge") afficherLiensPartage(info);
       setTimeout(() => { bp.textContent = avant; bp.disabled = false; }, 2200);
+    };
+
+    const bd = $("btnDefierApres");
+    if (bd) bd.onclick = () => lancerDefiBombe(nom, DUREE - Math.max(0, reste), true);
+
+    if (defierIntentionBombe) {
+      defierIntentionBombe = false;
+      lancerDefiBombe(nom, DUREE - Math.max(0, reste), true);
+    }
+  }
+
+  async function lancerDefiBombe(nom, temps, reussi) {
+    const zone = $("defiBombeLiens");
+    if (zone) zone.innerHTML = '<p style="color:var(--texte-doux);font-size:.88rem;margin-top:14px">Création du duel…</p>';
+
+    const duel = await window.BiZoukDuelBombe.creer({
+      chapitreId: chapitreId || null,
+      chapitreNom: chapitreCourant ? chapitreCourant.nom : "Bombe",
+      mots: motsBombeCourant,
+      cible: cibles[0],
+      joueur: nom || "Un joueur",
+      temps: reussi ? temps : null,
+      reussi: reussi
+    });
+
+    if (!duel) {
+      if (zone) zone.innerHTML = '<p style="color:#fca5a5;font-size:.88rem;margin-top:14px">Impossible de créer le duel.</p>';
+      return;
+    }
+
+    const lien = window.BiZoukDuelBombe.lien(duel.code);
+    const txt = encodeURIComponent("Je te défie sur la Bombe BiZouk ! Même grille, même mot à trouver. À toi de jouer : ");
+    const u = encodeURIComponent(lien);
+
+    if (zone) zone.innerHTML =
+      '<div style="background:var(--gris-3);border-radius:12px;padding:16px;margin-top:16px">'
+      + '<div style="font-size:.78rem;color:var(--texte-faible);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Code du duel Bombe</div>'
+      + '<div style="font-family:var(--serif);font-size:1.9rem;font-weight:700;color:var(--violet-c);letter-spacing:.14em;margin-bottom:12px">'
+      + duel.code + '</div>'
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">'
+      + '<a class="share-btn share-wa" href="https://wa.me/?text=' + txt + '%20' + u + '" target="_blank" rel="noopener">WhatsApp</a>'
+      + '<a class="share-btn share-tg" href="https://t.me/share/url?url=' + u + '&text=' + txt + '" target="_blank" rel="noopener">Telegram</a>'
+      + '<button class="share-btn" id="copierDefiBombe" style="background:var(--violet)">Copier le lien</button>'
+      + '</div></div>';
+
+    const cp = $("copierDefiBombe");
+    if (cp) cp.onclick = async () => {
+      try { await navigator.clipboard.writeText(lien); cp.textContent = "Copié ✓"; }
+      catch (e) { cp.textContent = "Copie impossible"; }
     };
   }
 
@@ -317,7 +376,16 @@
             : '<button class="bf-opt" id="optReessayer"><b>Réessayer la bombe</b><span>Le blocage est terminé</span></button>')
         + '<a class="bf-opt" href="parcours.html" style="display:block;text-decoration:none">'
         + '<b>Revenir au parcours</b><span>Tu peux rejouer des niveaux en attendant</span></a>'
-        + '</div>';
+        + '<button class="bf-opt" id="optDefierRate"><b>🎯 Défier un ami sur cette bombe</b><span>Même grille, à lui de faire mieux</span></button>'
+        + '</div>'
+        + '<div class="partage-liens" id="defiBombeLiens"></div>';
+
+      const od = $("optDefierRate");
+      if (od) od.onclick = async () => lancerDefiBombe(await nomJoueur(), null, false);
+      if (defierIntentionBombe) {
+        defierIntentionBombe = false;
+        nomJoueur().then(n => lancerDefiBombe(n, null, false));
+      }
 
       const p = $("optPayer");
       if (p) p.onclick = async () => {

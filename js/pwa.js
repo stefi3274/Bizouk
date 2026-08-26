@@ -118,6 +118,23 @@ async function verifierRappelSerie() {
 }
 document.addEventListener("DOMContentLoaded", verifierRappelSerie);
 
+/* Présence : signale que le joueur est actif, toutes les 90s, là où Progression est chargé. */
+(function () {
+  async function battement() {
+    if (!window.Progression) return;
+    try {
+      await window.Progression.init();
+      if (window.Progression.connecte && window.Progression.connecte()) {
+        window.Progression.enregistrerActivite();
+      }
+    } catch (e) {}
+  }
+  document.addEventListener("DOMContentLoaded", () => {
+    battement();
+    setInterval(battement, 90000);
+  });
+})();
+
 /* Mode contraste élevé / daltonien — disponible partout, mémorisé sur l'appareil */
 (function () {
   const CLE = "bizouk_contraste";

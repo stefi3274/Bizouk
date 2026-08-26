@@ -344,6 +344,20 @@
 
     async reinitialiser() { etat = vide(); await sauver(); },
 
+    async ajouterPierres(nb) {
+      etat.bizouk_vert += (nb || 0);
+      sauver().catch(() => {});
+    },
+
+    async enregistrerActivite() {
+      if (!utilisateur) return;
+      try {
+        const base = await db();
+        if (!base) return;
+        await base.from("progression").update({ derniere_activite: new Date().toISOString() }).eq("user_id", utilisateur.id);
+      } catch (e) {}
+    },
+
     async ajouterBadge(nomBadge, pierres) {
       if (!Array.isArray(etat.badges)) etat.badges = [];
       etat.badges.push({ nom: nomBadge, date: new Date().toISOString().slice(0,10) });

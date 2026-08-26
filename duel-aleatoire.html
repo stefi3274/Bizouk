@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Duel aléatoire · BiZouk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1c1b21">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16">
+
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="index.html" class="logo"><img src="icons/icon-192.png" alt="BiZouk" class="logo-mark"><span class="logo-txt">Bi<b>Zouk</b></span></a>
+    <nav class="nav-liens"><a href="duels.html">Duels</a></nav>
+    <a href="connexion.html" class="btn-connexion" id="navAuth">Se connecter</a>
+  </div>
+</header>
+
+<main class="page" id="ecranIntro" style="max-width:480px">
+  <div style="text-align:center;margin-bottom:22px">
+    <p class="page-kicker" style="text-align:center">🎲 Duel aléatoire</p>
+    <h1 style="font-family:var(--serif);font-size:clamp(1.7rem,5vw,2.2rem);color:var(--blanc)">Affronte quelqu'un maintenant</h1>
+    <p style="color:var(--texte-doux);margin-top:8px">On te met en relation avec un autre joueur. Si personne n'est disponible tout de suite, tu joues et on te trouve un adversaire dès que possible.</p>
+  </div>
+  <div class="form-carte" style="text-align:center" id="introCarte">
+    <button class="btn btn-v" id="btnChercher" style="width:100%">Chercher un adversaire</button>
+  </div>
+</main>
+
+<main class="page" id="ecranAttente" style="max-width:480px;display:none">
+  <div class="form-carte" style="text-align:center">
+    <div style="font-size:2.4rem;margin-bottom:10px">⏳</div>
+    <h2 style="font-family:var(--serif);color:var(--blanc);margin-bottom:8px">En attente d'un adversaire</h2>
+    <p style="color:var(--texte-doux);font-size:.9rem;margin-bottom:16px" id="attenteTexte">Ton temps est enregistré. Dès qu'un autre joueur cherche un duel aléatoire, vous serez mis en relation.</p>
+    <p style="color:var(--texte-faible);font-size:.82rem">Tu peux fermer cette page — retrouve ton duel dans "Mes duels".</p>
+    <a href="duels.html" class="btn btn-g btn-sm" style="margin-top:14px">Voir mes duels</a>
+  </div>
+</main>
+
+<!-- Le jeu -->
+<main class="jeu" id="ecranJeu" style="display:none">
+  <div class="jeu-head">
+    <div class="jeu-titre"><h1 id="jeuTitre">Duel aléatoire</h1><div class="jeu-meta" id="jeuMeta"></div></div>
+    <div class="jeu-stats no-print">
+      <div class="stat chrono"><b id="chrono">0:00</b><span>Temps</span></div>
+      <div class="stat"><b id="statTrouves">0</b><span>Trouvés</span></div>
+      <div class="stat"><b id="statRestants">0</b><span>Restants</span></div>
+    </div>
+  </div>
+  <div class="jeu-corps">
+    <div class="grille-box"><div class="grille" id="grille"></div></div>
+    <div class="mots-box">
+      <h3>Mots à trouver</h3>
+      <div class="mots-progres" id="motsProgres">—</div>
+      <div class="mots-liste" id="motsListe"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Résultat -->
+<div class="victoire" id="resultat">
+  <div class="vic-carte" style="max-width:460px">
+    <div class="vic-emoji" id="resEmoji">🏆</div>
+    <h2 id="resTitre">Résultat</h2>
+    <div id="resContenu"></div>
+    <div class="vic-actions" style="margin-top:20px">
+      <a class="btn btn-v btn-sm" href="duel-aleatoire.html">Nouveau duel aléatoire</a>
+      <a class="btn btn-g btn-sm" href="index.html">Retour</a>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/progression.js"></script>
+<script src="js/son.js"></script>
+<script src="js/moteur.js"></script>
+<script src="js/confetti.js"></script>
+<script src="js/duel.js"></script>
+<script src="js/duel-aleatoire.js"></script>
+<script src="js/retour.js"></script>
+<script src="js/pwa.js"></script>
+<script src="js/analytics.js"></script>
+</body>
+</html>
