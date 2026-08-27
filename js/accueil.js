@@ -77,16 +77,6 @@
         + '<div style="margin-top:12px;font-size:.85rem;font-weight:600;color:var(--nc)">Voir les chapitres →</div>'
         + '</a>';
     }).join("");
-
-    // Ligne de stats du hero, à partir des mêmes données (pas de requête en plus)
-    const hs = $("heroStats");
-    if (hs) {
-      const totalMots = (rC.data || []).reduce((s, c) => s + (Array.isArray(c.mots) ? c.mots.length : 0), 0);
-      hs.innerHTML = '<b>' + themes.length + '</b> thème' + (themes.length > 1 ? 's' : '')
-        + ' · <b>' + rC.data.length + '</b> chapitre' + (rC.data.length > 1 ? 's' : '')
-        + ' · <b>' + totalMots.toLocaleString("fr-FR") + '</b> mots à trouver';
-      hs.style.display = "block";
-    }
   }
 
   async function majAuth() {

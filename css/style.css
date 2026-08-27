@@ -99,19 +99,22 @@ header{position:sticky;top:0;z-index:100;background:rgba(28,27,33,.88);
 .hero-grid{display:grid;grid-template-columns:1fr;gap:40px;align-items:center;text-align:center}
 .hero h1{font-family:var(--serif);font-size:clamp(2.2rem,7vw,3.3rem);font-weight:700;
   color:var(--blanc);letter-spacing:-.03em;line-height:1.05;margin-bottom:14px}
-.hero h1 b{color:var(--violet-c);font-weight:700}
+.mot-vif{color:var(--c,var(--violet-c));font-weight:800;position:relative;white-space:nowrap}
+.mot-vif::after{content:"";position:absolute;left:-2px;right:-2px;bottom:.05em;height:.24em;
+  background:var(--c,var(--violet-c));opacity:.28;border-radius:3px;z-index:-1}
 .hero p{color:var(--texte-doux);font-size:1.08rem;max-width:520px;margin:0 auto 26px}
 .hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 .hero-stats{margin-top:20px;font-size:.84rem;color:var(--texte-faible)}
 .hero-stats b{color:var(--texte-doux);font-weight:700}
 .hero-visuel{display:flex;flex-direction:column;align-items:center;gap:10px}
-.hero-vignettes{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:340px}
-.hv-carte{background:var(--gris-2);border:1px solid var(--gris-line);border-radius:var(--r-lg);
-  padding:22px 14px;display:flex;flex-direction:column;align-items:center;gap:10px;
-  transition:transform .2s,border-color .2s}
-.hv-carte:hover{transform:translateY(-3px);border-color:var(--violet-c)}
-.hv-ic{font-size:1.9rem}
-.hv-txt{font-size:.86rem;font-weight:600;color:var(--texte-doux);text-align:center}
+.hero-vignettes{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:400px}
+.hv-carte{background:var(--gris-2);border:1px solid var(--gris-line);border-top:3px solid var(--hv,var(--violet-c));
+  border-radius:var(--r-lg);padding:30px 18px;display:flex;flex-direction:column;align-items:center;gap:14px;
+  transition:transform .25s,box-shadow .25s}
+.hv-carte:hover{transform:translateY(-5px);box-shadow:0 14px 30px -10px var(--hv,var(--violet-c))}
+.hv-ic{font-size:2.4rem;width:64px;height:64px;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;background:color-mix(in srgb, var(--hv,var(--violet-c)) 20%, transparent)}
+.hv-txt{font-size:.95rem;font-weight:700;color:var(--texte);text-align:center;letter-spacing:-.01em}
 @media (min-width:900px){
   .hero-grid{grid-template-columns:1.1fr .9fr;gap:48px;text-align:left}
   .hero p{margin:0 0 26px}
@@ -951,9 +954,6 @@ body.accueil .btn-connexion{border-color:rgba(255,255,255,.18);color:#fff}
 body.accueil .hero{padding:72px 20px 24px}
 body.accueil .hero-eyebrow{color:var(--violet-c);letter-spacing:.18em}
 body.accueil .hero h1{color:#fff;letter-spacing:-.035em;font-weight:700}
-body.accueil .hero h1 b{color:var(--violet-c);
-  background:linear-gradient(135deg,var(--violet-c),#fff);-webkit-background-clip:text;background-clip:text;
-  -webkit-text-fill-color:transparent}
 body.accueil .hero p{color:rgba(255,255,255,.62)}
 body.accueil .hero-stats{color:rgba(255,255,255,.45)}
 body.accueil .hero-stats b{color:#fff}
@@ -965,8 +965,7 @@ body.accueil .btn-g{background:transparent;border:1.5px solid rgba(255,255,255,.
 body.accueil .btn-g:hover{border-color:#fff}
 
 body.accueil .hv-carte{background:#0a0a0c;border-color:rgba(255,255,255,.1)}
-body.accueil .hv-txt{color:rgba(255,255,255,.65)}
-body.accueil .hv-carte:hover{border-color:var(--violet-c);background:rgba(124,58,237,.1)}
+body.accueil .hv-txt{color:rgba(255,255,255,.85)}
 
 body.accueil .install-bandeau{background:#0a0a0c;border-color:var(--violet-c);color:#fff}
 
