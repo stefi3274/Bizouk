@@ -110,7 +110,7 @@ header{position:sticky;top:0;z-index:100;background:rgba(28,27,33,.88);
 .hero-vignettes{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:400px}
 .hv-carte{background:var(--gris-2);border:1px solid var(--gris-line);border-top:3px solid var(--hv,var(--violet-c));
   border-radius:var(--r-lg);padding:30px 18px;display:flex;flex-direction:column;align-items:center;gap:14px;
-  transition:transform .25s,box-shadow .25s}
+  text-decoration:none;cursor:pointer;transition:transform .25s,box-shadow .25s}
 .hv-carte:hover{transform:translateY(-5px);box-shadow:0 14px 30px -10px var(--hv,var(--violet-c))}
 .hv-ic{font-size:2.4rem;width:64px;height:64px;display:flex;align-items:center;justify-content:center;
   border-radius:50%;background:color-mix(in srgb, var(--hv,var(--violet-c)) 20%, transparent)}
