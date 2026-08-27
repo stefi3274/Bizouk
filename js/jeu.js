@@ -245,6 +245,17 @@
     if (act) {
       act.innerHTML = "";   // on repart propre à chaque victoire
 
+      // La zone où le code/liens du duel s'afficheront — créée AVANT tout
+      // déclenchement possible de lancerDuel(), sinon elle écrit dans le vide.
+      let zoneL = document.getElementById("vicLiens");
+      if (!zoneL) {
+        zoneL = document.createElement("div");
+        zoneL.id = "vicLiens"; zoneL.className = "partage-liens";
+        document.querySelector("#victoire .vic-carte").appendChild(zoneL);
+      } else {
+        zoneL.innerHTML = ""; // repartir propre à chaque victoire, comme act
+      }
+
       // 1) L'action principale : continuer vers la suite
       const suite = prochaineEtape();
       if (suite) {
@@ -309,13 +320,6 @@
       }
 
       act.appendChild(ligne);
-    }
-
-    let zoneL = document.getElementById("vicLiens");
-    if (!zoneL) {
-      zoneL = document.createElement("div");
-      zoneL.id = "vicLiens"; zoneL.className = "partage-liens";
-      document.querySelector(".vic-carte").appendChild(zoneL);
     }
 
     // Le popup apparaît ici, immédiatement — digne d'une victoire, sans latence.
@@ -575,6 +579,11 @@
       if (nav) { nav.textContent = "Mon compte"; nav.href = "compte.html"; }
     }
   })();
+
+  // Écran d'intro (grille animée) : se ferme au clic, puis la partie démarre
+  const fermerIntro = () => { const el = $("introJeu"); if (el) el.classList.remove("on"); };
+  const _bfi = $("btnFermerIntro"); if (_bfi) _bfi.addEventListener("click", fermerIntro);
+  const _bci = $("btnCommencerIntro"); if (_bci) _bci.addEventListener("click", fermerIntro);
 
   lancer();
 })();
