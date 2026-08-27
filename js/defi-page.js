@@ -226,6 +226,24 @@
         + place.total + ' joueur' + (place.total > 1 ? 's' : '') + ' aujourd\'hui.'
       : 'Tu joues sans compte : ton temps n\'apparaît pas au classement.<br>'
         + '<a href="inscription.html" style="color:var(--violet-c);font-weight:600">Créer un compte →</a>');
+
+    // Grand moment (palier de série) : les liens de partage apparaissent tout
+    // de suite, sans avoir à cliquer "Partager" d'abord.
+    if (serieD && !serieD.deja && serieD.bonus) {
+      const infoSerie = {
+        chapitre: "Défi du jour · " + defi.chapitre, theme: defi.theme, niveau: "Défi",
+        temps: fmt(t), mots: totalMots, pierres: serieD.bonus,
+        joueur: place && place.resultat ? place.resultat.joueur : null
+      };
+      const l = window.BiZoukPartage.liensNiveau(infoSerie);
+      const zl = $("resLiens");
+      if (zl && !zl.innerHTML) {
+        zl.innerHTML = '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px">'
+          + '<a class="share-btn share-wa" href="' + l.whatsapp + '" target="_blank" rel="noopener">WhatsApp</a>'
+          + '<a class="share-btn share-tg" href="' + l.telegram + '" target="_blank" rel="noopener">Telegram</a>'
+          + '</div>';
+      }
+    }
   }
 
   async function lancerDuelDefi(temps, nomJoueur) {

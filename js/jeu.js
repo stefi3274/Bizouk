@@ -399,6 +399,15 @@
       ? '<a href="classement.html" style="color:var(--violet-c);font-weight:600;font-size:.88rem">Voir le classement →</a>'
       : '<span style="font-size:.86rem">Sans compte, ta progression reste sur cet appareil. '
         + '<a href="inscription.html" style="color:var(--violet-c);font-weight:600">Créer un compte →</a></span>');
+
+    // Grand moment (palier de série) : les liens de partage apparaissent tout de
+    // suite, sans avoir à cliquer "Partager" d'abord.
+    if (serie && serie.bonus && chapitreCourant) {
+      afficherLiensPartage({
+        chapitre: chapitreCourant.nom, theme: themeCourant ? themeCourant.nom : "",
+        niveau: conf.nom, temps: fmt(t), mots: et.total, pierres: serie.bonus, joueur: nomCourant || null
+      });
+    }
   }
 
   function afficherLiensPartage(info) {

@@ -737,6 +737,12 @@ div[style*="position:relative"] > button svg {
   background:var(--gris-3);border-radius:12px;padding:12px;margin-top:4px}
 .res-ecart b{color:var(--blanc)}
 
+.invite-post-duel{text-align:center;margin-top:16px;padding:18px;border-radius:14px;
+  background:linear-gradient(135deg,rgba(124,58,237,.22),rgba(124,58,237,.06));
+  border:1px solid var(--violet-c)}
+.invite-post-duel p{color:var(--texte);font-size:.92rem;margin-bottom:12px}
+.invite-post-duel p b{color:var(--blanc)}
+
 @media (max-width:480px){
   .comb-avatar{width:62px;height:62px;font-size:1.5rem}
   .comb-temps{font-size:1.25rem}

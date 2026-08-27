@@ -252,6 +252,15 @@
           : 'Il te manquait <b>' + fmt(ecart) + '</b>. Prends ta revanche, tu peux faire mieux !')
       + '</div>';
 
+    if (!monId) {
+      const lienInscription = "inscription.html?parrain=" + encodeURIComponent(duel.lanceur_id || "")
+        + "&retour=" + encodeURIComponent(location.href);
+      $("resContenu").innerHTML += '<div class="invite-post-duel">'
+        + '<p><b>Garde ta progression, tes pierres, et défie encore plus de monde.</b></p>'
+        + '<a href="' + lienInscription + '" class="btn btn-v btn-sm">Créer mon compte gratuitement</a>'
+        + '</div>';
+    }
+
     if (jeGagne) {
       if (window.BiZoukSon) window.BiZoukSon.jouer("victoire");
       if (window.BiZoukConfetti) window.BiZoukConfetti.lancer(2000, 1.4);
@@ -286,6 +295,16 @@
     };
 
     $("resultat").classList.add("on");
+
+    // Partage automatique dès la victoire : les liens apparaissent tout de suite,
+    // pas besoin de cliquer "Partager" d'abord. L'image reste une option en plus.
+    if (jeGagne) {
+      liensPartage({
+        chapitre: duel.chapitre_nom || "Duel", theme: "", niveau: "Niveau " + duel.niveau,
+        temps: fmt(t), mots: totalMots, pierres: 0, joueur: monNom,
+        duel: { adversaire: duel.lanceur_nom, sonTemps: fmt(duel.lanceur_temps), gagne: true }
+      });
+    }
   }
 
   /* Les deux combattants côte à côte, gagnant en premier */

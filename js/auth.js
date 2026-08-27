@@ -138,6 +138,22 @@
     }
     msg("Compte créé ! Redirection…", "ok");
     if (window.BiZoukAnalytics) window.BiZoukAnalytics.evenement("inscription");
+
+    // Parrainage : le nouveau compte et son parrain reçoivent tous les deux des pierres
+    try {
+      const parrain = new URLSearchParams(location.search).get("parrain")
+        || sessionStorage.getItem("bizouk_parrain");
+      if (parrain) {
+        const { data: sess } = await (await db()).auth.getSession();
+        if (sess.session) {
+          await (await db()).rpc("crediter_parrain", {
+            parrain_uid: parrain, filleul_uid: sess.session.user.id, filleul_nom: nom
+          });
+        }
+        sessionStorage.removeItem("bizouk_parrain");
+      }
+    } catch (e) { /* le parrainage ne doit jamais bloquer l'inscription */ }
+
     setTimeout(() => location.href = retour, 900);
   });
 })();

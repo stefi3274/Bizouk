@@ -38,6 +38,26 @@
     await chargerProgression();
     await chargerTemps();
     await chargerDuels();
+    brancherParrainage();
+  }
+
+  function brancherParrainage() {
+    const bp = $("btnPartagerParrainage");
+    if (!bp) return;
+    bp.onclick = () => {
+      const lien = location.origin + "/index.html?parrain=" + user.id;
+      const txt = encodeURIComponent(monNom + " te propose de jouer à BiZouk avec lui — mots mêlés en ligne, gratuit : ");
+      const u = encodeURIComponent(lien);
+      $("parrainageLiens").innerHTML =
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px">'
+        + '<a class="share-btn share-wa" href="https://wa.me/?text=' + txt + '%20' + u + '" target="_blank" rel="noopener">WhatsApp</a>'
+        + '<a class="share-btn share-tg" href="https://t.me/share/url?url=' + u + '&text=' + txt + '" target="_blank" rel="noopener">Telegram</a>'
+        + '<button class="share-btn" id="copierParrainage" style="background:var(--violet)">Copier le lien</button></div>';
+      const cp = $("copierParrainage");
+      if (cp) cp.onclick = async () => {
+        try { await navigator.clipboard.writeText(lien); cp.textContent = "Copié ✓"; } catch (e) {}
+      };
+    };
   }
 
   function afficherProfil() {

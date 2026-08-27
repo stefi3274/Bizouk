@@ -9,6 +9,8 @@
   const NOMS_NIV = { 1: "Niveau 1", 2: "Niveau 2", 3: "Niveau 3", 4: "Niveau 4", 5: "Niveau 5" };
 
   let niveauActif = "tous";
+  let paysActif = "tous";
+  let monPays = null;
 
   async function charger() {
     const zone = $("clsZone");
@@ -21,6 +23,7 @@
 
     let req = base.from("parties").select("*").eq("entreprise_id", ent);
     if (niveauActif !== "tous") req = req.eq("niveau", parseInt(niveauActif,10));
+    if (paysActif === "moi" && monPays) req = req.eq("pays", monPays);
     const { data, error } = await req.order("temps_sec", { ascending: true }).limit(300);
 
     if (error || !data || !data.length) {
@@ -67,10 +70,18 @@
       + '</div>';
   }
 
-  document.querySelectorAll(".cls-chip").forEach(chip => {
+  document.querySelectorAll('.cls-filtres:not(#filtresPays) .cls-chip').forEach(chip => {
     chip.addEventListener("click", () => {
-      document.querySelectorAll(".cls-chip").forEach(c => c.classList.toggle("on", c === chip));
+      document.querySelectorAll('.cls-filtres:not(#filtresPays) .cls-chip').forEach(c => c.classList.toggle("on", c === chip));
       niveauActif = chip.getAttribute("data-niv");
+      charger();
+    });
+  });
+
+  document.querySelectorAll('#filtresPays .cls-chip').forEach(chip => {
+    chip.addEventListener("click", () => {
+      document.querySelectorAll('#filtresPays .cls-chip').forEach(c => c.classList.toggle("on", c === chip));
+      paysActif = chip.getAttribute("data-pays");
       charger();
     });
   });
@@ -78,7 +89,19 @@
   (async () => {
     const base = await db(); if (!base) return;
     const { data } = await base.auth.getSession();
-    if (data.session) { const n = $("navAuth"); if (n) { n.textContent = "Mon compte"; n.href = "compte.html"; } }
+    if (data.session) {
+      const n = $("navAuth"); if (n) { n.textContent = "Mon compte"; n.href = "compte.html"; }
+      const p = data.session.user.user_metadata && data.session.user.user_metadata.pays;
+      if (p) {
+        monPays = p;
+        const chip = $("chipMonPays");
+        if (chip) {
+          const drap = window.BiZoukDrapeau ? window.BiZoukDrapeau.drapeau(p) + " " : "";
+          chip.textContent = drap + "Mon pays";
+          chip.style.display = "inline-flex";
+        }
+      }
+    }
   })();
 
   charger();

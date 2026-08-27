@@ -177,4 +177,16 @@
   majAuth();
   majSerie();
   afficherOnboarding();
+
+  // Parrainage : mémoriser ?parrain=... et l'attacher aux liens d'inscription
+  (function () {
+    const p = new URLSearchParams(location.search).get("parrain");
+    if (p) { try { sessionStorage.setItem("bizouk_parrain", p); } catch (e) {} }
+    const code = p || (() => { try { return sessionStorage.getItem("bizouk_parrain"); } catch (e) { return null; } })();
+    if (code) {
+      document.querySelectorAll('a[href="inscription.html"]').forEach(a => {
+        a.href = "inscription.html?parrain=" + encodeURIComponent(code);
+      });
+    }
+  })();
 })();
