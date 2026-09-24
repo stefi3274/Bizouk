@@ -7,7 +7,12 @@
 
   const MAX_MOTS = 22; // assez pour une grille riche, sans devenir trop grande
 
-  let jeu = null, mysterePlat = null, chapitreCourant = null;
+  let jeu = null, mysterePlat = null, chapitreCourant = null, motsCourant = null, debut = null, minuteur = null;
+
+  function fmt(s) {
+    const m = Math.floor(s / 60), r = s % 60;
+    return m + ":" + String(r).padStart(2, "0");
+  }
 
   async function chargerListe() {
     const box = $("listeChapitres");
@@ -41,6 +46,14 @@
     });
   }
 
+  async function nomJoueur() {
+    const base = await db(); if (!base) return null;
+    const { data } = await base.auth.getSession();
+    if (!data.session) return null;
+    const u = data.session.user;
+    return (u.user_metadata && u.user_metadata.nom) ? u.user_metadata.nom : (u.email||"").split("@")[0];
+  }
+
   function melanger(arr) {
     const a = arr.slice();
     for (let i = a.length - 1; i > 0; i--) {
@@ -57,7 +70,15 @@
     $("jeuTitre").textContent = chap.nom;
 
     const mots = melanger(chap.mots).slice(0, Math.min(MAX_MOTS, chap.mots.length));
+    motsCourant = mots;
     $("jeuMeta").textContent = mots.length + " mots à trouver · message mystère à révéler à la fin";
+
+    debut = Date.now();
+    clearInterval(minuteur);
+    minuteur = setInterval(() => {
+      const c = $("chrono");
+      if (c) c.textContent = fmt(Math.floor((Date.now() - debut) / 1000));
+    }, 1000);
 
     jeu = window.BiZouk.creerJeu({
       conteneur: $("grille"),
@@ -99,11 +120,57 @@
   }
 
   function terminer() {
-    $("vicSous").textContent = "Chapitre « " + chapitreCourant.nom + " » terminé.";
+    clearInterval(minuteur);
+    const t = debut ? Math.floor((Date.now() - debut) / 1000) : null;
+    $("vicSous").textContent = "Chapitre « " + chapitreCourant.nom + " » terminé"
+      + (t != null ? " en " + fmt(t) : "") + ".";
     $("victoire").classList.add("on");
     if (window.BiZoukSon) window.BiZoukSon.jouer("victoire");
     if (window.BiZoukConfetti) window.BiZoukConfetti.lancer(1600, 0.8);
     if (window.BiZoukAnalytics) window.BiZoukAnalytics.evenement("partie_terminee", { mode: "classique" });
+
+    const bd = $("btnDefierClassique");
+    if (bd) bd.onclick = () => lancerDefiClassique(t);
+  }
+
+  async function lancerDefiClassique(temps) {
+    const zone = $("defiClassiqueLiens");
+    if (zone) zone.innerHTML = '<p style="color:var(--texte-doux);font-size:.88rem;margin-top:14px">Création du duel…</p>';
+
+    const nom = await nomJoueur();
+    const duel = await window.BiZoukDuelClassique.creer({
+      chapitreId: chapitreCourant ? chapitreCourant.id : null,
+      chapitreNom: chapitreCourant ? chapitreCourant.nom : "Mode classique",
+      mots: motsCourant || [],
+      joueur: nom || "Un joueur",
+      temps: temps
+    });
+
+    if (!duel) {
+      if (zone) zone.innerHTML = '<p style="color:#fca5a5;font-size:.88rem;margin-top:14px">Impossible de créer le duel.</p>';
+      return;
+    }
+
+    const lien = window.BiZoukDuelClassique.lien(duel.code);
+    const txt = encodeURIComponent("Je te défie sur BiZouk (Mode classique) ! Mêmes mots, message mystère à révéler. À toi de jouer : ");
+    const u = encodeURIComponent(lien);
+
+    if (zone) zone.innerHTML =
+      '<div style="background:var(--gris-3);border-radius:12px;padding:16px;margin-top:16px">'
+      + '<div style="font-size:.78rem;color:var(--texte-faible);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Code du duel</div>'
+      + '<div style="font-family:var(--serif);font-size:1.9rem;font-weight:700;color:var(--violet-c);letter-spacing:.14em;margin-bottom:12px">'
+      + duel.code + '</div>'
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">'
+      + '<a class="share-btn share-wa" href="https://wa.me/?text=' + txt + '%20' + u + '" target="_blank" rel="noopener">WhatsApp</a>'
+      + '<a class="share-btn share-tg" href="https://t.me/share/url?url=' + u + '&text=' + txt + '" target="_blank" rel="noopener">Telegram</a>'
+      + '<button class="share-btn" id="copierDefiClassique" style="background:var(--violet)">Copier le lien</button>'
+      + '</div></div>';
+
+    const cp = $("copierDefiClassique");
+    if (cp) cp.onclick = async () => {
+      try { await navigator.clipboard.writeText(lien); cp.textContent = "Copié ✓"; }
+      catch (e) { cp.textContent = "Copie impossible"; }
+    };
   }
 
   $("vicRejouer").addEventListener("click", () => {
@@ -112,6 +179,9 @@
     $("mystereBanniere").style.display = "none";
     $("ecranChoix").style.display = "block";
     mysterePlat = null;
+    clearInterval(minuteur);
+    const zone = $("defiClassiqueLiens");
+    if (zone) zone.innerHTML = "";
   });
 
   chargerListe();

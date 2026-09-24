@@ -60,7 +60,7 @@
 
     const bda = $("btnDefierAvant");
     if (bda) {
-      bda.style.display = chapitreId ? "inline-flex" : "none";
+      bda.style.display = "inline-flex";
       bda.onclick = () => {
         defierIntention = true;
         $("apercuMots").classList.remove("on");
